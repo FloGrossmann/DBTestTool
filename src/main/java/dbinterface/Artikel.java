@@ -6,21 +6,19 @@ public class Artikel {
 	String artikelName;
 	double einzelPreis;
 	String waehrung;
-	int menge;
 	String beschreibung;
 
 	public Artikel() {
 
 	}
 
-	public Artikel(String artikelNummer, String artikelName, Double einzelPreis, String waehrung, int menge,
+	public Artikel(String artikelNummer, String artikelName, Double einzelPreis, String waehrung,
 			String beschreibung) {
 		super();
 		this.artikelNummer = artikelNummer;
 		this.artikelName = artikelName;
 		this.einzelPreis = einzelPreis;
 		this.waehrung = waehrung;
-		this.menge = menge;
 		this.beschreibung = beschreibung;
 	}
 
@@ -54,14 +52,6 @@ public class Artikel {
 
 	public void setWaehrung(String waehrung) {
 		this.waehrung = waehrung;
-	}
-
-	public int getMenge() {
-		return menge;
-	}
-
-	public void setMenge(int menge) {
-		this.menge = menge;
 	}
 
 	public String getBeschreibung() {

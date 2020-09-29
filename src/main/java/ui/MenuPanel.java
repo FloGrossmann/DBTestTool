@@ -12,6 +12,7 @@ import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
+import mariadb.MariaDBTest;
 import monogdb.MongoDBTest;
 
 public class MenuPanel extends JPanel {
@@ -20,11 +21,38 @@ public class MenuPanel extends JPanel {
 
 	Container c;
 	JTextField mongoDBConnectionTextField;
+	JTextField mariaDBConnectionTextField;
+	JTextField mariaDBUsernameTextField;
+	JTextField mariaDBPasswordTextField;
 	JLabel mongoDBConnectionLabel;
+	JLabel mariaDBConnectionLabel;
+	JLabel mariaDBUsernameLabel;
+	JLabel mariaDBPasswordLabel;
 	JTextArea mongoDBConnectionErrorText;
 	JButton mongoDBTestConnectionButton;
 	JButton mongoDBClearDBButton;
+	JButton mariaDBConnectionButton;
 
+	public JPanel createMariaDBPanel() {
+		JPanel mariaPanel=new JPanel();
+		mariaDBConnectionLabel = new JLabel("mariaDBConnectionString:");
+		mariaDBConnectionTextField = new JTextField(50);
+		mariaDBUsernameLabel = new JLabel("Benutzername:");
+		mariaDBPasswordLabel = new JLabel("Passwort:");
+		mariaDBPasswordTextField = new JTextField(50);
+		mariaDBUsernameTextField = new JTextField(50);
+		mariaDBConnectionButton = new JButton("Test MariaDB Connection");
+		mariaDBConnectionButton.addActionListener(alDBTestConnection);
+		mariaPanel.add(mariaDBConnectionLabel);
+		mariaPanel.add(mariaDBConnectionTextField);
+		mariaPanel.add(mariaDBPasswordLabel);
+		mariaPanel.add(mariaDBPasswordTextField);
+		mariaPanel.add(mariaDBUsernameLabel);
+		mariaPanel.add(mariaDBUsernameTextField);
+		mariaPanel.add(mariaDBConnectionButton);
+		return mariaPanel;
+	}
+	
 	public MenuPanel() {
 		mongoDBConnectionLabel = new JLabel("mongoDBConnectionString:");
 		add(mongoDBConnectionLabel);
@@ -36,20 +64,31 @@ public class MenuPanel extends JPanel {
 		add(mongoDBConnectionErrorText);
 
 		mongoDBTestConnectionButton = new JButton("Test MongoDB Connection");
-		mongoDBTestConnectionButton.addActionListener(alMongoDBTestConnection);
+		mongoDBTestConnectionButton.addActionListener(alDBTestConnection);
 		add(mongoDBTestConnectionButton);
 
 		mongoDBClearDBButton = new JButton("MongoDB test-DB löschen");
 		mongoDBClearDBButton.addActionListener(alMongoDBClear);
 		add(mongoDBClearDBButton);
+
 	}
 
-	ActionListener alMongoDBTestConnection=new ActionListener(){
+	ActionListener alDBTestConnection = new ActionListener() {
 
-	public void actionPerformed(ActionEvent e){MongoDBTest mongoTest=new MongoDBTest();mongoTest.connect(mongoDBConnectionTextField.getText());}};
+		public void actionPerformed(ActionEvent e) {
+			JButton jButton=(JButton) e.getSource();
+			if(jButton.getText().contains("Mongo")) {
+			MongoDBTest mongoTest = new MongoDBTest();
+			mongoTest.connect(mongoDBConnectionTextField.getText());
+			}else {
+				MariaDBTest mariaDBTest=new MariaDBTest(mariaDBConnectionTextField.getText(), mariaDBUsernameTextField.getText(), mariaDBPasswordTextField.getText());
+				mariaDBTest.connect();
+			}
+		}
+	};
 
 	DocumentListener alMongoDBConnectionStringUpdate = new DocumentListener() {
-		
+
 		public void changedUpdate(DocumentEvent arg0) {
 			testConnectionString();
 		}
@@ -61,11 +100,12 @@ public class MenuPanel extends JPanel {
 		public void removeUpdate(DocumentEvent arg0) {
 			testConnectionString();
 		}
-		
+
 		public void testConnectionString() {
-			if (!mongoDBConnectionTextField.getText().startsWith("mongodb://") 
+			if (!mongoDBConnectionTextField.getText().startsWith("mongodb://")
 					&& !mongoDBConnectionTextField.getText().startsWith("mongodb+srv://")) {
-				mongoDBConnectionErrorText.setText("The connection string is invalid. Connection strings must start with either 'mongodb://' or 'mongodb+srv://");
+				mongoDBConnectionErrorText.setText(
+						"The connection string is invalid. Connection strings must start with either 'mongodb://' or 'mongodb+srv://");
 			} else {
 				mongoDBConnectionErrorText.setText("");
 			}
@@ -73,10 +113,12 @@ public class MenuPanel extends JPanel {
 	};
 
 	ActionListener alMongoDBClear = new ActionListener() {
-		
+
 		public void actionPerformed(ActionEvent e) {
 			System.out.println(mongoDBConnectionTextField.getText());
-			
+
 		}
 	};
+	
+	
 }

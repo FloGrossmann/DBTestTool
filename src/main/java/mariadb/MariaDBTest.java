@@ -12,6 +12,7 @@ import dbinterface.Bewertung;
 import dbinterface.DBInterface;
 import dbinterface.Kauf;
 import dbinterface.Kunde;
+import ui.MenuFrame;
 
 public class MariaDBTest implements DBInterface {
 
@@ -20,30 +21,37 @@ public class MariaDBTest implements DBInterface {
 	String password;
 	Connection mariaDbConnection;
 	Statement statement;
+	String databaseName = "Webshop";
 
 	public MariaDBTest(String connectionString, String username, String password) {
-		this.connectionString=connectionString;
-		this.username=username;
-		this.password=password;
+		this.connectionString = connectionString;
+		this.username = username;
+		this.password = password;
 	}
-	
+
+	public MariaDBTest() {
+
+	}
+
 	public void connect() {
 		System.out.println("Test connection with connectionString: " + connectionString);
 		try {
 			mariaDbConnection = DriverManager.getConnection(
 					"jdbc:mariadb://" + connectionString + "/DB?user=" + username + "&password=" + password);
+//			mariaDbConnection=DriverManager.getConnection("jdbc:mariadb://localhost:3000/DB?user=admin&password=admin");
+			System.out.println("Verbindung erfolgt...");
 			statement = mariaDbConnection.createStatement();
-			setupDB();
-			getA();
+			if (setupDB())
+				System.out.println("Statements ausgeführt");
+			;
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			System.out.println("Verbindung fehlgeschlagen");
 		} finally {
 			try {
 				if (statement != null)
 					mariaDbConnection.close();
 			} catch (SQLException se) {
-			} // do nothing
+			}
 			try {
 				if (mariaDbConnection != null)
 					mariaDbConnection.close();
@@ -55,8 +63,18 @@ public class MariaDBTest implements DBInterface {
 
 	public boolean setupDB() {
 		try {
-			statement.execute("CREATE TABLE a (id int not null primary key, value varchar(20))");
-			System.out.println("Tabelle erstellt");
+			statement.execute("CREATE DATABASE IF NOT EXISTS " + databaseName);
+			statement.execute("CREATE TABLE IF NOT EXISTS " + databaseName
+					+ ".Adresse (PLZ int, Strasse varchar(255), Hausnummer varchar(255), Ortschaft varchar(255), primary key (Kundennummer))");
+			statement.execute("CREATE TABLE IF NOT EXISTS " + databaseName
+					+ ".Kunde (Kundennummer varchar(255), Vorname varchar(255), Nachname varchar(255), Email varchar(255), Telefonnummer int, primary key (Kundennummer))");
+			statement.execute("CREATE TABLE IF NOT EXISTS " + databaseName
+					+ ".Artikel (Artikelnummer varchar(255),Artikelname varchar(255), Einzelpreis double(20,2), Waehrung varchar(255), Beschreibung varchar(255), primary key (Artikelnummer))");
+			statement.execute("CREATE TABLE IF NOT EXISTS " + databaseName
+					+ ".Bewertung (Sterne int, Bewertung varchar(255),  FOREIGN KEY (Kundennummer) REFERENCES Kunde(Kundennummer),  FOREIGN KEY (Artikelnummer) REFERENCES Artikel(Artikelnummer), CONSTRAINT Bewertungsnummer PRIMARY KEY (Kundennummer, Artikelnummer))");
+			statement.execute("CREATE TABLE IF NOT EXISTS " + databaseName
+					+ ".Kauf (Kaufdatum date, Kaufpreis double(20,2), Menge int, value varchar(20), FOREIGN KEY (Kundennummer) REFERENCES Kunde(Kundennummer),  FOREIGN KEY (Artikelnummer) REFERENCES Artikel(Artikelnummer), CONSTRAINT Kaufnummer PRIMARY KEY (Kundennummer, Artikelnummer))");
+			System.out.println("Tabellen erstellt");
 			return true;
 		} catch (SQLException e) {
 			System.out.println("Setup fehlgeschlagen");
@@ -65,25 +83,8 @@ public class MariaDBTest implements DBInterface {
 
 	}
 
-	public void getA() {
-		try {
-			ResultSet resultSet = statement.executeQuery("SELECT * FROM a");
-			while(resultSet.next()) {
-				int id=resultSet.getInt("id");
-				String value=resultSet.getString("value");
-				
-				System.out.println("ID: "+id);
-				System.out.println("Value: "+ value);
-			}
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-	}
-
 	public boolean cleanData() {
-		// TODO Auto-generated method stub
+		// DROP Tables
 		return false;
 	}
 

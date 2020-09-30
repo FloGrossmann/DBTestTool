@@ -24,6 +24,9 @@ public class MenuPanel extends JPanel {
 	JTextArea mongoDBConnectionErrorText;
 	JButton mongoDBTestConnectionButton;
 	JButton mongoDBClearDBButton;
+	JButton mongoDBStartTestButton;
+	
+	MongoDBTest mongoTest;
 
 	public MenuPanel() {
 		mongoDBConnectionLabel = new JLabel("mongoDBConnectionString:");
@@ -31,6 +34,7 @@ public class MenuPanel extends JPanel {
 		mongoDBConnectionErrorText = new JTextArea();
 		mongoDBConnectionErrorText.setEditable(false);
 		mongoDBConnectionTextField = new JTextField(50);
+		mongoDBConnectionTextField.setText("mongodb://localhost:27017/?readPreference=primary&ssl=false");
 		mongoDBConnectionTextField.getDocument().addDocumentListener(alMongoDBConnectionStringUpdate);
 		add(mongoDBConnectionTextField);
 		add(mongoDBConnectionErrorText);
@@ -41,15 +45,36 @@ public class MenuPanel extends JPanel {
 
 		mongoDBClearDBButton = new JButton("MongoDB test-DB löschen");
 		mongoDBClearDBButton.addActionListener(alMongoDBClear);
+		mongoDBClearDBButton.setVisible(false);
 		add(mongoDBClearDBButton);
+		
+		mongoDBStartTestButton = new JButton("Setup MongoDB");
+		mongoDBStartTestButton.addActionListener(alMongoDBSetup);
+		mongoDBStartTestButton.setVisible(false);
+		add(mongoDBStartTestButton);
 	}
 
-	ActionListener alMongoDBTestConnection=new ActionListener(){
+	ActionListener alMongoDBTestConnection = new ActionListener() {
 
-	public void actionPerformed(ActionEvent e){MongoDBTest mongoTest=new MongoDBTest();mongoTest.connect(mongoDBConnectionTextField.getText());}};
+		public void actionPerformed(ActionEvent e) {
+			MongoDBTest mongoDBTest = new MongoDBTest();
+			try {
+				boolean success = mongoDBTest.connect(mongoDBConnectionTextField.getText());
+				if (success) {
+					mongoTest = mongoDBTest;
+					mongoDBConnectionErrorText.setText("Connection successful");
+					mongoDBClearDBButton.setVisible(true);
+					mongoDBStartTestButton.setVisible(true);
+				}
+			} catch (Exception ex) {
+				System.out.println(ex);
+				mongoDBConnectionErrorText.setText(ex.getMessage());
+			}
+		}
+	};
 
 	DocumentListener alMongoDBConnectionStringUpdate = new DocumentListener() {
-		
+
 		public void changedUpdate(DocumentEvent arg0) {
 			testConnectionString();
 		}
@@ -61,11 +86,12 @@ public class MenuPanel extends JPanel {
 		public void removeUpdate(DocumentEvent arg0) {
 			testConnectionString();
 		}
-		
+
 		public void testConnectionString() {
-			if (!mongoDBConnectionTextField.getText().startsWith("mongodb://") 
+			if (!mongoDBConnectionTextField.getText().startsWith("mongodb://")
 					&& !mongoDBConnectionTextField.getText().startsWith("mongodb+srv://")) {
-				mongoDBConnectionErrorText.setText("The connection string is invalid. Connection strings must start with either 'mongodb://' or 'mongodb+srv://");
+				mongoDBConnectionErrorText.setText(
+						"The connection string is invalid. Connection strings must start with either 'mongodb://' or 'mongodb+srv://");
 			} else {
 				mongoDBConnectionErrorText.setText("");
 			}
@@ -73,10 +99,16 @@ public class MenuPanel extends JPanel {
 	};
 
 	ActionListener alMongoDBClear = new ActionListener() {
-		
+
 		public void actionPerformed(ActionEvent e) {
-			System.out.println(mongoDBConnectionTextField.getText());
-			
+			mongoTest.cleanData();
+		}
+	};
+	
+	ActionListener alMongoDBSetup = new ActionListener() {
+
+		public void actionPerformed(ActionEvent e) {
+			mongoTest.setupDB();
 		}
 	};
 }

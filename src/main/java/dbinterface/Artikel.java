@@ -1,7 +1,10 @@
 package dbinterface;
 
+import org.bson.codecs.pojo.annotations.BsonId;
+
 public class Artikel {
 
+	@BsonId
 	String artikelNummer; //PS
 	String artikelName;
 	double einzelPreis;

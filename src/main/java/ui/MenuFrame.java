@@ -19,7 +19,6 @@ public class MenuFrame extends JFrame {
 		setTitle("DB Test Tool");
 		menuPanel = new MenuPanel();
 		add(menuPanel);
-		add(menuPanel.createMariaDBPanel());
 		
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setVisible(true);

@@ -33,8 +33,7 @@ public class MenuPanel extends JPanel {
 	JButton mongoDBClearDBButton;
 	JButton mariaDBConnectionButton;
 
-	public JPanel createMariaDBPanel() {
-		JPanel mariaPanel=new JPanel();
+	public void createMariaDBPanel() {
 		mariaDBConnectionLabel = new JLabel("mariaDBConnectionString:");
 		mariaDBConnectionTextField = new JTextField(50);
 		mariaDBUsernameLabel = new JLabel("Benutzername:");
@@ -43,14 +42,13 @@ public class MenuPanel extends JPanel {
 		mariaDBUsernameTextField = new JTextField(50);
 		mariaDBConnectionButton = new JButton("Test MariaDB Connection");
 		mariaDBConnectionButton.addActionListener(alDBTestConnection);
-		mariaPanel.add(mariaDBConnectionLabel);
-		mariaPanel.add(mariaDBConnectionTextField);
-		mariaPanel.add(mariaDBPasswordLabel);
-		mariaPanel.add(mariaDBPasswordTextField);
-		mariaPanel.add(mariaDBUsernameLabel);
-		mariaPanel.add(mariaDBUsernameTextField);
-		mariaPanel.add(mariaDBConnectionButton);
-		return mariaPanel;
+		add(mariaDBConnectionLabel);
+		add(mariaDBConnectionTextField);
+		add(mariaDBPasswordLabel);
+		add(mariaDBPasswordTextField);
+		add(mariaDBUsernameLabel);
+		add(mariaDBUsernameTextField);
+		add(mariaDBConnectionButton);
 	}
 	
 	public MenuPanel() {
@@ -70,7 +68,8 @@ public class MenuPanel extends JPanel {
 		mongoDBClearDBButton = new JButton("MongoDB test-DB löschen");
 		mongoDBClearDBButton.addActionListener(alMongoDBClear);
 		add(mongoDBClearDBButton);
-
+		
+		createMariaDBPanel();
 	}
 
 	ActionListener alDBTestConnection = new ActionListener() {

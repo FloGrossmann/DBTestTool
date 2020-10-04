@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 
+import dbinterface.Adresse;
 import dbinterface.Artikel;
 import dbinterface.Bewertung;
 import dbinterface.DBInterface;
@@ -43,7 +44,6 @@ public class MariaDBTest implements DBInterface {
 			statement = mariaDbConnection.createStatement();
 			if (setupDB())
 				System.out.println("Statements ausgeführt");
-			;
 		} catch (SQLException e) {
 			System.out.println("Verbindung fehlgeschlagen");
 		} finally {
@@ -65,7 +65,7 @@ public class MariaDBTest implements DBInterface {
 		try {
 			statement.execute("CREATE DATABASE IF NOT EXISTS " + databaseName);
 			statement.execute("CREATE TABLE IF NOT EXISTS " + databaseName
-					+ ".Adresse (PLZ int, Strasse varchar(255), Hausnummer varchar(255), Ortschaft varchar(255), primary key (Kundennummer))");
+					+ ".Adresse (PLZ int, Strasse varchar(255), Hausnummer varchar(255), Ortschaft varchar(255), FOREIGN KEY (Kundennummer) REFERENCES Kunde(Kundennummer), primary key (Kundennummer))");
 			statement.execute("CREATE TABLE IF NOT EXISTS " + databaseName
 					+ ".Kunde (Kundennummer varchar(255), Vorname varchar(255), Nachname varchar(255), Email varchar(255), Telefonnummer int, primary key (Kundennummer))");
 			statement.execute("CREATE TABLE IF NOT EXISTS " + databaseName
@@ -73,7 +73,7 @@ public class MariaDBTest implements DBInterface {
 			statement.execute("CREATE TABLE IF NOT EXISTS " + databaseName
 					+ ".Bewertung (Sterne int, Bewertung varchar(255),  FOREIGN KEY (Kundennummer) REFERENCES Kunde(Kundennummer),  FOREIGN KEY (Artikelnummer) REFERENCES Artikel(Artikelnummer), CONSTRAINT Bewertungsnummer PRIMARY KEY (Kundennummer, Artikelnummer))");
 			statement.execute("CREATE TABLE IF NOT EXISTS " + databaseName
-					+ ".Kauf (Kaufdatum date, Kaufpreis double(20,2), Menge int, value varchar(20), FOREIGN KEY (Kundennummer) REFERENCES Kunde(Kundennummer),  FOREIGN KEY (Artikelnummer) REFERENCES Artikel(Artikelnummer), CONSTRAINT Kaufnummer PRIMARY KEY (Kundennummer, Artikelnummer))");
+					+ ".Kauf (Kaufdatum date, Kaufpreis double(20,2), Menge int, FOREIGN KEY (Kundennummer) REFERENCES Kunde(Kundennummer),  FOREIGN KEY (Artikelnummer) REFERENCES Artikel(Artikelnummer), CONSTRAINT Kaufnummer PRIMARY KEY (Kundennummer, Artikelnummer))");
 			System.out.println("Tabellen erstellt");
 			return true;
 		} catch (SQLException e) {
@@ -84,28 +84,59 @@ public class MariaDBTest implements DBInterface {
 	}
 
 	public boolean cleanData() {
-		// DROP Tables
+		try {
+			statement.execute("DROP DATABASE IF EXISTS "+databaseName);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return false;
 	}
 
 	public Kunde addKunde(Kunde kunde) {
-		// TODO Auto-generated method stub
-		return null;
+		try {
+			Adresse adresse=kunde.getAdresse();
+			statement.execute("INSERT INTO "+ databaseName+".Kunde (Kundennummer, Vorname, Nachname, Email, Telefonnummer) VALUES("+kunde.getKundenNummer()+", "+kunde.getVorname()+", "+kunde.getNachname()+", "+kunde.getEmail()+", "+kunde.getTelefonNummer()+")");
+			statement.execute("INSERT INTO "+ databaseName+".Adresse (PLZ, Strasse, Hausnummer, Ortschaft, Kundennummer) VALUES("+adresse.getPlz()+", "+adresse.getStrasse()+", "+adresse.getHausnummer()+", "+adresse.getOrtschaft()+", "+kunde.getKundenNummer()+")");
+			return kunde;
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	public Artikel addArtikel(Artikel artikel) {
-		// TODO Auto-generated method stub
-		return null;
+		try {
+			statement.execute("INSERT INTO "+ databaseName+".Artikel (Artikelnummer, Artikelname, Einzelpreis, Waehrung, Beschreibung) VALUES("+artikel.getArtikelNummer()+", "+artikel.getArtikelName()+", "+artikel.getEinzelPreis()+", "+artikel.getWaehrung()+", "+artikel.getBeschreibung()+")");
+			return artikel;
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	public Bewertung addBewertung(Bewertung bewertung) {
-		// TODO Auto-generated method stub
-		return null;
+		try {
+			statement.execute("INSERT INTO "+ databaseName+".Bewertung (Sterne, Bewertung, Kundennummer, Artikelnummer) VALUES("+bewertung.getSterne()+", "+bewertung.getBewertung()+", "+bewertung.getKundenNummer()+", "+bewertung.getArtikelNummer()+")");
+			return bewertung;
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	public Kauf addKauf(Kauf kauf) {
-		// TODO Auto-generated method stub
-		return null;
+		try {
+			statement.execute("INSERT INTO "+ databaseName+".Kauf (Kaufdatum, Kaufpreis, Menge, Kundennummer, Artikelnummer) VALUES("+kauf.getKaufdatum()+", "+kauf.getKaufPreis()+", "+kauf.getMenge()+", "+kauf.getKundenNr()+", "+kauf.getArtikelNr()+")");
+			return kauf;
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	public Kunde getKundeByKundenNr(String kundenNr) {

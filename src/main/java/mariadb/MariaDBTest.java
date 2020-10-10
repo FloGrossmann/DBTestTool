@@ -17,7 +17,7 @@ import dbinterface.Kauf;
 import dbinterface.Kunde;
 
 public class MariaDBTest implements DBInterface {
-	
+
 	static final String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
 
 	String connectionString;
@@ -42,8 +42,7 @@ public class MariaDBTest implements DBInterface {
 			System.out.println("Verbindung erfolgt...");
 //			mariaDbConnection = DriverManager.getConnection(
 //					"jdbc:mariadb://localhost:3000","root","admin");
-			mariaDbConnection = DriverManager.getConnection(
-					"jdbc:mariadb://" + connectionString, username, password);
+			mariaDbConnection = DriverManager.getConnection("jdbc:mariadb://" + connectionString, username, password);
 			statement = mariaDbConnection.createStatement();
 			if (setupDB())
 				System.out.println("Statements ausgeführt");
@@ -59,7 +58,7 @@ public class MariaDBTest implements DBInterface {
 			try {
 				if (mariaDbConnection != null)
 					System.out.println("Verbindung erfolgreich");
-					mariaDbConnection.close();
+				mariaDbConnection.close();
 			} catch (SQLException se) {
 				se.printStackTrace();
 			}
@@ -432,8 +431,8 @@ public class MariaDBTest implements DBInterface {
 	public List<Kauf> getVerkauefeForArtikel(String artikelNummer) {
 		List<Kauf> kaufList = new ArrayList<Kauf>();
 		try {
-			ResultSet resultSet = statement
-					.executeQuery("SELECT * FROM " + databaseName + ".Kauf WHERE Artikelnummer='" + artikelNummer + "'");
+			ResultSet resultSet = statement.executeQuery(
+					"SELECT * FROM " + databaseName + ".Kauf WHERE Artikelnummer='" + artikelNummer + "'");
 			while (resultSet.next()) {
 				Kauf kauf = new Kauf();
 				kauf.setArtikelNr(resultSet.getString("Artikelnummer"));
@@ -452,29 +451,65 @@ public class MariaDBTest implements DBInterface {
 
 	public Kunde updateKunde(Kunde kunde) {
 		try {
-			statement.execute("UPDATE "+databaseName+".Kunde SET ");
+			statement.execute("UPDATE " + databaseName + ".Kunde SET Vorname=" + kunde.getVorname() + ", Nachname="
+					+ kunde.getNachname() + ", Email=" + kunde.getEmail() + ", Telefonnummer="
+					+ kunde.getTelefonNummer() + " WHERE Kundennummer=" + kunde.getKundenNummer());
+			Adresse adresse = kunde.getAdresse();
+			statement.execute("UPDATE " + databaseName + ".Adresse SET Strasse=" + adresse.getStrasse()
+					+ ", Hausnummer=" + adresse.getHausnummer() + ", Ortschaft=" + adresse.getOrtschaft() + ", PLZ="
+					+ adresse.getPlz() + " WHERE Kundennummer=" + kunde.getKundenNummer());
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return kunde;
 	}
 
 	public Artikel updateArtikel(Artikel artikel) {
+		try {
+			statement.execute("UPDATE " + databaseName + ".Artikel SET Artikelname=" + artikel.getArtikelName() + ", Beschreibung="
+					+ artikel.getBeschreibung() + ", Einzelpreis=" + artikel.getEinzelPreis() + ", Waehrung=" + artikel.getWaehrung()
+					+ " WHERE Artkelnummer=" + artikel.getArtikelNummer());
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 		return artikel;
 	}
 
 	public Bewertung updateBewertung(Bewertung bewertung) {
+		try {
+			statement.execute("UPDATE " + databaseName + ".Bewertung SET Bewertung=" + bewertung.getBewertung() + ", Sterne="
+					+ bewertung.getSterne() + " WHERE Artkelnummer=" + bewertung.getArtikelNummer()+" AND Kundennummer="+bewertung.getKundenNummer());
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 		return bewertung;
 	}
 
 	public void deleteKundeByKundenNr(String kundenNr) {
+		try {
+			statement.execute("DELETE FROM "+databaseName+".Kunde WHERE Kundennummer="+kundenNr);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public void deleteArtikelbyArtikelNr(String artikelNr) {
+		try {
+			statement.execute("DELETE FROM "+databaseName+".Artikel WHERE Artikelnummer="+artikelNr);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public void deleteBewertungByArtikelNrAndKundenNr(String artikelNr, String bewertungNr) {
+		try {
+			statement.execute("DELETE FROM "+databaseName+".Bewertung WHERE Kundennummer="+bewertungNr+" Artikelnummer="+artikelNr);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 }

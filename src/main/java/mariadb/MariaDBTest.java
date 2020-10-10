@@ -126,7 +126,6 @@ public class MariaDBTest implements DBInterface {
 					+ ", " + artikel.getWaehrung() + ", " + artikel.getBeschreibung() + ")");
 			return artikel;
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return null;
 		}
@@ -140,7 +139,6 @@ public class MariaDBTest implements DBInterface {
 					+ bewertung.getArtikelNummer() + ")");
 			return bewertung;
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return null;
 		}
@@ -154,7 +152,6 @@ public class MariaDBTest implements DBInterface {
 					+ kauf.getArtikelNr() + ")");
 			return kauf;
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return null;
 		}
@@ -469,19 +466,13 @@ public class MariaDBTest implements DBInterface {
 		return null;
 	}
 
-	public Kunde deleteKundeByKundenNr(String kundenNr) {
-		// TODO Auto-generated method stub
-		return null;
+	public void deleteKundeByKundenNr(String kundenNr) {
 	}
 
-	public Artikel deleteArtikelbyArtikelNr(String artikelNr) {
-		// TODO Auto-generated method stub
-		return null;
+	public void deleteArtikelbyArtikelNr(String artikelNr) {
 	}
 
-	public Bewertung deleteBewertungByArtikelNrAndKundenNr(String artikelNr, String bewertungNr) {
-		// TODO Auto-generated method stub
-		return null;
+	public void deleteBewertungByArtikelNrAndKundenNr(String artikelNr, String bewertungNr) {
 	}
 
 }

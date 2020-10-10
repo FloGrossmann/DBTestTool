@@ -1,7 +1,17 @@
 package monogdb;
 
+import static com.mongodb.client.model.Filters.and;
+import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Filters.gt;
+import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
+import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
+
 import java.util.LinkedList;
 import java.util.List;
+
+import org.bson.codecs.configuration.CodecRegistry;
+import org.bson.codecs.pojo.PojoCodecProvider;
+import org.bson.types.ObjectId;
 
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
@@ -11,9 +21,6 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.MongoIterable;
 import com.mongodb.client.model.Indexes;
-import com.mongodb.connection.ServerSettings;
-
-import static com.mongodb.client.model.Filters.*;
 
 import dbinterface.Artikel;
 import dbinterface.Bewertung;
@@ -49,7 +56,9 @@ public class MongoDBTest implements DBInterface {
 			    .retryWrites(true)
 			    .build();
 		MongoClient mongoClient = MongoClients.create(settings);
-		testDatabase = mongoClient.getDatabase(TESTDATABASENAME);
+		CodecRegistry pojoCodecRegistry = fromRegistries(MongoClientSettings.getDefaultCodecRegistry(),
+                fromProviders(PojoCodecProvider.builder().automatic(true).build()));
+		testDatabase = mongoClient.getDatabase(TESTDATABASENAME).withCodecRegistry(pojoCodecRegistry);
 		MongoIterable<String> databaseNames = mongoClient.listDatabaseNames();
 		if (databaseNames != null) {
 			for (String dbName : databaseNames) {
@@ -81,7 +90,7 @@ public class MongoDBTest implements DBInterface {
 
 	public boolean cleanData() {
 		testDatabase.drop();
-		return false;
+		return true;
 	}
 
 	public Kunde addKunde(Kunde kunde) {
@@ -212,19 +221,16 @@ public class MongoDBTest implements DBInterface {
 		return null;
 	}
 
-	public Kunde deleteKundeByKundenNr(String kundenNr) {
-		// TODO Auto-generated method stub
-		return null;
+	public void deleteKundeByKundenNr(String kundenNr) {
+		kundeCollection.deleteOne(eq("kundenNummer", kundenNr));
 	}
 
-	public Artikel deleteArtikelbyArtikelNr(String artikelNr) {
-		// TODO Auto-generated method stub
-		return null;
+	public void deleteArtikelbyArtikelNr(String artikelNr) {
+		artikelCollection.deleteOne(eq("artikelNummer", new ObjectId(artikelNr)));
 	}
 
-	public Bewertung deleteBewertungByArtikelNrAndKundenNr(String artikelNr, String bewertungNr) {
-		// TODO Auto-generated method stub
-		return null;
+	public void deleteBewertungByArtikelNrAndKundenNr(String artikelNr, String bewertungNr) {
+		bewertungCollection.deleteOne(and(eq("artikelNummer", new ObjectId(artikelNr)), eq("artikelNummer", new ObjectId())));
 	}
 	
 	

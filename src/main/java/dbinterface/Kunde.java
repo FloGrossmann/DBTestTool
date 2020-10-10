@@ -1,7 +1,10 @@
 package dbinterface;
 
+import org.bson.codecs.pojo.annotations.BsonId;
+
 public class Kunde {
 
+	@BsonId
 	String kundenNummer; //PS
 	String email;
 	String telefonNummer;

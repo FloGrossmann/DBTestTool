@@ -72,10 +72,10 @@ public interface DBInterface {
 
 	// DELETE
 
-	Kunde deleteKundeByKundenNr(String kundenNr);
+	void deleteKundeByKundenNr(String kundenNr);
 
-	Artikel deleteArtikelbyArtikelNr(String artikelNr);
+	void deleteArtikelbyArtikelNr(String artikelNr);
 
-	Bewertung deleteBewertungByArtikelNrAndKundenNr(String artikelNr, String bewertungNr);
+	void deleteBewertungByArtikelNrAndKundenNr(String artikelNr, String bewertungNr);
 
 }

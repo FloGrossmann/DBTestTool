@@ -3,6 +3,7 @@ package ui;
 import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Date;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -12,6 +13,11 @@ import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
+import dbinterface.Adresse;
+import dbinterface.Artikel;
+import dbinterface.Bewertung;
+import dbinterface.Kauf;
+import dbinterface.Kunde;
 import mariadb.MariaDBTest;
 import monogdb.MongoDBTest;
 
@@ -31,6 +37,9 @@ public class MenuPanel extends JPanel {
 	JTextArea mongoDBConnectionErrorText;
 	JButton mongoDBTestConnectionButton;
 	JButton mongoDBClearDBButton;
+	JButton mongoDBStartTestButton;
+	
+	MongoDBTest mongoTest;
 	JButton mariaDBConnectionButton;
 
 	public void createMariaDBPanel() {
@@ -57,6 +66,7 @@ public class MenuPanel extends JPanel {
 		mongoDBConnectionErrorText = new JTextArea();
 		mongoDBConnectionErrorText.setEditable(false);
 		mongoDBConnectionTextField = new JTextField(50);
+		mongoDBConnectionTextField.setText("mongodb://localhost:27017/?readPreference=primary&ssl=false");
 		mongoDBConnectionTextField.getDocument().addDocumentListener(alMongoDBConnectionStringUpdate);
 		add(mongoDBConnectionTextField);
 		add(mongoDBConnectionErrorText);
@@ -65,10 +75,31 @@ public class MenuPanel extends JPanel {
 		mongoDBTestConnectionButton.addActionListener(alDBTestConnection);
 		add(mongoDBTestConnectionButton);
 
-		mongoDBClearDBButton = new JButton("MongoDB test-DB l�schen");
+		mongoDBClearDBButton = new JButton("MongoDB test-DB löschen");
 		mongoDBClearDBButton.addActionListener(alMongoDBClear);
+		mongoDBClearDBButton.setVisible(false);
 		add(mongoDBClearDBButton);
-		
+		mongoDBStartTestButton = new JButton("Start MongoDB Test");
+		mongoDBStartTestButton.addActionListener(alMongoDBSetup);
+		mongoDBStartTestButton.setVisible(false);
+		add(mongoDBStartTestButton);
+	}
+
+	ActionListener alMongoDBTestConnection = new ActionListener() {
+
+		public void actionPerformed(ActionEvent e) {
+			MongoDBTest mongoDBTest = new MongoDBTest();
+			try {
+				boolean success = mongoDBTest.connect(mongoDBConnectionTextField.getText());
+				if (success) {
+					mongoTest = mongoDBTest;
+					mongoDBConnectionErrorText.setText("Connection successful");
+					mongoDBClearDBButton.setVisible(true);
+					mongoDBStartTestButton.setVisible(true);
+				}
+			} catch (Exception ex) {
+				System.out.println(ex);
+				mongoDBConnectionErrorText.setText(ex.getMessage());
 		createMariaDBPanel();
 	}
 
@@ -114,8 +145,18 @@ public class MenuPanel extends JPanel {
 	ActionListener alMongoDBClear = new ActionListener() {
 
 		public void actionPerformed(ActionEvent e) {
-			System.out.println(mongoDBConnectionTextField.getText());
+			mongoTest.cleanData();
+		}
+	};
+	
+	ActionListener alMongoDBSetup = new ActionListener() {
 
+		public void actionPerformed(ActionEvent e) {
+			mongoTest.setupDB();
+			mongoTest.addArtikel(new Artikel("22", "artikelName", 42.42, "euro", "ein Artikel"));
+			mongoTest.addKunde(new Kunde("12", "email@web.de", "07234723", "Vorname", "Nachname", new Adresse("ortschaft", "hausnummer", "Straße", "712231")));
+			mongoTest.addKauf(new Kauf("12", "22", new Date(), 43.43, 2));
+			mongoTest.addBewertung(new Bewertung("12", "22", 5, "war okay"));
 		}
 	};
 	

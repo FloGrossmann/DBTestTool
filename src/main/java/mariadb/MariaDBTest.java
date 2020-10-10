@@ -1,5 +1,6 @@
 package mariadb;
 
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -17,6 +18,8 @@ import dbinterface.Kunde;
 import ui.MenuFrame;
 
 public class MariaDBTest implements DBInterface {
+	
+	static final String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
 
 	String connectionString;
 	String username;
@@ -28,7 +31,7 @@ public class MariaDBTest implements DBInterface {
 	public MariaDBTest(String connectionString, String username, String password) {
 		this.connectionString = connectionString;
 		this.username = username;
-		this.password = password;
+		this.password = new String(password.getBytes(), StandardCharsets.UTF_8);
 	}
 
 	public MariaDBTest() {
@@ -36,16 +39,17 @@ public class MariaDBTest implements DBInterface {
 	}
 
 	public void connect() {
-		System.out.println("Test connection with connectionString: " + connectionString);
 		try {
-			mariaDbConnection = DriverManager.getConnection(
-					"jdbc:mariadb://" + connectionString + "/DB?user=" + username + "&password=" + password);
-//			mariaDbConnection=DriverManager.getConnection("jdbc:mariadb://localhost:3000/DB?user=admin&password=admin");
 			System.out.println("Verbindung erfolgt...");
+//			mariaDbConnection = DriverManager.getConnection(
+//					"jdbc:mariadb://localhost:3000","root","admin");
+			mariaDbConnection = DriverManager.getConnection(
+					"jdbc:mariadb://" + connectionString, username, password);
 			statement = mariaDbConnection.createStatement();
 			if (setupDB())
 				System.out.println("Statements ausgeführt");
 		} catch (SQLException e) {
+			System.err.println(e.getMessage());
 			System.out.println("Verbindung fehlgeschlagen");
 		} finally {
 			try {
@@ -55,6 +59,7 @@ public class MariaDBTest implements DBInterface {
 			}
 			try {
 				if (mariaDbConnection != null)
+					System.out.println("Verbindung erfolgreich");
 					mariaDbConnection.close();
 			} catch (SQLException se) {
 				se.printStackTrace();
@@ -66,19 +71,20 @@ public class MariaDBTest implements DBInterface {
 		try {
 			statement.execute("CREATE DATABASE IF NOT EXISTS " + databaseName);
 			statement.execute("CREATE TABLE IF NOT EXISTS " + databaseName
-					+ ".Adresse (PLZ int, Strasse varchar(255), Hausnummer varchar(255), Ortschaft varchar(255), FOREIGN KEY (Kundennummer) REFERENCES Kunde(Kundennummer), primary key (Kundennummer))");
-			statement.execute("CREATE TABLE IF NOT EXISTS " + databaseName
 					+ ".Kunde (Kundennummer varchar(255), Vorname varchar(255), Nachname varchar(255), Email varchar(255), Telefonnummer int, primary key (Kundennummer))");
+			statement.execute("CREATE TABLE IF NOT EXISTS " + databaseName
+					+ ".Adresse (PLZ int, Strasse varchar(255), Hausnummer varchar(255), Ortschaft varchar(255), Kundennummer varchar(255), FOREIGN KEY (Kundennummer) REFERENCES Kunde(Kundennummer), primary key (Kundennummer))");
 			statement.execute("CREATE TABLE IF NOT EXISTS " + databaseName
 					+ ".Artikel (Artikelnummer varchar(255),Artikelname varchar(255), Einzelpreis double(20,2), Waehrung varchar(255), Beschreibung varchar(255), primary key (Artikelnummer))");
 			statement.execute("CREATE TABLE IF NOT EXISTS " + databaseName
-					+ ".Bewertung (Sterne int, Bewertung varchar(255),  FOREIGN KEY (Kundennummer) REFERENCES Kunde(Kundennummer),  FOREIGN KEY (Artikelnummer) REFERENCES Artikel(Artikelnummer), CONSTRAINT Bewertungsnummer PRIMARY KEY (Kundennummer, Artikelnummer))");
+					+ ".Bewertung (Sterne int, Bewertung varchar(255), Kundennummer varchar(255), Artikelnummer varchar(255), FOREIGN KEY (Kundennummer) REFERENCES Kunde(Kundennummer),  FOREIGN KEY (Artikelnummer) REFERENCES Artikel(Artikelnummer), CONSTRAINT Bewertungsnummer PRIMARY KEY (Kundennummer, Artikelnummer))");
 			statement.execute("CREATE TABLE IF NOT EXISTS " + databaseName
-					+ ".Kauf (Kaufdatum date, Kaufpreis double(20,2), Menge int, FOREIGN KEY (Kundennummer) REFERENCES Kunde(Kundennummer),  FOREIGN KEY (Artikelnummer) REFERENCES Artikel(Artikelnummer), CONSTRAINT Kaufnummer PRIMARY KEY (Kundennummer, Artikelnummer))");
+					+ ".Kauf (Kaufdatum date, Kaufpreis double(20,2), Menge int, Kundennummer varchar(255), Artikelnummer varchar(255), FOREIGN KEY (Kundennummer) REFERENCES Kunde(Kundennummer),  FOREIGN KEY (Artikelnummer) REFERENCES Artikel(Artikelnummer), CONSTRAINT Kaufnummer PRIMARY KEY (Kundennummer, Artikelnummer))");
 			System.out.println("Tabellen erstellt");
 			return true;
 		} catch (SQLException e) {
 			System.out.println("Setup fehlgeschlagen");
+			e.printStackTrace();
 			return false;
 		}
 
@@ -88,7 +94,6 @@ public class MariaDBTest implements DBInterface {
 		try {
 			statement.execute("DROP DATABASE IF EXISTS " + databaseName);
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return false;

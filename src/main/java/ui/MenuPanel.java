@@ -3,6 +3,7 @@ package ui;
 import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Date;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -12,6 +13,11 @@ import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
+import dbinterface.Adresse;
+import dbinterface.Artikel;
+import dbinterface.Bewertung;
+import dbinterface.Kauf;
+import dbinterface.Kunde;
 import monogdb.MongoDBTest;
 
 public class MenuPanel extends JPanel {
@@ -48,7 +54,7 @@ public class MenuPanel extends JPanel {
 		mongoDBClearDBButton.setVisible(false);
 		add(mongoDBClearDBButton);
 		
-		mongoDBStartTestButton = new JButton("Setup MongoDB");
+		mongoDBStartTestButton = new JButton("Start MongoDB Test");
 		mongoDBStartTestButton.addActionListener(alMongoDBSetup);
 		mongoDBStartTestButton.setVisible(false);
 		add(mongoDBStartTestButton);
@@ -109,6 +115,10 @@ public class MenuPanel extends JPanel {
 
 		public void actionPerformed(ActionEvent e) {
 			mongoTest.setupDB();
+			mongoTest.addArtikel(new Artikel("22", "artikelName", 42.42, "euro", "ein Artikel"));
+			mongoTest.addKunde(new Kunde("12", "email@web.de", "07234723", "Vorname", "Nachname", new Adresse("ortschaft", "hausnummer", "Straﬂe", "712231")));
+			mongoTest.addKauf(new Kauf("12", "22", new Date(), 43.43, 2));
+			mongoTest.addBewertung(new Bewertung("12", "22", 5, "war okay"));
 		}
 	};
 }

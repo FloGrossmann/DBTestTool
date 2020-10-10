@@ -18,6 +18,7 @@ import dbinterface.Artikel;
 import dbinterface.Bewertung;
 import dbinterface.Kauf;
 import dbinterface.Kunde;
+import mariadb.MariaDBTest;
 import monogdb.MongoDBTest;
 
 public class MenuPanel extends JPanel {
@@ -26,14 +27,39 @@ public class MenuPanel extends JPanel {
 
 	Container c;
 	JTextField mongoDBConnectionTextField;
+	JTextField mariaDBConnectionTextField;
+	JTextField mariaDBUsernameTextField;
+	JTextField mariaDBPasswordTextField;
 	JLabel mongoDBConnectionLabel;
+	JLabel mariaDBConnectionLabel;
+	JLabel mariaDBUsernameLabel;
+	JLabel mariaDBPasswordLabel;
 	JTextArea mongoDBConnectionErrorText;
 	JButton mongoDBTestConnectionButton;
 	JButton mongoDBClearDBButton;
 	JButton mongoDBStartTestButton;
 	
 	MongoDBTest mongoTest;
+	JButton mariaDBConnectionButton;
 
+	public void createMariaDBPanel() {
+		mariaDBConnectionLabel = new JLabel("mariaDBConnectionString:");
+		mariaDBConnectionTextField = new JTextField(50);
+		mariaDBUsernameLabel = new JLabel("Benutzername:");
+		mariaDBPasswordLabel = new JLabel("Passwort:");
+		mariaDBPasswordTextField = new JTextField(50);
+		mariaDBUsernameTextField = new JTextField(50);
+		mariaDBConnectionButton = new JButton("Test MariaDB Connection");
+		mariaDBConnectionButton.addActionListener(alDBTestConnection);
+		add(mariaDBConnectionLabel);
+		add(mariaDBConnectionTextField);
+		add(mariaDBPasswordLabel);
+		add(mariaDBPasswordTextField);
+		add(mariaDBUsernameLabel);
+		add(mariaDBUsernameTextField);
+		add(mariaDBConnectionButton);
+	}
+	
 	public MenuPanel() {
 		mongoDBConnectionLabel = new JLabel("mongoDBConnectionString:");
 		add(mongoDBConnectionLabel);
@@ -46,14 +72,13 @@ public class MenuPanel extends JPanel {
 		add(mongoDBConnectionErrorText);
 
 		mongoDBTestConnectionButton = new JButton("Test MongoDB Connection");
-		mongoDBTestConnectionButton.addActionListener(alMongoDBTestConnection);
+		mongoDBTestConnectionButton.addActionListener(alDBTestConnection);
 		add(mongoDBTestConnectionButton);
 
-		mongoDBClearDBButton = new JButton("MongoDB test-DB lˆschen");
+		mongoDBClearDBButton = new JButton("MongoDB test-DB l√∂schen");
 		mongoDBClearDBButton.addActionListener(alMongoDBClear);
 		mongoDBClearDBButton.setVisible(false);
 		add(mongoDBClearDBButton);
-		
 		mongoDBStartTestButton = new JButton("Start MongoDB Test");
 		mongoDBStartTestButton.addActionListener(alMongoDBSetup);
 		mongoDBStartTestButton.setVisible(false);
@@ -75,6 +100,19 @@ public class MenuPanel extends JPanel {
 			} catch (Exception ex) {
 				System.out.println(ex);
 				mongoDBConnectionErrorText.setText(ex.getMessage());
+		createMariaDBPanel();
+	}
+
+	ActionListener alDBTestConnection = new ActionListener() {
+
+		public void actionPerformed(ActionEvent e) {
+			JButton jButton=(JButton) e.getSource();
+			if(jButton.getText().contains("Mongo")) {
+			MongoDBTest mongoTest = new MongoDBTest();
+			mongoTest.connect(mongoDBConnectionTextField.getText());
+			}else {
+				MariaDBTest mariaDBTest=new MariaDBTest(mariaDBConnectionTextField.getText(), mariaDBUsernameTextField.getText(), mariaDBPasswordTextField.getText());
+				mariaDBTest.connect();
 			}
 		}
 	};
@@ -116,9 +154,11 @@ public class MenuPanel extends JPanel {
 		public void actionPerformed(ActionEvent e) {
 			mongoTest.setupDB();
 			mongoTest.addArtikel(new Artikel("22", "artikelName", 42.42, "euro", "ein Artikel"));
-			mongoTest.addKunde(new Kunde("12", "email@web.de", "07234723", "Vorname", "Nachname", new Adresse("ortschaft", "hausnummer", "Straﬂe", "712231")));
+			mongoTest.addKunde(new Kunde("12", "email@web.de", "07234723", "Vorname", "Nachname", new Adresse("ortschaft", "hausnummer", "Stra√üe", "712231")));
 			mongoTest.addKauf(new Kauf("12", "22", new Date(), 43.43, 2));
 			mongoTest.addBewertung(new Bewertung("12", "22", 5, "war okay"));
 		}
 	};
+	
+	
 }

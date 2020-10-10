@@ -11,7 +11,7 @@ public class MenuFrame extends JFrame {
 	private static final long serialVersionUID = 5735221567303441881L;
 	
 	Container c;
-	JPanel menuPanel;
+	MenuPanel menuPanel;
 	
 	public MenuFrame() {
 		this.c = getContentPane();

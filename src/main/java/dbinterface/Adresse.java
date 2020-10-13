@@ -1,17 +1,24 @@
 package dbinterface;
 
+import org.bson.codecs.pojo.annotations.BsonProperty;
+
 public class Adresse {
 
+	@BsonProperty("ortschaft")
 	String ortschaft;
+	@BsonProperty("hausnummer")
 	String hausnummer;
+	@BsonProperty("strasse")
 	String strasse;
+	@BsonProperty("plz")
 	String plz;
 
 	public Adresse() {
 
 	}
 
-	public Adresse(String ortschaft, String hausnummer, String strasse, String plz) {
+	public Adresse(@BsonProperty("ortschaft") String ortschaft, @BsonProperty("hausnummer") String hausnummer,
+			@BsonProperty("strasse") String strasse, @BsonProperty("plz") String plz) {
 		super();
 		this.ortschaft = ortschaft;
 		this.hausnummer = hausnummer;

@@ -1,19 +1,30 @@
 package dbinterface;
 
-import org.bson.codecs.pojo.annotations.BsonId;
+import org.bson.BsonDocument;
+import org.bson.codecs.configuration.CodecRegistry;
+import org.bson.codecs.pojo.annotations.BsonCreator;
+import org.bson.codecs.pojo.annotations.BsonProperty;
+import org.bson.conversions.Bson;
 
 public class Kunde {
 
-	@BsonId
-	String kundenNummer; //PS
+	@BsonProperty("kundenNummer")
+	String kundenNummer; // PS
+	@BsonProperty("email")
 	String email;
+	@BsonProperty("telefonNummer")
 	String telefonNummer;
+	@BsonProperty("vorname")
 	String vorname;
+	@BsonProperty("nachname")
 	String nachname;
+	@BsonProperty("adresse")
 	Adresse adresse;
 
-	public Kunde(String kundennummer, String email, String telefonnummer, String vorname, String nachname,
-			Adresse adresse) {
+	@BsonCreator
+	public Kunde(@BsonProperty("kundennummer") String kundennummer, @BsonProperty("email") String email,
+			@BsonProperty("telefonnummer") String telefonnummer, @BsonProperty("vorname") String vorname, @BsonProperty("nachname") String nachname,
+			@BsonProperty("adresse") Adresse adresse) {
 		super();
 		this.kundenNummer = kundennummer;
 		this.email = email;
@@ -74,5 +85,4 @@ public class Kunde {
 	public void setAdresse(Adresse adresse) {
 		this.adresse = adresse;
 	}
-
 }

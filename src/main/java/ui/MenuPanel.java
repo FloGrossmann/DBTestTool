@@ -72,7 +72,7 @@ public class MenuPanel extends JPanel {
 		add(mongoDBConnectionErrorText);
 
 		mongoDBTestConnectionButton = new JButton("Test MongoDB Connection");
-		mongoDBTestConnectionButton.addActionListener(alDBTestConnection);
+		mongoDBTestConnectionButton.addActionListener(alMongoDBTestConnection);
 		add(mongoDBTestConnectionButton);
 
 		mongoDBClearDBButton = new JButton("MongoDB test-DB loeschen");
@@ -109,19 +109,9 @@ public class MenuPanel extends JPanel {
 	ActionListener alDBTestConnection = new ActionListener() {
 
 		public void actionPerformed(ActionEvent e) {
-			JButton jButton = (JButton) e.getSource();
-			if (jButton.getText().contains("Mongo")) {
-				MongoDBTest mongoTest = new MongoDBTest();
-				try {
-					mongoTest.connect(mongoDBConnectionTextField.getText());
-				} catch (Exception e1) {
-					e1.printStackTrace();
-				}
-			} else {
-				MariaDBTest mariaDBTest = new MariaDBTest(mariaDBConnectionTextField.getText(),
-						mariaDBUsernameTextField.getText(), mariaDBPasswordTextField.getText());
-				mariaDBTest.connect();
-			}
+			MariaDBTest mariaDBTest = new MariaDBTest(mariaDBConnectionTextField.getText(),
+					mariaDBUsernameTextField.getText(), mariaDBPasswordTextField.getText());
+			mariaDBTest.connect();
 		}
 	};
 

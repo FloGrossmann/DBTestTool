@@ -1,17 +1,24 @@
 package dbinterface;
 
+import org.bson.codecs.pojo.annotations.BsonProperty;
+
 public class Bewertung {
 
-	String kundenNummer; //PS
-	String artikelNummer; //PS
+	@BsonProperty("kundenNummer")
+	String kundenNummer; // PS
+	@BsonProperty("artikelNummer")
+	String artikelNummer; // PS
+	@BsonProperty("sterne")
 	int sterne;
+	@BsonProperty("bewertung")
 	String bewertung;
 
 	public Bewertung() {
 
 	}
 
-	public Bewertung(String kundenNummer, String artikelNummer, int sterne, String bewertung) {
+	public Bewertung(@BsonProperty("kundenNummer") String kundenNummer, @BsonProperty("artikelNummer") String artikelNummer,
+			@BsonProperty("sterne") int sterne, @BsonProperty("bewertung") String bewertung) {
 		super();
 		this.kundenNummer = kundenNummer;
 		this.artikelNummer = artikelNummer;

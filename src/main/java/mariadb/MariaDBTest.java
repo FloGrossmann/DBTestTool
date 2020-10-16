@@ -7,6 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import dbinterface.Adresse;
@@ -44,15 +45,25 @@ public class MariaDBTest implements DBInterface {
 //					"jdbc:mariadb://localhost:3000","root","admin");
 			mariaDbConnection = DriverManager.getConnection("jdbc:mariadb://" + connectionString, username, password);
 			statement = mariaDbConnection.createStatement();
-			if (setupDB())
+			if (setupDB()) {
+				Kunde kunde=new Kunde("001", "kevin.hink.professor", //es darf kein @ Zeichen verwendet werden
+						"0122336", "Kevin", "Hink", new Adresse("Falkenberg", "8", "Grenzstraße", "04895"));
+				Artikel artikel=new Artikel("1", "Stuhl", 25.95, "Euro", "Ein Stuhl zum Sitzen");
+				
+				this.addKunde(kunde);
+				this.addArtikel(artikel);
+				this.addBewertung(new Bewertung(kunde.getKundenNummer(), artikel.getArtikelNummer(), 3, "sehr solide"));
+				this.addKauf(new Kauf(kunde.getKundenNummer(), artikel.getArtikelNummer(), "16.10.2020", artikel.getEinzelPreis() , 5));
 				System.out.println("Statements ausgeführt");
+			}
 		} catch (SQLException e) {
 			System.err.println(e.getMessage());
 			System.out.println("Verbindung fehlgeschlagen");
 		} finally {
 			try {
-				if (statement != null)
+				if (statement != null) {
 					mariaDbConnection.close();
+				}
 			} catch (SQLException se) {
 			}
 			try {
@@ -71,13 +82,13 @@ public class MariaDBTest implements DBInterface {
 			statement.execute("CREATE TABLE IF NOT EXISTS " + databaseName
 					+ ".Kunde (Kundennummer varchar(255), Vorname varchar(255), Nachname varchar(255), Email varchar(255), Telefonnummer int, primary key (Kundennummer))");
 			statement.execute("CREATE TABLE IF NOT EXISTS " + databaseName
-					+ ".Adresse (PLZ int, Strasse varchar(255), Hausnummer varchar(255), Ortschaft varchar(255), Kundennummer varchar(255), FOREIGN KEY (Kundennummer) REFERENCES Kunde(Kundennummer), primary key (Kundennummer))");
+					+ ".Adresse (PLZ varchar(255), Strasse varchar(255), Hausnummer varchar(255), Ortschaft varchar(255), Kundennummer varchar(255), FOREIGN KEY (Kundennummer) REFERENCES Kunde(Kundennummer), primary key (Kundennummer))");
 			statement.execute("CREATE TABLE IF NOT EXISTS " + databaseName
 					+ ".Artikel (Artikelnummer varchar(255),Artikelname varchar(255), Einzelpreis double(20,2), Waehrung varchar(255), Beschreibung varchar(255), primary key (Artikelnummer))");
 			statement.execute("CREATE TABLE IF NOT EXISTS " + databaseName
 					+ ".Bewertung (Sterne int, Bewertung varchar(255), Kundennummer varchar(255), Artikelnummer varchar(255), FOREIGN KEY (Kundennummer) REFERENCES Kunde(Kundennummer),  FOREIGN KEY (Artikelnummer) REFERENCES Artikel(Artikelnummer), CONSTRAINT Bewertungsnummer PRIMARY KEY (Kundennummer, Artikelnummer))");
 			statement.execute("CREATE TABLE IF NOT EXISTS " + databaseName
-					+ ".Kauf (Kaufdatum date, Kaufpreis double(20,2), Menge int, Kundennummer varchar(255), Artikelnummer varchar(255), FOREIGN KEY (Kundennummer) REFERENCES Kunde(Kundennummer),  FOREIGN KEY (Artikelnummer) REFERENCES Artikel(Artikelnummer), CONSTRAINT Kaufnummer PRIMARY KEY (Kundennummer, Artikelnummer))");
+					+ ".Kauf (Kaufdatum varchar(255), Kaufpreis double(20,2), Menge int, Kundennummer varchar(255), Artikelnummer varchar(255), FOREIGN KEY (Kundennummer) REFERENCES Kunde(Kundennummer),  FOREIGN KEY (Artikelnummer) REFERENCES Artikel(Artikelnummer), CONSTRAINT Kaufnummer PRIMARY KEY (Kundennummer, Artikelnummer))");
 			System.out.println("Tabellen erstellt");
 			return true;
 		} catch (SQLException e) {
@@ -100,14 +111,14 @@ public class MariaDBTest implements DBInterface {
 	public Kunde addKunde(Kunde kunde) {
 		try {
 			Adresse adresse = kunde.getAdresse();
-			statement.execute("INSERT INTO " + databaseName
-					+ ".Kunde (Kundennummer, Vorname, Nachname, Email, Telefonnummer) VALUES(" + kunde.getKundenNummer()
-					+ ", " + kunde.getVorname() + ", " + kunde.getNachname() + ", " + kunde.getEmail() + ", "
-					+ kunde.getTelefonNummer() + ")");
-			statement.execute("INSERT INTO " + databaseName
-					+ ".Adresse (PLZ, Strasse, Hausnummer, Ortschaft, Kundennummer) VALUES(" + adresse.getPlz() + ", "
-					+ adresse.getStrasse() + ", " + adresse.getHausnummer() + ", " + adresse.getOrtschaft() + ", "
-					+ kunde.getKundenNummer() + ")");
+			statement.executeUpdate("INSERT INTO " + databaseName
+					+ ".Kunde (Kundennummer, Vorname, Nachname, Email, Telefonnummer) VALUES('" + kunde.getKundenNummer()
+					+ "', '" + kunde.getVorname() + "', '" + kunde.getNachname() + "', '" + kunde.getEmail() + "', '"
+					+ kunde.getTelefonNummer() + "')");
+			statement.executeUpdate("INSERT INTO " + databaseName
+					+ ".Adresse (PLZ, Strasse, Hausnummer, Ortschaft, Kundennummer) VALUES('" + adresse.getPlz() + "', '"
+					+ adresse.getStrasse() + "', '" + adresse.getHausnummer() + "', '" + adresse.getOrtschaft() + "', '"
+					+ kunde.getKundenNummer() + "')");
 			return kunde;
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -118,10 +129,10 @@ public class MariaDBTest implements DBInterface {
 
 	public Artikel addArtikel(Artikel artikel) {
 		try {
-			statement.execute("INSERT INTO " + databaseName
-					+ ".Artikel (Artikelnummer, Artikelname, Einzelpreis, Waehrung, Beschreibung) VALUES("
-					+ artikel.getArtikelNummer() + ", " + artikel.getArtikelName() + ", " + artikel.getEinzelPreis()
-					+ ", " + artikel.getWaehrung() + ", " + artikel.getBeschreibung() + ")");
+			statement.executeUpdate("INSERT INTO " + databaseName
+					+ ".Artikel (Artikelnummer, Artikelname, Einzelpreis, Waehrung, Beschreibung) VALUES('"
+					+ artikel.getArtikelNummer() + "', '" + artikel.getArtikelName() + "', " + artikel.getEinzelPreis()
+					+ ", '" + artikel.getWaehrung() + "', '" + artikel.getBeschreibung() + "')");
 			return artikel;
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -133,8 +144,8 @@ public class MariaDBTest implements DBInterface {
 		try {
 			statement.execute("INSERT INTO " + databaseName
 					+ ".Bewertung (Sterne, Bewertung, Kundennummer, Artikelnummer) VALUES(" + bewertung.getSterne()
-					+ ", " + bewertung.getBewertung() + ", " + bewertung.getKundenNummer() + ", "
-					+ bewertung.getArtikelNummer() + ")");
+					+ ", '" + bewertung.getBewertung() + "', '" + bewertung.getKundenNummer() + "', '"
+					+ bewertung.getArtikelNummer() + "')");
 			return bewertung;
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -146,8 +157,8 @@ public class MariaDBTest implements DBInterface {
 		try {
 			statement.execute("INSERT INTO " + databaseName
 					+ ".Kauf (Kaufdatum, Kaufpreis, Menge, Kundennummer, Artikelnummer) VALUES(" + kauf.getKaufdatum()
-					+ ", " + kauf.getKaufPreis() + ", " + kauf.getMenge() + ", " + kauf.getKundenNr() + ", "
-					+ kauf.getArtikelNr() + ")");
+					+ ", " + kauf.getKaufPreis() + ", " + kauf.getMenge() + ", '" + kauf.getKundenNr() + "', '"
+					+ kauf.getArtikelNr() + "')");
 			return kauf;
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -417,7 +428,7 @@ public class MariaDBTest implements DBInterface {
 				kauf.setArtikelNr(resultSet.getString("Artikelnummer"));
 				kauf.setKundenNr(resultSet.getString("Kundennummer"));
 				kauf.setKaufPreis(resultSet.getDouble("Kaufpreis"));
-				kauf.setKaufdatum(resultSet.getDate("Kaufdatum"));
+				kauf.setKaufdatum(resultSet.getString("Kaufdatum"));
 				kauf.setMenge(resultSet.getInt("Menge"));
 				kaufList.add(kauf);
 			}
@@ -438,7 +449,7 @@ public class MariaDBTest implements DBInterface {
 				kauf.setArtikelNr(resultSet.getString("Artikelnummer"));
 				kauf.setKundenNr(resultSet.getString("Kundennummer"));
 				kauf.setKaufPreis(resultSet.getDouble("Kaufpreis"));
-				kauf.setKaufdatum(resultSet.getDate("Kaufdatum"));
+				kauf.setKaufdatum(resultSet.getString("Kaufdatum"));
 				kauf.setMenge(resultSet.getInt("Menge"));
 				kaufList.add(kauf);
 			}

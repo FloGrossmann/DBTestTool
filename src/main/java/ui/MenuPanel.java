@@ -3,7 +3,7 @@ package ui;
 import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Date;
+import java.sql.Date;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -161,7 +161,7 @@ public class MenuPanel extends JPanel {
 			mongoTest.setupDB();
 			mongoTest.addArtikel(new Artikel("22", "artikelName", 42.42, "euro", "ein Artikel"));
 			mongoTest.addKunde(new Kunde("12", "email@web.de", "07234723", "Vorname", "Nachname", new Adresse("ortschaft", "hausnummer", "Straﬂe", "712231")));
-			mongoTest.addKauf(new Kauf("12", "22", new Date(), 43.43, 2));
+			mongoTest.addKauf(new Kauf("12", "22", new Date(new java.util.Date().getTime()), 43.43, 2));
 			mongoTest.addBewertung(new Bewertung("12", "22", 5, "war okay"));
 		}
 	};

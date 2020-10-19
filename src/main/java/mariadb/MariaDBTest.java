@@ -2,13 +2,17 @@ package mariadb;
 
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.DateFormat;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 import dbinterface.Adresse;
 import dbinterface.Artikel;
@@ -27,6 +31,8 @@ public class MariaDBTest implements DBInterface {
 	Connection mariaDbConnection;
 	Statement statement;
 	String databaseName = "Webshop";
+	int kundenId = 000;
+	int artikelId = 0;
 
 	public MariaDBTest(String connectionString, String username, String password) {
 		this.connectionString = connectionString;
@@ -38,6 +44,18 @@ public class MariaDBTest implements DBInterface {
 
 	}
 
+	public <T> void printOutSelect(List<T> list) {
+		Iterator<T> iterator = list.iterator();
+		while (iterator.hasNext()) {
+			T objekt = iterator.next();
+			System.out.println(objekt.toString());
+		}
+	}
+
+	public <T> void printOutSelect(T objekt) {
+		System.out.println(objekt.toString());
+	}
+
 	public void connect() {
 		try {
 			System.out.println("Verbindung erfolgt...");
@@ -46,14 +64,77 @@ public class MariaDBTest implements DBInterface {
 			mariaDbConnection = DriverManager.getConnection("jdbc:mariadb://" + connectionString, username, password);
 			statement = mariaDbConnection.createStatement();
 			if (setupDB()) {
-				Kunde kunde=new Kunde("001", "kevin.hink.professor", //es darf kein @ Zeichen verwendet werden
+				Kunde kunde = new Kunde(++this.kundenId+"", "kevin.hink.professor", // es darf kein @ Zeichen
+																								// verwendet werden
 						"0122336", "Kevin", "Hink", new Adresse("Falkenberg", "8", "Grenzstraße", "04895"));
-				Artikel artikel=new Artikel("1", "Stuhl", 25.95, "Euro", "Ein Stuhl zum Sitzen");
+				Artikel artikel = new Artikel(++this.artikelId+ "", "Stuhl", 25.95, "Euro", "Ein Stuhl zum Sitzen");
+				Bewertung bewertung=new Bewertung(kunde.getKundenNummer(), artikel.getArtikelNummer(), 3, "sehr solide");
+				Kauf kauf=new Kauf(kunde.getKundenNummer(), artikel.getArtikelNummer(),
+						new Date(new java.util.Date().getTime()), artikel.getEinzelPreis(), 5);
 				
+				// Delete Operations -> müssen in der Reihenfolge ausgeführt werden
+				System.out.println("Löschen...");
+				this.deleteKaufByArtikelNrAndKundenNr(artikel.getArtikelNummer(), kunde.getKundenNummer());
+				this.deleteBewertungByArtikelNrAndKundenNr(artikel.getArtikelNummer(), kunde.getKundenNummer());
+				this.deleteAdresseByKundenNr(kunde.getKundenNummer());
+				this.deleteKundeByKundenNr(kunde.getKundenNummer());
+				this.deleteArtikelbyArtikelNr(artikel.getArtikelNummer());
+
+				//Insert Operations
+				System.out.println("Hinzufügen");
 				this.addKunde(kunde);
 				this.addArtikel(artikel);
-				this.addBewertung(new Bewertung(kunde.getKundenNummer(), artikel.getArtikelNummer(), 3, "sehr solide"));
-				this.addKauf(new Kauf(kunde.getKundenNummer(), artikel.getArtikelNummer(), "16.10.2020", artikel.getEinzelPreis() , 5));
+				this.addBewertung(bewertung);
+				this.addKauf(kauf);
+
+				//Select Operations
+				System.out.println("Alle Select Operationen");
+				//Kunde
+				System.out.println("Alle für Kunde: \n\n");
+				printOutSelect(this.getKundeByKundenNr(kunde.getKundenNummer()));
+				printOutSelect(this.getKundenByNachName(kunde.getNachname()));
+				printOutSelect(this.getKundenByPlz(kunde.getAdresse().getPlz()));
+				printOutSelect(this.getKundeByEmail(kunde.getEmail()));
+				
+				//printOutSelect(this.getDistinctOrte());//die Methode funktioniert so noch nicht
+				
+				//Artikel
+				System.out.println("Alle für Artikel: \n\n");
+				printOutSelect(this.getArtikelByArtikelNummer(artikel.getArtikelNummer()));
+				printOutSelect(this.getArtikelByArtikelName(artikel.getArtikelName()));
+				printOutSelect(this.getArtikelWhichCostMoreThan(artikel.getEinzelPreis()));
+				
+				//Bewertung
+				System.out.println("Alle für Bewertung: \n\n");
+				printOutSelect(this.getBewertungByKundenNrAndArtikelNr(artikel.getArtikelNummer(),kunde.getKundenNummer()));
+				printOutSelect(this.getBewertungenByArtikelNr(artikel.getArtikelNummer()));
+				printOutSelect(this.getBewertungenByKundenNr(kunde.getKundenNummer()));
+				printOutSelect(this.getBewertungenByAnzahlSterne(bewertung.getSterne()));
+				
+				//Kauf
+				System.out.println("Alle für Kauf: \n\n");
+				printOutSelect(this.getEinkaeufeForKunde(kunde.getKundenNummer()));
+				printOutSelect(this.getVerkauefeForArtikel(artikel.getArtikelNummer()));
+				
+				//Update Objects
+				kunde.setNachname("Schaak");
+				kunde.getAdresse().setHausnummer(kunde.getAdresse().getHausnummer()+"a");
+				artikel.setArtikelName(artikel.getArtikelName()+" v1.10");
+				artikel.setBeschreibung(artikel.getBeschreibung()+" jetzt mit einer neuen Version");
+				bewertung.setSterne(bewertung.getSterne()+1);
+
+				//Update
+				this.updateKunde(kunde);
+				this.updateArtikel(artikel);
+				this.updateBewertung(bewertung);
+				
+				//Select of changed objects
+				System.out.println("Select für alle geänderten Objekte: \n\n");
+				printOutSelect(this.getKundenByNachName(kunde.getNachname()));
+				printOutSelect(this.getArtikelByArtikelName(artikel.getArtikelName()));
+				printOutSelect(this.getBewertungenByAnzahlSterne(bewertung.getSterne()));
+				
+				
 				System.out.println("Statements ausgeführt");
 			}
 		} catch (SQLException e) {
@@ -112,13 +193,13 @@ public class MariaDBTest implements DBInterface {
 		try {
 			Adresse adresse = kunde.getAdresse();
 			statement.executeUpdate("INSERT INTO " + databaseName
-					+ ".Kunde (Kundennummer, Vorname, Nachname, Email, Telefonnummer) VALUES('" + kunde.getKundenNummer()
-					+ "', '" + kunde.getVorname() + "', '" + kunde.getNachname() + "', '" + kunde.getEmail() + "', '"
-					+ kunde.getTelefonNummer() + "')");
+					+ ".Kunde (Kundennummer, Vorname, Nachname, Email, Telefonnummer) VALUES('"
+					+ kunde.getKundenNummer() + "', '" + kunde.getVorname() + "', '" + kunde.getNachname() + "', '"
+					+ kunde.getEmail() + "', '" + kunde.getTelefonNummer() + "')");
 			statement.executeUpdate("INSERT INTO " + databaseName
-					+ ".Adresse (PLZ, Strasse, Hausnummer, Ortschaft, Kundennummer) VALUES('" + adresse.getPlz() + "', '"
-					+ adresse.getStrasse() + "', '" + adresse.getHausnummer() + "', '" + adresse.getOrtschaft() + "', '"
-					+ kunde.getKundenNummer() + "')");
+					+ ".Adresse (PLZ, Strasse, Hausnummer, Ortschaft, Kundennummer) VALUES('" + adresse.getPlz()
+					+ "', '" + adresse.getStrasse() + "', '" + adresse.getHausnummer() + "', '" + adresse.getOrtschaft()
+					+ "', '" + kunde.getKundenNummer() + "')");
 			return kunde;
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -142,7 +223,7 @@ public class MariaDBTest implements DBInterface {
 
 	public Bewertung addBewertung(Bewertung bewertung) {
 		try {
-			statement.execute("INSERT INTO " + databaseName
+			statement.executeUpdate("INSERT INTO " + databaseName
 					+ ".Bewertung (Sterne, Bewertung, Kundennummer, Artikelnummer) VALUES(" + bewertung.getSterne()
 					+ ", '" + bewertung.getBewertung() + "', '" + bewertung.getKundenNummer() + "', '"
 					+ bewertung.getArtikelNummer() + "')");
@@ -154,23 +235,45 @@ public class MariaDBTest implements DBInterface {
 	}
 
 	public Kauf addKauf(Kauf kauf) {
+
+//		Andere Möglichkeit zur Ausführung von Statements
+
+		String sql = "INSERT INTO " + databaseName
+				+ ".Kauf (Kaufdatum, Kaufpreis, Menge, Kundennummer, Artikelnummer) VALUES(?,?,?,?,?)";
+		PreparedStatement prest;
 		try {
-			statement.execute("INSERT INTO " + databaseName
-					+ ".Kauf (Kaufdatum, Kaufpreis, Menge, Kundennummer, Artikelnummer) VALUES(" + kauf.getKaufdatum()
-					+ ", " + kauf.getKaufPreis() + ", " + kauf.getMenge() + ", '" + kauf.getKundenNr() + "', '"
-					+ kauf.getArtikelNr() + "')");
+			prest = mariaDbConnection.prepareStatement(sql);
+			prest.setDate(1, kauf.getKaufdatum());
+			prest.setDouble(2, kauf.getKaufPreis());
+			prest.setInt(3, kauf.getMenge());
+			prest.setString(4, kauf.getKundenNr());
+			prest.setString(5, kauf.getArtikelNr());
+			prest.executeUpdate();
 			return kauf;
 		} catch (SQLException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return null;
 		}
+//	    
+//		try {
+//			statement.executeUpdate("INSERT INTO " + databaseName
+//					+ ".Kauf (Kaufdatum, Kaufpreis, Menge, Kundennummer, Artikelnummer) VALUES('" + kauf.getKaufdatum()
+//					+ "', " + kauf.getKaufPreis() + ", " + kauf.getMenge() + ", '" + kauf.getKundenNr() + "', '"
+//					+ kauf.getArtikelNr() + "')");
+//			return kauf;
+//		} catch (SQLException e) {
+//			e.printStackTrace();
+//			return null;
+//		}
 	}
 
 	public Kunde getKundeByKundenNr(String kundenNr) {
 		Kunde kunde = new Kunde();
 		try {
-			ResultSet resultSet = statement.executeQuery("SELECT * FROM " + databaseName + ".Kunde FULL JOIN "
-					+ databaseName + ".Adresse WHERE Kundennummer='" + kundenNr + "'");
+			ResultSet resultSet = statement.executeQuery("SELECT * FROM " + databaseName + ".Kunde WHERE Kundennummer='" + kundenNr + "'");
+			ResultSet resultSetAdresse = statement.executeQuery("SELECT * FROM " + databaseName + ".Adresse WHERE Kundennummer='" + kundenNr + "'");
+//					+ "FULL JOIN "+ databaseName + ".Adresse WHERE Kundennummer='" + kundenNr + "'"); Für die Adresse mit hinzu
 			while (resultSet.next()) {
 				kunde.setKundenNummer(resultSet.getString("Kundennummer"));
 				kunde.setEmail(resultSet.getString("Email"));
@@ -180,9 +283,10 @@ public class MariaDBTest implements DBInterface {
 				// wie soll das hier gehen? kommt das in der Antwort einfach so mit?? Wird die
 				// mit geladen weil kundennummer der foreign Kay ist? -> habe es erstmal mit
 				// einem JOIN probiert aber vielleicht geht es ja auch ohne
-				kunde.setAdresse(new Adresse(resultSet.getString("Ortschaft"), resultSet.getString("Hausnummer"),
-						resultSet.getString("Strasse"), resultSet.getString("PLZ")));
 			}
+			while(resultSetAdresse.next())
+				kunde.setAdresse(new Adresse(resultSetAdresse.getString("Ortschaft"), resultSetAdresse.getString("Hausnummer"),
+						resultSetAdresse.getString("Strasse"), resultSetAdresse.getString("PLZ")));
 			return kunde;
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -344,7 +448,7 @@ public class MariaDBTest implements DBInterface {
 		Bewertung bewertung = new Bewertung();
 		try {
 			ResultSet resultSet = statement.executeQuery("SELECT * FROM " + databaseName
-					+ ".Bewertung WHERE Artikelnummer='" + artikelNummer + "', Kundennummer='" + kundenNummer + "'");
+					+ ".Bewertung WHERE Artikelnummer='" + artikelNummer + "' AND Kundennummer='" + kundenNummer + "'");
 			while (resultSet.next()) {
 				bewertung.setArtikelNummer(resultSet.getString("Artikelnummer"));
 				bewertung.setKundenNummer(resultSet.getString("Kundennummer"));
@@ -428,7 +532,7 @@ public class MariaDBTest implements DBInterface {
 				kauf.setArtikelNr(resultSet.getString("Artikelnummer"));
 				kauf.setKundenNr(resultSet.getString("Kundennummer"));
 				kauf.setKaufPreis(resultSet.getDouble("Kaufpreis"));
-				kauf.setKaufdatum(resultSet.getString("Kaufdatum"));
+				kauf.setKaufdatum(resultSet.getDate("Kaufdatum"));
 				kauf.setMenge(resultSet.getInt("Menge"));
 				kaufList.add(kauf);
 			}
@@ -449,7 +553,7 @@ public class MariaDBTest implements DBInterface {
 				kauf.setArtikelNr(resultSet.getString("Artikelnummer"));
 				kauf.setKundenNr(resultSet.getString("Kundennummer"));
 				kauf.setKaufPreis(resultSet.getDouble("Kaufpreis"));
-				kauf.setKaufdatum(resultSet.getString("Kaufdatum"));
+				kauf.setKaufdatum(resultSet.getDate("Kaufdatum"));
 				kauf.setMenge(resultSet.getInt("Menge"));
 				kaufList.add(kauf);
 			}
@@ -462,13 +566,13 @@ public class MariaDBTest implements DBInterface {
 
 	public Kunde updateKunde(Kunde kunde) {
 		try {
-			statement.execute("UPDATE " + databaseName + ".Kunde SET Vorname=" + kunde.getVorname() + ", Nachname="
-					+ kunde.getNachname() + ", Email=" + kunde.getEmail() + ", Telefonnummer="
-					+ kunde.getTelefonNummer() + " WHERE Kundennummer=" + kunde.getKundenNummer());
+			statement.executeUpdate("UPDATE " + databaseName + ".Kunde SET Vorname='" + kunde.getVorname()
+					+ "', Nachname='" + kunde.getNachname() + "', Email='" + kunde.getEmail() + "', Telefonnummer='"
+					+ kunde.getTelefonNummer() + "' WHERE Kundennummer='" + kunde.getKundenNummer() + "'");
 			Adresse adresse = kunde.getAdresse();
-			statement.execute("UPDATE " + databaseName + ".Adresse SET Strasse=" + adresse.getStrasse()
-					+ ", Hausnummer=" + adresse.getHausnummer() + ", Ortschaft=" + adresse.getOrtschaft() + ", PLZ="
-					+ adresse.getPlz() + " WHERE Kundennummer=" + kunde.getKundenNummer());
+			statement.executeUpdate("UPDATE " + databaseName + ".Adresse SET Strasse='" + adresse.getStrasse()
+					+ "', Hausnummer='" + adresse.getHausnummer() + "', Ortschaft='" + adresse.getOrtschaft()
+					+ "', PLZ='" + adresse.getPlz() + "' WHERE Kundennummer='" + kunde.getKundenNummer() + "'");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -477,9 +581,10 @@ public class MariaDBTest implements DBInterface {
 
 	public Artikel updateArtikel(Artikel artikel) {
 		try {
-			statement.execute("UPDATE " + databaseName + ".Artikel SET Artikelname=" + artikel.getArtikelName() + ", Beschreibung="
-					+ artikel.getBeschreibung() + ", Einzelpreis=" + artikel.getEinzelPreis() + ", Waehrung=" + artikel.getWaehrung()
-					+ " WHERE Artkelnummer=" + artikel.getArtikelNummer());
+			statement.executeUpdate("UPDATE " + databaseName + ".Artikel SET Artikelname='" + artikel.getArtikelName()
+					+ "', Beschreibung='" + artikel.getBeschreibung() + "', Einzelpreis=" + artikel.getEinzelPreis()
+					+ ", Waehrung='" + artikel.getWaehrung() + "' WHERE Artikelnummer='" + artikel.getArtikelNummer()
+					+ "'");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -488,8 +593,9 @@ public class MariaDBTest implements DBInterface {
 
 	public Bewertung updateBewertung(Bewertung bewertung) {
 		try {
-			statement.execute("UPDATE " + databaseName + ".Bewertung SET Bewertung=" + bewertung.getBewertung() + ", Sterne="
-					+ bewertung.getSterne() + " WHERE Artkelnummer=" + bewertung.getArtikelNummer()+" AND Kundennummer="+bewertung.getKundenNummer());
+			statement.executeUpdate("UPDATE " + databaseName + ".Bewertung SET Bewertung='" + bewertung.getBewertung()
+					+ "', Sterne=" + bewertung.getSterne() + " WHERE Artikelnummer='" + bewertung.getArtikelNummer()
+					+ "' AND Kundennummer='" + bewertung.getKundenNummer() + "'");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -498,7 +604,7 @@ public class MariaDBTest implements DBInterface {
 
 	public void deleteKundeByKundenNr(String kundenNr) {
 		try {
-			statement.execute("DELETE FROM "+databaseName+".Kunde WHERE Kundennummer="+kundenNr);
+			statement.executeUpdate("DELETE FROM " + databaseName + ".Kunde WHERE Kundennummer='" + kundenNr + "'");
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -507,20 +613,42 @@ public class MariaDBTest implements DBInterface {
 
 	public void deleteArtikelbyArtikelNr(String artikelNr) {
 		try {
-			statement.execute("DELETE FROM "+databaseName+".Artikel WHERE Artikelnummer="+artikelNr);
+			statement.executeUpdate("DELETE FROM " + databaseName + ".Artikel WHERE Artikelnummer='" + artikelNr + "'");
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
-	public void deleteBewertungByArtikelNrAndKundenNr(String artikelNr, String bewertungNr) {
+	public void deleteBewertungByArtikelNrAndKundenNr(String artikelnummer, String kundennummer) {
 		try {
-			statement.execute("DELETE FROM "+databaseName+".Bewertung WHERE Kundennummer="+bewertungNr+" Artikelnummer="+artikelNr);
+			statement.executeUpdate("DELETE FROM " + databaseName + ".Bewertung WHERE Kundennummer='" + kundennummer
+					+ "' AND Artikelnummer='" + artikelnummer + "'");
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	public void deleteKaufByArtikelNrAndKundenNr(String artikelNr, String kundennummer) {
+		try {
+			statement.executeUpdate("DELETE FROM " + databaseName + ".Kauf WHERE Kundennummer='" + kundennummer
+					+ "' AND Artikelnummer='" + artikelNr + "'");
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+
+	public void deleteAdresseByKundenNr(String kundennummer) {
+		try {
+			statement.executeUpdate("DELETE FROM " + databaseName + ".Adresse WHERE Kundennummer='" + kundennummer+"'");
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
 
 }

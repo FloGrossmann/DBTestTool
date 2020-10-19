@@ -53,7 +53,7 @@ public class Adresse {
 	
 	@Override
 	public String toString() {
-		return "Adresse: \n"+strasse+" "+hausnummer+"\n"+ortschaft+"\n"+plz;
+		return "\nAdresse: \n"+strasse+" "+hausnummer+"\n"+plz+" "+ortschaft;
 		
 	}
 

@@ -75,4 +75,9 @@ public class Kunde {
 		this.adresse = adresse;
 	}
 
+	@Override
+	public String toString() {
+		return "Kunde/n Kundennummer: "+kundenNummer+"/nName: "+vorname+" "+nachname+"/nE-Mail Adresse: "+email+"/nTelefonnummer: "+telefonNummer;
+		
+	}
 }

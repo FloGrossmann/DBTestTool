@@ -1,6 +1,6 @@
 package dbinterface;
 
-import java.util.Date;
+import java.sql.Date;
 
 public class Kauf {
 
@@ -14,12 +14,12 @@ public class Kauf {
 
 	}
 
-	public Kauf(String kundenNr, String artikelNr, Date kaufdatum, double kaufPreis, int menge) {
+	public Kauf(String kundenNr, String artikelNr, Date kaufdatum, double einzelpreis, int menge) {
 		super();
 		this.kundenNr = kundenNr;
 		this.artikelNr = artikelNr;
 		this.kaufdatum = kaufdatum;
-		this.kaufPreis = kaufPreis;
+		this.kaufPreis = einzelpreis*menge;
 		this.menge = menge;
 	}
 
@@ -61,6 +61,12 @@ public class Kauf {
 
 	public void setMenge(int menge) {
 		this.menge = menge;
+	}
+	
+	@Override
+	public String toString() {
+		return "Transaktion für den Artikel mit der Artikelnummer: "+artikelNr+" vom Kunden mit der Kundennummer: "+kundenNr+"/nAnzahl der gekauften Artikel: "+menge+"/nGesamtpreis: "+kaufPreis;
+		
 	}
 
 }

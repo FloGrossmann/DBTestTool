@@ -77,7 +77,7 @@ public class Kunde {
 
 	@Override
 	public String toString() {
-		return "Kunde/n Kundennummer: "+kundenNummer+"/nName: "+vorname+" "+nachname+"/nE-Mail Adresse: "+email+"/nTelefonnummer: "+telefonNummer;
+		return "Kunde\n Kundennummer: "+kundenNummer+"\nName: "+vorname+" "+nachname+"\nE-Mail Adresse: "+email+"\nTelefonnummer: "+telefonNummer + "\n"+ adresse.toString();
 		
 	}
 }

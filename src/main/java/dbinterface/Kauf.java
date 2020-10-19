@@ -65,7 +65,7 @@ public class Kauf {
 	
 	@Override
 	public String toString() {
-		return "Transaktion für den Artikel mit der Artikelnummer: "+artikelNr+" vom Kunden mit der Kundennummer: "+kundenNr+"/nAnzahl der gekauften Artikel: "+menge+"/nGesamtpreis: "+kaufPreis;
+		return "Transaktion für den Artikel mit der Artikelnummer: "+artikelNr+" vom Kunden mit der Kundennummer: "+kundenNr+"\nAnzahl der gekauften Artikel: "+menge+"\nGesamtpreis: "+kaufPreis;
 		
 	}
 

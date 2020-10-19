@@ -67,7 +67,7 @@ public class Artikel {
 	
 	@Override
 	public String toString() {
-		return "Artikel /nArtikelnummer: "+artikelNummer+"/nArtikelname: "+artikelName+"/nBeschreibung: "+beschreibung+"/nEinzelpreis: "+einzelPreis+"/nWährung: "+waehrung;
+		return "Artikel \nArtikelnummer: "+artikelNummer+"\nArtikelname: "+artikelName+"\nBeschreibung: "+beschreibung+"\nEinzelpreis: "+einzelPreis+"\nWährung: "+waehrung;
 		
 	}
 

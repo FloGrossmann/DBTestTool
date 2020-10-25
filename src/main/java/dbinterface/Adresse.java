@@ -57,5 +57,11 @@ public class Adresse {
 	public void setPlz(String plz) {
 		this.plz = plz;
 	}
+	
+	@Override
+	public String toString() {
+		return "\nAdresse: \n"+strasse+" "+hausnummer+"\n"+plz+" "+ortschaft;
+		
+	}
 
 }

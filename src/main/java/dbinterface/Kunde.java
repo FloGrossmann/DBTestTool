@@ -85,4 +85,10 @@ public class Kunde {
 	public void setAdresse(Adresse adresse) {
 		this.adresse = adresse;
 	}
+
+	@Override
+	public String toString() {
+		return "\nKunde\nKundennummer: "+kundenNummer+"\nName: "+vorname+" "+nachname+"\nE-Mail Adresse: "+email+"\nTelefonnummer: "+telefonNummer + "\n"+ adresse.toString();
+		
+	}
 }

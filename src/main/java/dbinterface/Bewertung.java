@@ -57,5 +57,11 @@ public class Bewertung {
 	public void setBewertung(String bewertung) {
 		this.bewertung = bewertung;
 	}
+	
+	@Override
+	public String toString() {
+		return "\nBewertung für Artikel mit der Artikelnummer: "+artikelNummer+" vom Kunden mit der Kundennummer: "+kundenNummer+"\nSterne: "+sterne+"\nBewertung: "+bewertung;
+		
+	}
 
 }

@@ -69,5 +69,11 @@ public class Artikel {
 	public void setBeschreibung(String beschreibung) {
 		this.beschreibung = beschreibung;
 	}
+	
+	@Override
+	public String toString() {
+		return "\nArtikel \nArtikelnummer: "+artikelNummer+"\nArtikelname: "+artikelName+"\nBeschreibung: "+beschreibung+"\nEinzelpreis: "+einzelPreis+"\nWährung: "+waehrung;
+		
+	}
 
 }

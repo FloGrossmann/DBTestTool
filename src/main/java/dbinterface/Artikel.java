@@ -1,22 +1,27 @@
 package dbinterface;
 
-import org.bson.codecs.pojo.annotations.BsonId;
+import org.bson.codecs.pojo.annotations.BsonProperty;
 
 public class Artikel {
 
-	@BsonId
-	String artikelNummer; //PS
+	@BsonProperty("artikelNummer")
+	String artikelNummer; // PS
+	@BsonProperty("artikelName")
 	String artikelName;
+	@BsonProperty("einzelPreis")
 	double einzelPreis;
+	@BsonProperty("waehrung")
 	String waehrung;
+	@BsonProperty("beschreibung")
 	String beschreibung;
 
 	public Artikel() {
 
 	}
 
-	public Artikel(String artikelNummer, String artikelName, Double einzelPreis, String waehrung,
-			String beschreibung) {
+	public Artikel(@BsonProperty("artikelNummer") String artikelNummer, @BsonProperty("artikelName") String artikelName,
+			@BsonProperty("einzelPreis") Double einzelPreis, @BsonProperty("waehrung") String waehrung,
+			@BsonProperty("beschreibung") String beschreibung) {
 		super();
 		this.artikelNummer = artikelNummer;
 		this.artikelName = artikelName;

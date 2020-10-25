@@ -72,7 +72,7 @@ public class MenuPanel extends JPanel {
 		add(mongoDBConnectionErrorText);
 
 		mongoDBTestConnectionButton = new JButton("Test MongoDB Connection");
-		mongoDBTestConnectionButton.addActionListener(alDBTestConnection);
+		mongoDBTestConnectionButton.addActionListener(alMongoDBTestConnection);
 		add(mongoDBTestConnectionButton);
 
 		mongoDBClearDBButton = new JButton("MongoDB test-DB loeschen");
@@ -101,25 +101,17 @@ public class MenuPanel extends JPanel {
 			} catch (Exception ex) {
 				System.out.println(ex);
 				mongoDBConnectionErrorText.setText(ex.getMessage());
-				
+
 			}
-	}};
+		}
+	};
 
 	ActionListener alDBTestConnection = new ActionListener() {
 
 		public void actionPerformed(ActionEvent e) {
-			JButton jButton=(JButton) e.getSource();
-			if(jButton.getText().contains("Mongo")) {
-			MongoDBTest mongoTest = new MongoDBTest();
-			try {
-				mongoTest.connect(mongoDBConnectionTextField.getText());
-			} catch (Exception e1) {
-				e1.printStackTrace();
-			}
-			}else {
-				MariaDBTest mariaDBTest=new MariaDBTest(mariaDBConnectionTextField.getText(), mariaDBUsernameTextField.getText(), mariaDBPasswordTextField.getText());
-				mariaDBTest.connect();
-			}
+			MariaDBTest mariaDBTest = new MariaDBTest(mariaDBConnectionTextField.getText(),
+					mariaDBUsernameTextField.getText(), mariaDBPasswordTextField.getText());
+			mariaDBTest.connect();
 		}
 	};
 
@@ -154,16 +146,16 @@ public class MenuPanel extends JPanel {
 			mongoTest.cleanData();
 		}
 	};
-	
+
 	ActionListener alMongoDBSetup = new ActionListener() {
 
 		public void actionPerformed(ActionEvent e) {
 			mongoTest.setupDB();
 			mongoTest.addArtikel(new Artikel("22", "artikelName", 42.42, "euro", "ein Artikel"));
-			mongoTest.addKunde(new Kunde("12", "email@web.de", "07234723", "Vorname", "Nachname", new Adresse("ortschaft", "hausnummer", "Straﬂe", "712231")));
+			mongoTest.addKunde(new Kunde("12", "email@web.de", "07234723", "Vorname", "Nachname", new Adresse("ortschaft", "hausnummer", "Stra√üe", "712231")));
 			mongoTest.addKauf(new Kauf("12", "22", new Date(new java.util.Date().getTime()), 43.43, 2));
 			mongoTest.addBewertung(new Bewertung("12", "22", 5, "war okay"));
 		}
 	};
-	
+
 }

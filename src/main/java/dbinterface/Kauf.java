@@ -2,19 +2,28 @@ package dbinterface;
 
 import java.sql.Date;
 
+import org.bson.codecs.pojo.annotations.BsonProperty;
+
 public class Kauf {
 
+	@BsonProperty("kundenNr")
 	String kundenNr;
+	@BsonProperty("artikelNr")
 	String artikelNr;
+	@BsonProperty("kaufdatum")
 	Date kaufdatum;
+	@BsonProperty("kaufPreis")
 	double kaufPreis;
+	@BsonProperty("menge")
 	int menge;
 
 	public Kauf() {
 
 	}
 
-	public Kauf(String kundenNr, String artikelNr, Date kaufdatum, double einzelpreis, int menge) {
+	public Kauf(@BsonProperty("kundenNr") String kundenNr, @BsonProperty("artikelNr") String artikelNr,
+			@BsonProperty("kaufdatum") Date kaufdatum, @BsonProperty("kaufPreis") double kaufPreis,
+			@BsonProperty("menge") int menge) {
 		super();
 		this.kundenNr = kundenNr;
 		this.artikelNr = artikelNr;
@@ -65,7 +74,7 @@ public class Kauf {
 	
 	@Override
 	public String toString() {
-		return "\nTransaktion für den Artikel mit der Artikelnummer: "+artikelNr+" vom Kunden mit der Kundennummer: "+kundenNr+"\nAnzahl der gekauften Artikel: "+menge+"\nGesamtpreis: "+kaufPreis;
+		return "\nTransaktion fï¿½r den Artikel mit der Artikelnummer: "+artikelNr+" vom Kunden mit der Kundennummer: "+kundenNr+"\nAnzahl der gekauften Artikel: "+menge+"\nGesamtpreis: "+kaufPreis;
 		
 	}
 

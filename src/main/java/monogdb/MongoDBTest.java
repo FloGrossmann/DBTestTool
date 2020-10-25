@@ -3,12 +3,11 @@ package monogdb;
 import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Filters.gt;
-import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
-import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 
 import java.util.LinkedList;
 import java.util.List;
 
+import org.bson.codecs.configuration.CodecRegistries;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
 import org.bson.types.ObjectId;
@@ -56,8 +55,11 @@ public class MongoDBTest implements DBInterface {
 			    .retryWrites(true)
 			    .build();
 		MongoClient mongoClient = MongoClients.create(settings);
-		CodecRegistry pojoCodecRegistry = fromRegistries(MongoClientSettings.getDefaultCodecRegistry(),
-                fromProviders(PojoCodecProvider.builder().automatic(true).build()));
+		
+		CodecRegistry defaultCodecRegistry = MongoClientSettings.getDefaultCodecRegistry();
+	    CodecRegistry fromProvider = CodecRegistries.fromProviders(PojoCodecProvider.builder().automatic(true).build());
+	    CodecRegistry pojoCodecRegistry = CodecRegistries.fromRegistries(defaultCodecRegistry, fromProvider);
+	    
 		testDatabase = mongoClient.getDatabase(TESTDATABASENAME).withCodecRegistry(pojoCodecRegistry);
 		MongoIterable<String> databaseNames = mongoClient.listDatabaseNames();
 		if (databaseNames != null) {
@@ -80,10 +82,12 @@ public class MongoDBTest implements DBInterface {
 		testDatabase.createCollection(COLLECTION_KAUF);
 		
 		kundeCollection = testDatabase.getCollection(COLLECTION_KUNDE, Kunde.class);
-		artikelCollection = testDatabase.getCollection(COLLECTION_KUNDE, Artikel.class);
-		bewertungCollection = testDatabase.getCollection(COLLECTION_KUNDE, Bewertung.class);
+		kundeCollection.createIndex(Indexes.ascending("kundenNummer"));
+		artikelCollection = testDatabase.getCollection(COLLECTION_ARTIKEL, Artikel.class);
+		kundeCollection.createIndex(Indexes.ascending("artikelNummer"));
+		bewertungCollection = testDatabase.getCollection(COLLECTION_BEWERTUNG, Bewertung.class);
 		bewertungCollection.createIndex(Indexes.compoundIndex(Indexes.ascending("kundenNummer"), Indexes.ascending("artikelNummer")));
-		kaufCollection = testDatabase.getCollection(COLLECTION_KUNDE, Kauf.class);
+		kaufCollection = testDatabase.getCollection(COLLECTION_KAUF, Kauf.class);
 		kaufCollection.createIndex(Indexes.compoundIndex(Indexes.ascending("kundenNr"), Indexes.ascending("artikelNr")));
 		return true;
 	}
@@ -207,18 +211,18 @@ public class MongoDBTest implements DBInterface {
 	}
 
 	public Kunde updateKunde(Kunde kunde) {
-//		kundeCollection.updateOne(eq("kundenNummer", kunde.getKundenNummer()), kunde);
-		return null;
+		kundeCollection.findOneAndReplace(eq("kundenNummer", kunde.getKundenNummer()), kunde);
+		return kunde;
 	}
 
 	public Artikel updateArtikel(Artikel artikel) {
-		// TODO Auto-generated method stub
-		return null;
+		artikelCollection.findOneAndReplace(eq("artikelNummer", artikel.getArtikelNummer()), artikel);
+		return artikel;
 	}
 
 	public Bewertung updateBewertung(Bewertung bewertung) {
-		// TODO Auto-generated method stub
-		return null;
+		bewertungCollection.findOneAndReplace(and(eq("artikelNummer", bewertung.getArtikelNummer()), eq("kundenNummer", bewertung.getKundenNummer())), bewertung);
+		return bewertung;
 	}
 
 	public void deleteKundeByKundenNr(String kundenNr) {

@@ -13,7 +13,7 @@ import com.opencsv.bean.StatefulBeanToCsvBuilder;
 
 public class CsvBeanWriter {
 
-	private static void writeCsvFromAccessTime(Path path, List<accessTime> zugriffszeiten) throws Exception {
+	private static void writeCsvFromAccessTime(Path path, List<AccessTime> zugriffszeiten) throws Exception {
 		Writer writer = new FileWriter(path.toString());
 
 		StatefulBeanToCsv<CsvBean> sbc = new StatefulBeanToCsvBuilder<CsvBean>(writer)
@@ -27,7 +27,7 @@ public class CsvBeanWriter {
 		writer.close();
 	}
 
-	public static void writeCsvFromAccessTimeExample(List<accessTime> list) throws Exception {
+	public static void writeCsvFromAccessTimeExample(List<AccessTime> list) throws Exception {
 		Path path = Paths.get("C:/Users/User/Desktop/messdaten.csv");
 		writeCsvFromAccessTime(path, list);
 	}

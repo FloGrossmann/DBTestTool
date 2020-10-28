@@ -26,7 +26,7 @@ import dbinterface.Kauf;
 import dbinterface.Kunde;
 import measure.CRUDoperation;
 import measure.CsvBeanWriter;
-import measure.accessTime;
+import measure.AccessTime;
 
 public class MariaDBTest implements DBInterface {
 
@@ -42,7 +42,7 @@ public class MariaDBTest implements DBInterface {
 	int artikelId = 0;
 	Instant start;
 	Instant end;
-	List<accessTime> timeMeasures = new ArrayList<accessTime>();
+	List<AccessTime> timeMeasures = new ArrayList<AccessTime>();
 
 	public MariaDBTest(String connectionString, String username, String password) {
 		this.connectionString = connectionString;
@@ -87,32 +87,32 @@ public class MariaDBTest implements DBInterface {
 				start = Instant.now();
 				this.deleteKaufByArtikelNrAndKundenNr(artikel.getArtikelNummer(), kunde.getKundenNummer());
 				end = Instant.now();
-				timeMeasures.add(new accessTime("Kauf by Artikel- und Kundennummer",
+				timeMeasures.add(new AccessTime("Kauf by Artikel- und Kundennummer",
 						Duration.between(start, end).toMillis(), CRUDoperation.DELETE));// für die richtigen Zeiten
 																						// müssen noch die Sysouts aus
 																						// den Methoden genommen werden.
 				start = Instant.now();
 				this.deleteBewertungByArtikelNrAndKundenNr(artikel.getArtikelNummer(), kunde.getKundenNummer());
 				end = Instant.now();
-				timeMeasures.add(new accessTime("Bewertung by Artikel- und Kundennummer",
+				timeMeasures.add(new AccessTime("Bewertung by Artikel- und Kundennummer",
 						Duration.between(start, end).toMillis(), CRUDoperation.DELETE));
 
 				start = Instant.now();
 				this.deleteAdresseByKundenNr(kunde.getKundenNummer());
 				end = Instant.now();
-				timeMeasures.add(new accessTime("Adresse by Kundennummer", Duration.between(start, end).toMillis(),
+				timeMeasures.add(new AccessTime("Adresse by Kundennummer", Duration.between(start, end).toMillis(),
 						CRUDoperation.DELETE));
 
 				start = Instant.now();
 				this.deleteKundeByKundenNr(kunde.getKundenNummer());
 				end = Instant.now();
-				timeMeasures.add(new accessTime("Kunde by Kundennummer", Duration.between(start, end).toMillis(),
+				timeMeasures.add(new AccessTime("Kunde by Kundennummer", Duration.between(start, end).toMillis(),
 						CRUDoperation.DELETE));
 
 				start = Instant.now();
 				this.deleteArtikelbyArtikelNr(artikel.getArtikelNummer());
 				end = Instant.now();
-				timeMeasures.add(new accessTime("Artikel by Artikelnummer", Duration.between(start, end).toMillis(),
+				timeMeasures.add(new AccessTime("Artikel by Artikelnummer", Duration.between(start, end).toMillis(),
 						CRUDoperation.DELETE));
 
 				// Insert Operations
@@ -122,24 +122,24 @@ public class MariaDBTest implements DBInterface {
 				this.addKunde(kunde);
 				end = Instant.now();
 				timeMeasures
-						.add(new accessTime("Kunde", Duration.between(start, end).toMillis(), CRUDoperation.INSERT));
+						.add(new AccessTime("Kunde", Duration.between(start, end).toMillis(), CRUDoperation.INSERT));
 
 				start = Instant.now();
 				this.addArtikel(artikel);
 				end = Instant.now();
 				timeMeasures
-						.add(new accessTime("Artikel", Duration.between(start, end).toMillis(), CRUDoperation.INSERT));
+						.add(new AccessTime("Artikel", Duration.between(start, end).toMillis(), CRUDoperation.INSERT));
 
 				start = Instant.now();
 				this.addBewertung(bewertung);
 				end = Instant.now();
 				timeMeasures.add(
-						new accessTime("Bewertung", Duration.between(start, end).toMillis(), CRUDoperation.INSERT));
+						new AccessTime("Bewertung", Duration.between(start, end).toMillis(), CRUDoperation.INSERT));
 
 				start = Instant.now();
 				this.addKauf(kauf);
 				end = Instant.now();
-				timeMeasures.add(new accessTime("Kauf", Duration.between(start, end).toMillis(), CRUDoperation.INSERT));
+				timeMeasures.add(new AccessTime("Kauf", Duration.between(start, end).toMillis(), CRUDoperation.INSERT));
 
 				try {
 					CsvBeanWriter.writeCsvFromAccessTimeExample(timeMeasures);

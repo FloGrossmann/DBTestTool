@@ -9,10 +9,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.DateFormat;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
+
+import com.mongodb.DuplicateKeyException;
 
 import dbinterface.Adresse;
 import dbinterface.Artikel;
@@ -20,6 +24,9 @@ import dbinterface.Bewertung;
 import dbinterface.DBInterface;
 import dbinterface.Kauf;
 import dbinterface.Kunde;
+import measure.CRUDoperation;
+import measure.CsvBeanWriter;
+import measure.accessTime;
 
 public class MariaDBTest implements DBInterface {
 
@@ -33,6 +40,9 @@ public class MariaDBTest implements DBInterface {
 	String databaseName = "Webshop";
 	int kundenId = 000;
 	int artikelId = 0;
+	Instant start;
+	Instant end;
+	List<accessTime> timeMeasures = new ArrayList<accessTime>();
 
 	public MariaDBTest(String connectionString, String username, String password) {
 		this.connectionString = connectionString;
@@ -59,82 +69,133 @@ public class MariaDBTest implements DBInterface {
 	public void connect() {
 		try {
 			System.out.println("Verbindung erfolgt...");
-//			mariaDbConnection = DriverManager.getConnection(
-//					"jdbc:mariadb://localhost:3000","root","admin");
 			mariaDbConnection = DriverManager.getConnection("jdbc:mariadb://" + connectionString, username, password);
 			statement = mariaDbConnection.createStatement();
 			if (setupDB()) {
-				Kunde kunde = new Kunde(++this.kundenId+"", "kevin.hink.professor", // es darf kein @ Zeichen
-																								// verwendet werden
+				Kunde kunde = new Kunde(++this.kundenId + "", "kevin.hink.professor", // es darf kein @ Zeichen
+																						// verwendet werden
 						"0122336", "Kevin", "Hink", new Adresse("Falkenberg", "8", "Grenzstraße", "04895"));
-				Artikel artikel = new Artikel(++this.artikelId+ "", "Stuhl", 25.95, "Euro", "Ein Stuhl zum Sitzen");
-				Bewertung bewertung=new Bewertung(kunde.getKundenNummer(), artikel.getArtikelNummer(), 3, "sehr solide");
-				Kauf kauf=new Kauf(kunde.getKundenNummer(), artikel.getArtikelNummer(),
-						new Date(new java.util.Date().getTime()), artikel.getEinzelPreis(), 5);
-				
+				Artikel artikel = new Artikel(++this.artikelId + "", "Stuhl", 25.95, "Euro", "Ein Stuhl zum Sitzen");
+				Bewertung bewertung = new Bewertung(kunde.getKundenNummer(), artikel.getArtikelNummer(), 3,
+						"sehr solide");
+				Kauf kauf = new Kauf(kunde.getKundenNummer(), artikel.getArtikelNummer(),
+						new Date(new java.util.Date().getTime()), artikel.getEinzelPreis() * 5, 5);
+
 				// Delete Operations -> müssen in der Reihenfolge ausgeführt werden
-				System.out.println("Löschen...");
+				System.out.println("Löschen");
+
+				start = Instant.now();
 				this.deleteKaufByArtikelNrAndKundenNr(artikel.getArtikelNummer(), kunde.getKundenNummer());
+				end = Instant.now();
+				timeMeasures.add(new accessTime("Kauf by Artikel- und Kundennummer",
+						Duration.between(start, end).toMillis(), CRUDoperation.DELETE));// für die richtigen Zeiten
+																						// müssen noch die Sysouts aus
+																						// den Methoden genommen werden.
+				start = Instant.now();
 				this.deleteBewertungByArtikelNrAndKundenNr(artikel.getArtikelNummer(), kunde.getKundenNummer());
+				end = Instant.now();
+				timeMeasures.add(new accessTime("Bewertung by Artikel- und Kundennummer",
+						Duration.between(start, end).toMillis(), CRUDoperation.DELETE));
+
+				start = Instant.now();
 				this.deleteAdresseByKundenNr(kunde.getKundenNummer());
+				end = Instant.now();
+				timeMeasures.add(new accessTime("Adresse by Kundennummer", Duration.between(start, end).toMillis(),
+						CRUDoperation.DELETE));
+
+				start = Instant.now();
 				this.deleteKundeByKundenNr(kunde.getKundenNummer());
+				end = Instant.now();
+				timeMeasures.add(new accessTime("Kunde by Kundennummer", Duration.between(start, end).toMillis(),
+						CRUDoperation.DELETE));
+
+				start = Instant.now();
 				this.deleteArtikelbyArtikelNr(artikel.getArtikelNummer());
+				end = Instant.now();
+				timeMeasures.add(new accessTime("Artikel by Artikelnummer", Duration.between(start, end).toMillis(),
+						CRUDoperation.DELETE));
 
-				//Insert Operations
+				// Insert Operations
 				System.out.println("Hinzufügen");
-				this.addKunde(kunde);
-				this.addArtikel(artikel);
-				this.addBewertung(bewertung);
-				this.addKauf(kauf);
 
-				//Select Operations
+				start = Instant.now();
+				this.addKunde(kunde);
+				end = Instant.now();
+				timeMeasures
+						.add(new accessTime("Kunde", Duration.between(start, end).toMillis(), CRUDoperation.INSERT));
+
+				start = Instant.now();
+				this.addArtikel(artikel);
+				end = Instant.now();
+				timeMeasures
+						.add(new accessTime("Artikel", Duration.between(start, end).toMillis(), CRUDoperation.INSERT));
+
+				start = Instant.now();
+				this.addBewertung(bewertung);
+				end = Instant.now();
+				timeMeasures.add(
+						new accessTime("Bewertung", Duration.between(start, end).toMillis(), CRUDoperation.INSERT));
+
+				start = Instant.now();
+				this.addKauf(kauf);
+				end = Instant.now();
+				timeMeasures.add(new accessTime("Kauf", Duration.between(start, end).toMillis(), CRUDoperation.INSERT));
+
+				try {
+					CsvBeanWriter.writeCsvFromAccessTimeExample(timeMeasures);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+
+				// Select Operations
 				System.out.println("Alle Select Operationen");
-				//Kunde
+				// Kunde
 				System.out.println("Alle für Kunde: \n\n");
 				printOutSelect(this.getKundeByKundenNr(kunde.getKundenNummer()));
 				printOutSelect(this.getKundenByNachName(kunde.getNachname()));
 				printOutSelect(this.getKundenByPlz(kunde.getAdresse().getPlz()));
 				printOutSelect(this.getKundeByEmail(kunde.getEmail()));
-				
-				//printOutSelect(this.getDistinctOrte());//die Methode funktioniert so noch nicht
-				
-				//Artikel
+
+				// printOutSelect(this.getDistinctOrte());//die Methode funktioniert so noch
+				// nicht
+
+				// Artikel
 				System.out.println("Alle für Artikel: \n\n");
 				printOutSelect(this.getArtikelByArtikelNummer(artikel.getArtikelNummer()));
 				printOutSelect(this.getArtikelByArtikelName(artikel.getArtikelName()));
 				printOutSelect(this.getArtikelWhichCostMoreThan(artikel.getEinzelPreis()));
-				
-				//Bewertung
+
+				// Bewertung
 				System.out.println("Alle für Bewertung: \n\n");
-				printOutSelect(this.getBewertungByKundenNrAndArtikelNr(artikel.getArtikelNummer(),kunde.getKundenNummer()));
+				printOutSelect(
+						this.getBewertungByKundenNrAndArtikelNr(artikel.getArtikelNummer(), kunde.getKundenNummer()));
 				printOutSelect(this.getBewertungenByArtikelNr(artikel.getArtikelNummer()));
 				printOutSelect(this.getBewertungenByKundenNr(kunde.getKundenNummer()));
 				printOutSelect(this.getBewertungenByAnzahlSterne(bewertung.getSterne()));
-				
-				//Kauf
+
+				// Kauf
 				System.out.println("Alle für Kauf: \n\n");
 				printOutSelect(this.getEinkaeufeForKunde(kunde.getKundenNummer()));
 				printOutSelect(this.getVerkauefeForArtikel(artikel.getArtikelNummer()));
-				
-				//Update Objects
-				kunde.setNachname("Schaak");
-				kunde.getAdresse().setHausnummer(kunde.getAdresse().getHausnummer()+"a");
-				artikel.setArtikelName(artikel.getArtikelName()+" v1.10");
-				artikel.setBeschreibung(artikel.getBeschreibung()+" jetzt mit einer neuen Version");
-				bewertung.setSterne(bewertung.getSterne()+1);
 
-				//Update
+				// Update Objects
+				kunde.setNachname("Schaak");
+				kunde.getAdresse().setHausnummer(kunde.getAdresse().getHausnummer() + "a");
+				artikel.setArtikelName(artikel.getArtikelName() + " v1.10");
+				artikel.setBeschreibung(artikel.getBeschreibung() + " jetzt mit einer neuen Version");
+				bewertung.setSterne(bewertung.getSterne() + 1);
+
+				// Update
 				this.updateKunde(kunde);
 				this.updateArtikel(artikel);
 				this.updateBewertung(bewertung);
-				
-				//Select of changed objects
+
+				// Select of changed objects
 				System.out.println("Select für alle geänderten Objekte: \n\n");
 				printOutSelect(this.getKundenByNachName(kunde.getNachname()));
 				printOutSelect(this.getArtikelByArtikelName(artikel.getArtikelName()));
 				printOutSelect(this.getBewertungenByAnzahlSterne(bewertung.getSterne()));
-				
-				
+
 				System.out.println("Statements ausgeführt");
 			}
 		} catch (SQLException e) {
@@ -271,8 +332,10 @@ public class MariaDBTest implements DBInterface {
 	public Kunde getKundeByKundenNr(String kundenNr) {
 		Kunde kunde = new Kunde();
 		try {
-			ResultSet resultSet = statement.executeQuery("SELECT * FROM " + databaseName + ".Kunde WHERE Kundennummer='" + kundenNr + "'");
-			ResultSet resultSetAdresse = statement.executeQuery("SELECT * FROM " + databaseName + ".Adresse WHERE Kundennummer='" + kundenNr + "'");
+			ResultSet resultSet = statement
+					.executeQuery("SELECT * FROM " + databaseName + ".Kunde WHERE Kundennummer='" + kundenNr + "'");
+			ResultSet resultSetAdresse = statement
+					.executeQuery("SELECT * FROM " + databaseName + ".Adresse WHERE Kundennummer='" + kundenNr + "'");
 //					+ "FULL JOIN "+ databaseName + ".Adresse WHERE Kundennummer='" + kundenNr + "'"); Für die Adresse mit hinzu
 			while (resultSet.next()) {
 				kunde.setKundenNummer(resultSet.getString("Kundennummer"));
@@ -284,9 +347,10 @@ public class MariaDBTest implements DBInterface {
 				// mit geladen weil kundennummer der foreign Kay ist? -> habe es erstmal mit
 				// einem JOIN probiert aber vielleicht geht es ja auch ohne
 			}
-			while(resultSetAdresse.next())
-				kunde.setAdresse(new Adresse(resultSetAdresse.getString("Ortschaft"), resultSetAdresse.getString("Hausnummer"),
-						resultSetAdresse.getString("Strasse"), resultSetAdresse.getString("PLZ")));
+			while (resultSetAdresse.next())
+				kunde.setAdresse(
+						new Adresse(resultSetAdresse.getString("Ortschaft"), resultSetAdresse.getString("Hausnummer"),
+								resultSetAdresse.getString("Strasse"), resultSetAdresse.getString("PLZ")));
 			return kunde;
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -638,17 +702,18 @@ public class MariaDBTest implements DBInterface {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 	}
 
 	public void deleteAdresseByKundenNr(String kundennummer) {
 		try {
-			statement.executeUpdate("DELETE FROM " + databaseName + ".Adresse WHERE Kundennummer='" + kundennummer+"'");
+			statement.executeUpdate(
+					"DELETE FROM " + databaseName + ".Adresse WHERE Kundennummer='" + kundennummer + "'");
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 	}
 
 }

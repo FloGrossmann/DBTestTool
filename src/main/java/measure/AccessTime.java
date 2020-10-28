@@ -1,21 +1,17 @@
 package measure;
 
 import com.opencsv.bean.CsvBindByName;
-import com.opencsv.bean.CsvBindByPosition;
 
 public class AccessTime extends CsvBean{
 
 	
 	@CsvBindByName(column = "Kategorie", required = true)
-//	@CsvBindByPosition(position = 0)
 	CRUDoperation kategorie;
 	
 	@CsvBindByName(column = "Beschreibung", required = true)
-//	@CsvBindByPosition(position = 1)
 	String beschreibung;
 	
 	@CsvBindByName(column = "Zeit in ms", required = true)
-//	@CsvBindByPosition(position = 2)
 	long zugriffszeitZeit;
 	
 	public AccessTime(String beschreibung, long zeit, CRUDoperation kategorie) {

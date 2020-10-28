@@ -18,7 +18,7 @@ public class CsvBeanWriter {
 
 		StatefulBeanToCsv<CsvBean> sbc = new StatefulBeanToCsvBuilder<CsvBean>(writer)
 				.withQuotechar(CSVWriter.NO_QUOTE_CHARACTER).withEscapechar(CSVWriter.NO_ESCAPE_CHARACTER)
-				.withSeparator(CSVWriter.DEFAULT_SEPARATOR).build();
+				.withSeparator(';').build();
 
 		List<CsvBean> list = new ArrayList<>();
 		list.addAll(zugriffszeiten);
@@ -28,7 +28,7 @@ public class CsvBeanWriter {
 	}
 
 	public static void writeCsvFromAccessTimeExample(List<AccessTime> list) throws Exception {
-		Path path = Paths.get("C:/Users/User/Desktop/messdaten.csv");
+		Path path = Paths.get("messdaten.csv");
 		writeCsvFromAccessTime(path, list);
 	}
 }

@@ -307,8 +307,8 @@ public class MariaDBTest implements DBInterface {
 			prest.setDate(1, kauf.getKaufdatum());
 			prest.setDouble(2, kauf.getKaufPreis());
 			prest.setInt(3, kauf.getMenge());
-			prest.setString(4, kauf.getKundenNr());
-			prest.setString(5, kauf.getArtikelNr());
+			prest.setString(4, kauf.getKundenNummer());
+			prest.setString(5, kauf.getArtikelNummer());
 			prest.executeUpdate();
 			return kauf;
 		} catch (SQLException e) {
@@ -591,8 +591,8 @@ public class MariaDBTest implements DBInterface {
 					.executeQuery("SELECT * FROM " + databaseName + ".Kauf WHERE Kundennummer='" + kundenNummer + "'");
 			while (resultSet.next()) {
 				Kauf kauf = new Kauf();
-				kauf.setArtikelNr(resultSet.getString("Artikelnummer"));
-				kauf.setKundenNr(resultSet.getString("Kundennummer"));
+				kauf.setArtikelNummer(resultSet.getString("Artikelnummer"));
+				kauf.setKundenNummer(resultSet.getString("Kundennummer"));
 				kauf.setKaufPreis(resultSet.getDouble("Kaufpreis"));
 				kauf.setKaufdatum(resultSet.getDate("Kaufdatum"));
 				kauf.setMenge(resultSet.getInt("Menge"));
@@ -612,8 +612,8 @@ public class MariaDBTest implements DBInterface {
 					"SELECT * FROM " + databaseName + ".Kauf WHERE Artikelnummer='" + artikelNummer + "'");
 			while (resultSet.next()) {
 				Kauf kauf = new Kauf();
-				kauf.setArtikelNr(resultSet.getString("Artikelnummer"));
-				kauf.setKundenNr(resultSet.getString("Kundennummer"));
+				kauf.setArtikelNummer(resultSet.getString("Artikelnummer"));
+				kauf.setKundenNummer(resultSet.getString("Kundennummer"));
 				kauf.setKaufPreis(resultSet.getDouble("Kaufpreis"));
 				kauf.setKaufdatum(resultSet.getDate("Kaufdatum"));
 				kauf.setMenge(resultSet.getInt("Menge"));

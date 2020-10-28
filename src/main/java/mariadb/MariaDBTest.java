@@ -437,7 +437,7 @@ public class MariaDBTest implements DBInterface {
 	public List<String> getDistinctOrte() {
 		List<String> ortList = new ArrayList<String>();
 		try {
-			ResultSet resultSet = statement.executeQuery("SELECT * FROM " + databaseName + ".Adresse");
+			ResultSet resultSet = statement.executeQuery("SELECT Ortschaft FROM " + databaseName + ".Adresse");
 			// WHERE Ortschaft='" + ??? + "'");Soll da was anderes gemacht werden?
 			while (resultSet.next()) {
 				String ort = resultSet.getString("Ortschaft");
@@ -453,8 +453,7 @@ public class MariaDBTest implements DBInterface {
 	public Artikel getArtikelByArtikelNummer(String artikelNummer) {
 		Artikel artikel = new Artikel();
 		try {
-			ResultSet resultSet = statement.executeQuery("SELECT * FROM " + databaseName + ".Artikel FULL JOIN "
-					+ databaseName + ".Adresse WHERE Artikelnummer='" + artikelNummer + "'");
+			ResultSet resultSet = statement.executeQuery("SELECT * FROM " + databaseName + ".Artikel WHERE Artikelnummer='" + artikelNummer + "'");
 			while (resultSet.next()) {
 				artikel.setArtikelNummer(resultSet.getString("Artikelnummer"));
 				artikel.setArtikelName(resultSet.getString("Artikelname"));
@@ -472,8 +471,7 @@ public class MariaDBTest implements DBInterface {
 	public Artikel getArtikelByArtikelName(String artikelName) {
 		Artikel artikel = new Artikel();
 		try {
-			ResultSet resultSet = statement.executeQuery("SELECT * FROM " + databaseName + ".Artikel FULL JOIN "
-					+ databaseName + ".Adresse WHERE Artikelname='" + artikelName + "'");
+			ResultSet resultSet = statement.executeQuery("SELECT * FROM " + databaseName + ".Artikel WHERE Artikelname='" + artikelName + "'");
 			while (resultSet.next()) {
 				artikel.setArtikelNummer(resultSet.getString("Artikelnummer"));
 				artikel.setArtikelName(resultSet.getString("Artikelname"));

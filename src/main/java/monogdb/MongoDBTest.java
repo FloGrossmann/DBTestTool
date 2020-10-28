@@ -7,12 +7,17 @@ import static com.mongodb.client.model.Filters.gt;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.bson.BsonDocument;
+import org.bson.BsonValue;
 import org.bson.codecs.configuration.CodecRegistries;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
+import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.ConnectionString;
+import com.mongodb.DBObject;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
@@ -88,7 +93,7 @@ public class MongoDBTest implements DBInterface {
 		bewertungCollection = testDatabase.getCollection(COLLECTION_BEWERTUNG, Bewertung.class);
 		bewertungCollection.createIndex(Indexes.compoundIndex(Indexes.ascending("kundenNummer"), Indexes.ascending("artikelNummer")));
 		kaufCollection = testDatabase.getCollection(COLLECTION_KAUF, Kauf.class);
-		kaufCollection.createIndex(Indexes.compoundIndex(Indexes.ascending("kundenNr"), Indexes.ascending("artikelNr")));
+		kaufCollection.createIndex(Indexes.compoundIndex(Indexes.ascending("kundenNummer"), Indexes.ascending("artikelNummer")));
 		return true;
 	}
 
@@ -202,12 +207,12 @@ public class MongoDBTest implements DBInterface {
 
 	public List<Kauf> getEinkaeufeForKunde(String kundenNummer) {
 		LinkedList<Kauf> result = new LinkedList<Kauf>();
-		return kaufCollection.find(eq("kundenNr", kundenNummer)).into(result);
+		return kaufCollection.find(eq("kundenNummer", kundenNummer)).into(result);
 	}
 
 	public List<Kauf> getVerkauefeForArtikel(String artikelNummer) {
 		LinkedList<Kauf> result = new LinkedList<Kauf>();
-		return kaufCollection.find(eq("artikelNr", artikelNummer)).into(result);
+		return kaufCollection.find(eq("artikelNummer", artikelNummer)).into(result);
 	}
 
 	public Kunde updateKunde(Kunde kunde) {
@@ -229,12 +234,22 @@ public class MongoDBTest implements DBInterface {
 		kundeCollection.deleteOne(eq("kundenNummer", kundenNr));
 	}
 
-	public void deleteArtikelbyArtikelNr(String artikelNr) {
-		artikelCollection.deleteOne(eq("artikelNummer", new ObjectId(artikelNr)));
+	public void deleteArtikelbyArtikelNr(String artikelNummer) {
+		artikelCollection.deleteOne(eq("artikelNummer", new ObjectId(artikelNummer)));
 	}
 
-	public void deleteBewertungByArtikelNrAndKundenNr(String artikelNr, String bewertungNr) {
-		bewertungCollection.deleteOne(and(eq("artikelNummer", new ObjectId(artikelNr)), eq("artikelNummer", new ObjectId())));
+	public void deleteBewertungByArtikelNrAndKundenNr(String artikelNummer, String kundenNummer) {
+		bewertungCollection.deleteOne(and(eq("artikelNummer", new ObjectId(artikelNummer)), eq("kundenNummer", new ObjectId(kundenNummer))));
+	}
+
+	@Override
+	public void deleteKaufByArtikelNrAndKundenNr(String artikelNummer, String kundennummer) {
+		kaufCollection.deleteOne(and(eq("artikelNummer", new ObjectId(artikelNummer)), eq("artikelNummer", new ObjectId())));
+	}
+
+	@Override
+	public void deleteAdresseByKundenNr(String kundennummer) {
+		kundeCollection.updateOne(eq("kundenNummer", kundennummer), new BasicDBObject( "$unset", new BasicDBObject("adresse", "")));
 	}
 	
 	

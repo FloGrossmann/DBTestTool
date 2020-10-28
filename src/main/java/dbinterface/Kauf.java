@@ -6,10 +6,10 @@ import org.bson.codecs.pojo.annotations.BsonProperty;
 
 public class Kauf {
 
-	@BsonProperty("kundenNr")
-	String kundenNr;
-	@BsonProperty("artikelNr")
-	String artikelNr;
+	@BsonProperty("kundenNummer")
+	String kundenNummer;
+	@BsonProperty("artikelNummer")
+	String artikelNummer;
 	@BsonProperty("kaufdatum")
 	Date kaufdatum;
 	@BsonProperty("kaufPreis")
@@ -21,31 +21,31 @@ public class Kauf {
 
 	}
 
-	public Kauf(@BsonProperty("kundenNr") String kundenNr, @BsonProperty("artikelNr") String artikelNr,
+	public Kauf(@BsonProperty("kundenNummer") String kundenNummer, @BsonProperty("artikelNummer") String artikelNummer,
 			@BsonProperty("kaufdatum") Date kaufdatum, @BsonProperty("kaufPreis") double kaufPreis,
 			@BsonProperty("menge") int menge) {
 		super();
-		this.kundenNr = kundenNr;
-		this.artikelNr = artikelNr;
+		this.kundenNummer = kundenNummer;
+		this.artikelNummer = artikelNummer;
 		this.kaufdatum = kaufdatum;
 		this.kaufPreis = kaufPreis;
 		this.menge = menge;
 	}
 
-	public String getKundenNr() {
-		return kundenNr;
+	public String getKundenNummer() {
+		return kundenNummer;
 	}
 
-	public void setKundenNr(String kundenNr) {
-		this.kundenNr = kundenNr;
+	public void setKundenNummer(String kundenNummerr) {
+		this.kundenNummer = kundenNummerr;
 	}
 
-	public String getArtikelNr() {
-		return artikelNr;
+	public String getArtikelNummer() {
+		return artikelNummer;
 	}
 
-	public void setArtikelNr(String artikelNr) {
-		this.artikelNr = artikelNr;
+	public void setArtikelNummer(String artikelummeNr) {
+		this.artikelNummer = artikelummeNr;
 	}
 
 	public Date getKaufdatum() {
@@ -74,7 +74,7 @@ public class Kauf {
 	
 	@Override
 	public String toString() {
-		return "\nTransaktion fuer den Artikel mit der Artikelnummer: "+artikelNr+" vom Kunden mit der Kundennummer: "+kundenNr+"\nAnzahl der gekauften Artikel: "+menge+"\nGesamtpreis: "+kaufPreis;
+		return "\nTransaktion fuer den Artikel mit der Artikelnummer: "+artikelNummer+" vom Kunden mit der Kundennummer: "+kundenNummer+"\nAnzahl der gekauften Artikel: "+menge+"\nGesamtpreis: "+kaufPreis;
 		
 	}
 

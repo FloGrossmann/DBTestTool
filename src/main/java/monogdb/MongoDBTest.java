@@ -4,20 +4,17 @@ import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Filters.gt;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.LinkedList;
-import java.util.List;
 
-import org.bson.BsonDocument;
-import org.bson.BsonValue;
 import org.bson.codecs.configuration.CodecRegistries;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
-import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.ConnectionString;
-import com.mongodb.DBObject;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
@@ -33,38 +30,39 @@ import dbinterface.Kauf;
 import dbinterface.Kunde;
 
 public class MongoDBTest implements DBInterface {
-	
+
 	ConnectionString connString;
 	MongoClient mongoClient;
 	MongoDatabase testDatabase;
-	
+
 	public static final String TESTDATABASENAME = "testDB";
 	public static final String COLLECTION_KUNDE = "Kunde";
 	public static final String COLLECTION_ARTIKEL = "Artikel";
 	public static final String COLLECTION_BEWERTUNG = "Bewertung";
 	public static final String COLLECTION_KAUF = "Kauf";
-	
+
 	private MongoCollection<Kunde> kundeCollection;
 	private MongoCollection<Artikel> artikelCollection;
 	private MongoCollection<Bewertung> bewertungCollection;
 	private MongoCollection<Kauf> kaufCollection;
-	
+
+	Instant start;
+	Instant end;
+
 	public MongoDBTest() {
 	}
-	
+
 	public boolean connect(String connectionString) throws Exception {
 		connString = new ConnectionString(connectionString);
 		System.out.println("Test connection with connectionString" + connString.getConnectionString());
-		MongoClientSettings settings = MongoClientSettings.builder()
-			    .applyConnectionString(connString)
-			    .retryWrites(true)
-			    .build();
+		MongoClientSettings settings = MongoClientSettings.builder().applyConnectionString(connString).retryWrites(true)
+				.build();
 		MongoClient mongoClient = MongoClients.create(settings);
-		
+
 		CodecRegistry defaultCodecRegistry = MongoClientSettings.getDefaultCodecRegistry();
-	    CodecRegistry fromProvider = CodecRegistries.fromProviders(PojoCodecProvider.builder().automatic(true).build());
-	    CodecRegistry pojoCodecRegistry = CodecRegistries.fromRegistries(defaultCodecRegistry, fromProvider);
-	    
+		CodecRegistry fromProvider = CodecRegistries.fromProviders(PojoCodecProvider.builder().automatic(true).build());
+		CodecRegistry pojoCodecRegistry = CodecRegistries.fromRegistries(defaultCodecRegistry, fromProvider);
+
 		testDatabase = mongoClient.getDatabase(TESTDATABASENAME).withCodecRegistry(pojoCodecRegistry);
 		MongoIterable<String> databaseNames = mongoClient.listDatabaseNames();
 		if (databaseNames != null) {
@@ -85,15 +83,17 @@ public class MongoDBTest implements DBInterface {
 		testDatabase.createCollection(COLLECTION_ARTIKEL);
 		testDatabase.createCollection(COLLECTION_BEWERTUNG);
 		testDatabase.createCollection(COLLECTION_KAUF);
-		
+
 		kundeCollection = testDatabase.getCollection(COLLECTION_KUNDE, Kunde.class);
 		kundeCollection.createIndex(Indexes.ascending("kundenNummer"));
 		artikelCollection = testDatabase.getCollection(COLLECTION_ARTIKEL, Artikel.class);
 		kundeCollection.createIndex(Indexes.ascending("artikelNummer"));
 		bewertungCollection = testDatabase.getCollection(COLLECTION_BEWERTUNG, Bewertung.class);
-		bewertungCollection.createIndex(Indexes.compoundIndex(Indexes.ascending("kundenNummer"), Indexes.ascending("artikelNummer")));
+		bewertungCollection.createIndex(
+				Indexes.compoundIndex(Indexes.ascending("kundenNummer"), Indexes.ascending("artikelNummer")));
 		kaufCollection = testDatabase.getCollection(COLLECTION_KAUF, Kauf.class);
-		kaufCollection.createIndex(Indexes.compoundIndex(Indexes.ascending("kundenNummer"), Indexes.ascending("artikelNummer")));
+		kaufCollection.createIndex(
+				Indexes.compoundIndex(Indexes.ascending("kundenNummer"), Indexes.ascending("artikelNummer")));
 		return true;
 	}
 
@@ -102,155 +102,224 @@ public class MongoDBTest implements DBInterface {
 		return true;
 	}
 
-	public Kunde addKunde(Kunde kunde) {
+	public long addKunde(Kunde kunde) {
 		try {
-			if (kundeCollection.insertOne(kunde).wasAcknowledged()) {
-				return kunde;
-			}
-			return null;
-		} catch(Exception e) {
+			start = Instant.now();
+			kundeCollection.insertOne(kunde);
+			end = Instant.now();
+			return Duration.between(start, end).toNanos();
+		} catch (Exception e) {
 			System.err.println(e);
-			return null;
+			return Long.MAX_VALUE;
 		}
 	}
 
-	public Artikel addArtikel(Artikel artikel) {
+	public long addArtikel(Artikel artikel) {
 		try {
-			if (artikelCollection.insertOne(artikel).wasAcknowledged()) {
-				return artikel;
-			}
-			return null;
-		} catch(Exception e) {
+			start = Instant.now();
+			artikelCollection.insertOne(artikel);
+			end = Instant.now();
+			return Duration.between(start, end).toNanos();
+		} catch (Exception e) {
 			System.err.println(e);
-			return null;
+			return Long.MAX_VALUE;
 		}
 	}
 
-	public Bewertung addBewertung(Bewertung bewertung) {
+	public long addBewertung(Bewertung bewertung) {
 		try {
-			if (bewertungCollection.insertOne(bewertung).wasAcknowledged()) {
-				return bewertung;
-			}
-			return null;
-		} catch(Exception e) {
+			start = Instant.now();
+			bewertungCollection.insertOne(bewertung);
+			end = Instant.now();
+			return Duration.between(start, end).toNanos();
+		} catch (Exception e) {
 			System.err.println(e);
-			return null;
+			return Long.MAX_VALUE;
 		}
 	}
 
-	public Kauf addKauf(Kauf kauf) {
+	public long addKauf(Kauf kauf) {
 		try {
-			if (kaufCollection.insertOne(kauf).wasAcknowledged()) {
-				return kauf;
-			}
-			return null;
-		} catch(Exception e) {
+			start = Instant.now();
+			kaufCollection.insertOne(kauf);
+			end = Instant.now();
+			System.out.println(Duration.between(start, end).toNanos());
+			return Duration.between(start, end).toNanos();
+		} catch (Exception e) {
 			System.err.println(e);
-			return null;
+			return Long.MAX_VALUE;
 		}
 	}
 
-	public Kunde getKundeByKundenNr(String kundenNr) {
-		return kundeCollection.find(eq("kundenNummer", kundenNr)).first();
+	public long getKundeByKundenNr(String kundenNr) {
+		start = Instant.now();
+		kundeCollection.find(eq("kundenNummer", kundenNr)).first();
+		end = Instant.now();
+		return Duration.between(start, end).toNanos();
 	}
 
-	public Kunde getKundeByEmail(String email) {
-		return kundeCollection.find(eq("email", email)).first();
+	public long getKundeByEmail(String email) {
+		start = Instant.now();
+		kundeCollection.find(eq("email", email)).first();
+		end = Instant.now();
+		return Duration.between(start, end).toNanos();
 	}
 
-	public List<Kunde> getKundenByPlz(String plz) {
+	public long getKundenByPlz(String plz) {
 		LinkedList<Kunde> result = new LinkedList<Kunde>();
-		return kundeCollection.find(eq("adresse.plz", plz)).into(result);
+		start = Instant.now();
+		kundeCollection.find(eq("adresse.plz", plz)).into(result);
+		end = Instant.now();
+		return Duration.between(start, end).toNanos();
 	}
 
-	public List<Kunde> getKundenByNachName(String nachName) {
+	public long getKundenByNachName(String nachName) {
 		LinkedList<Kunde> result = new LinkedList<Kunde>();
-		return kundeCollection.find(eq("nachname", nachName)).into(result);
+		start = Instant.now();
+		kundeCollection.find(eq("nachname", nachName)).into(result);
+		end = Instant.now();
+		return Duration.between(start, end).toNanos();
 	}
 
-	public List<String> getDistinctOrte() {
+	public long getDistinctOrte() {
 		LinkedList<String> result = new LinkedList<String>();
-		return kundeCollection.distinct("adresse.ortschaft", String.class).into(result);
+		start = Instant.now();
+		kundeCollection.distinct("adresse.ortschaft", String.class).into(result);
+		end = Instant.now();
+		return Duration.between(start, end).toNanos();
 	}
 
-	public Artikel getArtikelByArtikelNummer(String artikelNummer) {
-		return artikelCollection.find(eq("artikelNummer", artikelNummer)).first();
+	public long getArtikelByArtikelNummer(String artikelNummer) {
+		start = Instant.now();
+		artikelCollection.find(eq("artikelNummer", artikelNummer)).first();
+		end = Instant.now();
+		return Duration.between(start, end).toNanos();
 	}
 
-	public Artikel getArtikelByArtikelName(String artikelName) {
-		return artikelCollection.find(eq("artikelName", artikelName)).first();
+	public long getArtikelByArtikelName(String artikelName) {
+		start = Instant.now();
+		artikelCollection.find(eq("artikelName", artikelName)).first();
+		end = Instant.now();
+		return Duration.between(start, end).toNanos();
 	}
 
-	public List<Artikel> getArtikelWhichCostMoreThan(Double price) {
+	public long getArtikelWhichCostMoreThan(Double price) {
+		start = Instant.now();
 		LinkedList<Artikel> result = new LinkedList<Artikel>();
-		return artikelCollection.find(gt("einzelPreis", price)).into(result);
+		artikelCollection.find(gt("einzelPreis", price)).into(result);
+		end = Instant.now();
+		return Duration.between(start, end).toNanos();
 	}
 
-	public Bewertung getBewertungByKundenNrAndArtikelNr(String artikelNummer, String kundenNummer) {
-		return bewertungCollection.find(and(eq("artikelNummer", artikelNummer), eq("kundenNummer", kundenNummer))).first();
+	public long getBewertungByKundenNrAndArtikelNr(String artikelNummer, String kundenNummer) {
+		start = Instant.now();
+		bewertungCollection.find(and(eq("artikelNummer", artikelNummer), eq("kundenNummer", kundenNummer)))
+				.first();
+		end = Instant.now();
+		return Duration.between(start, end).toNanos();
 	}
 
-	public List<Bewertung> getBewertungenByAnzahlSterne(int sterne) {
+	public long getBewertungenByAnzahlSterne(int sterne) {
 		LinkedList<Bewertung> result = new LinkedList<Bewertung>();
-		return bewertungCollection.find(eq("sterne", sterne)).into(result);
+		start = Instant.now();
+		bewertungCollection.find(eq("sterne", sterne)).into(result);
+		end = Instant.now();
+		return Duration.between(start, end).toNanos();
 	}
 
-	public List<Bewertung> getBewertungenByKundenNr(String kundenNummer) {
+	public long getBewertungenByKundenNr(String kundenNummer) {
 		LinkedList<Bewertung> result = new LinkedList<Bewertung>();
-		return bewertungCollection.find(eq("kundenNummer", kundenNummer)).into(result);
+		start = Instant.now();
+		bewertungCollection.find(eq("kundenNummer", kundenNummer)).into(result);
+		end = Instant.now();
+		return Duration.between(start, end).toNanos();
 	}
 
-	public List<Bewertung> getBewertungenByArtikelNr(String artikelNummer) {
+	public long getBewertungenByArtikelNr(String artikelNummer) {
 		LinkedList<Bewertung> result = new LinkedList<Bewertung>();
-		return bewertungCollection.find(eq("artikelNummer", artikelNummer)).into(result);
+		start = Instant.now();
+		bewertungCollection.find(eq("artikelNummer", artikelNummer)).into(result);
+		end = Instant.now();
+		return Duration.between(start, end).toNanos();
 	}
 
-	public List<Kauf> getEinkaeufeForKunde(String kundenNummer) {
+	public long getEinkaeufeForKunde(String kundenNummer) {
 		LinkedList<Kauf> result = new LinkedList<Kauf>();
-		return kaufCollection.find(eq("kundenNummer", kundenNummer)).into(result);
+		start = Instant.now();
+		kaufCollection.find(eq("kundenNummer", kundenNummer)).into(result);
+		end = Instant.now();
+		return Duration.between(start, end).toNanos();
 	}
 
-	public List<Kauf> getVerkauefeForArtikel(String artikelNummer) {
+	public long getVerkauefeForArtikel(String artikelNummer) {
 		LinkedList<Kauf> result = new LinkedList<Kauf>();
-		return kaufCollection.find(eq("artikelNummer", artikelNummer)).into(result);
+		start = Instant.now();
+		kaufCollection.find(eq("artikelNummer", artikelNummer)).into(result);
+		end = Instant.now();
+		return Duration.between(start, end).toNanos();
 	}
 
-	public Kunde updateKunde(Kunde kunde) {
+	public long updateKunde(Kunde kunde) {
+		start = Instant.now();
 		kundeCollection.findOneAndReplace(eq("kundenNummer", kunde.getKundenNummer()), kunde);
-		return kunde;
+		end = Instant.now();
+		return Duration.between(start, end).toNanos();
 	}
 
-	public Artikel updateArtikel(Artikel artikel) {
+	public long updateArtikel(Artikel artikel) {
+		start = Instant.now();
 		artikelCollection.findOneAndReplace(eq("artikelNummer", artikel.getArtikelNummer()), artikel);
-		return artikel;
+		end = Instant.now();
+		return Duration.between(start, end).toNanos();
 	}
 
-	public Bewertung updateBewertung(Bewertung bewertung) {
-		bewertungCollection.findOneAndReplace(and(eq("artikelNummer", bewertung.getArtikelNummer()), eq("kundenNummer", bewertung.getKundenNummer())), bewertung);
-		return bewertung;
+	public long updateBewertung(Bewertung bewertung) {
+		start = Instant.now();
+		bewertungCollection.findOneAndReplace(
+				and(eq("artikelNummer", bewertung.getArtikelNummer()), eq("kundenNummer", bewertung.getKundenNummer())),
+				bewertung);
+		end = Instant.now();
+		return Duration.between(start, end).toNanos();
 	}
 
-	public void deleteKundeByKundenNr(String kundenNr) {
+	public long deleteKundeByKundenNr(String kundenNr) {
+		start = Instant.now();
 		kundeCollection.deleteOne(eq("kundenNummer", kundenNr));
+		end = Instant.now();
+		return Duration.between(start, end).toNanos();
 	}
 
-	public void deleteArtikelbyArtikelNr(String artikelNummer) {
+	public long deleteArtikelbyArtikelNr(String artikelNummer) {
+		start = Instant.now();
 		artikelCollection.deleteOne(eq("artikelNummer", new ObjectId(artikelNummer)));
+		end = Instant.now();
+		return Duration.between(start, end).toNanos();
 	}
 
-	public void deleteBewertungByArtikelNrAndKundenNr(String artikelNummer, String kundenNummer) {
-		bewertungCollection.deleteOne(and(eq("artikelNummer", new ObjectId(artikelNummer)), eq("kundenNummer", new ObjectId(kundenNummer))));
+	public long deleteBewertungByArtikelNrAndKundenNr(String artikelNummer, String kundenNummer) {
+		start = Instant.now();
+		bewertungCollection.deleteOne(
+				and(eq("artikelNummer", new ObjectId(artikelNummer)), eq("kundenNummer", new ObjectId(kundenNummer))));
+		end = Instant.now();
+		return Duration.between(start, end).toNanos();
 	}
 
 	@Override
-	public void deleteKaufByArtikelNrAndKundenNr(String artikelNummer, String kundennummer) {
-		kaufCollection.deleteOne(and(eq("artikelNummer", new ObjectId(artikelNummer)), eq("artikelNummer", new ObjectId())));
+	public long deleteKaufByArtikelNrAndKundenNr(String artikelNummer, String kundennummer) {
+		start = Instant.now();
+		kaufCollection
+				.deleteOne(and(eq("artikelNummer", new ObjectId(artikelNummer)), eq("artikelNummer", new ObjectId())));
+		end = Instant.now();
+		return Duration.between(start, end).toNanos();
 	}
 
 	@Override
-	public void deleteAdresseByKundenNr(String kundennummer) {
-		kundeCollection.updateOne(eq("kundenNummer", kundennummer), new BasicDBObject( "$unset", new BasicDBObject("adresse", "")));
+	public long deleteAdresseByKundenNr(String kundennummer) {
+		start = Instant.now();
+		kundeCollection.updateOne(eq("kundenNummer", kundennummer),
+				new BasicDBObject("$unset", new BasicDBObject("adresse", "")));
+		end = Instant.now();
+		return Duration.between(start, end).toNanos();
 	}
-	
-	
+
 }

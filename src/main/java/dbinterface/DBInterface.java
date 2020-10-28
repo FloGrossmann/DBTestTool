@@ -1,7 +1,5 @@
 package dbinterface;
 
-import java.util.List;
-
 public interface DBInterface {
 
 	// SETUP
@@ -24,62 +22,62 @@ public interface DBInterface {
 
 	// CREATE
 
-	Kunde addKunde(Kunde kunde);
+	long addKunde(Kunde kunde);
 
-	Artikel addArtikel(Artikel artikel);
+	long addArtikel(Artikel artikel);
 
-	Bewertung addBewertung(Bewertung bewertung);
+	long addBewertung(Bewertung bewertung);
 
-	Kauf addKauf(Kauf kauf);
+	long addKauf(Kauf kauf);
 
 	// READ
 
-	Kunde getKundeByKundenNr(String kundenNr);
+	long getKundeByKundenNr(String kundenNr);
 
-	Kunde getKundeByEmail(String email);
+	long getKundeByEmail(String email);
 
-	List<Kunde> getKundenByPlz(String plz);
+	long getKundenByPlz(String plz);
 
-	List<Kunde> getKundenByNachName(String nachName);
+	long getKundenByNachName(String nachName);
 
-	List<String> getDistinctOrte();
+	long getDistinctOrte();
 
-	Artikel getArtikelByArtikelNummer(String artikelNummer);
+	long getArtikelByArtikelNummer(String artikelNummer);
 
-	Artikel getArtikelByArtikelName(String artikelName);
+	long getArtikelByArtikelName(String artikelName);
 
-	List<Artikel> getArtikelWhichCostMoreThan(Double price);
+	long getArtikelWhichCostMoreThan(Double price);
 
-	Bewertung getBewertungByKundenNrAndArtikelNr(String artikelNummer, String kundenNummer);
+	long getBewertungByKundenNrAndArtikelNr(String artikelNummer, String kundenNummer);
 
-	List<Bewertung> getBewertungenByAnzahlSterne(int sterne);
+	long getBewertungenByAnzahlSterne(int sterne);
 
-	List<Bewertung> getBewertungenByKundenNr(String kundenNummer);
+	long getBewertungenByKundenNr(String kundenNummer);
 
-	List<Bewertung> getBewertungenByArtikelNr(String artikelNummer);
+	long getBewertungenByArtikelNr(String artikelNummer);
 
-	List<Kauf> getEinkaeufeForKunde(String kundenNummer);
+	long getEinkaeufeForKunde(String kundenNummer);
 
-	List<Kauf> getVerkauefeForArtikel(String artikelNummer);
+	long getVerkauefeForArtikel(String artikelNummer);
 
 	// UPDATE
 
-	Kunde updateKunde(Kunde kunde);
+	long updateKunde(Kunde kunde);
 
-	Artikel updateArtikel(Artikel artikel);
+	long updateArtikel(Artikel artikel);
 
-	Bewertung updateBewertung(Bewertung bewertung);
+	long updateBewertung(Bewertung bewertung);
 
 	// DELETE
 
-	void deleteKundeByKundenNr(String kundenNr);
+	long deleteKundeByKundenNr(String kundenNr);
 
-	void deleteArtikelbyArtikelNr(String artikelNr);
+	long deleteArtikelbyArtikelNr(String artikelNr);
 
-	void deleteBewertungByArtikelNrAndKundenNr(String artikelNr, String kundennummer);
+	long deleteBewertungByArtikelNrAndKundenNr(String artikelNr, String kundennummer);
 	
-	void deleteKaufByArtikelNrAndKundenNr(String artikelNr, String kundennummer);
+	long deleteKaufByArtikelNrAndKundenNr(String artikelNr, String kundennummer);
 	
-	void deleteAdresseByKundenNr(String kundennummer);
+	long deleteAdresseByKundenNr(String kundennummer);
 
 }

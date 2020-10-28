@@ -1,7 +1,11 @@
 package ui;
 
 import java.awt.Container;
+import java.io.File;
+import java.io.IOException;
 
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
@@ -17,6 +21,12 @@ public class MenuFrame extends JFrame {
 		this.c = getContentPane();
 		setSize(600, 600);
 		setTitle("DB Test Tool");
+		try {
+			setIconImage(new ImageIcon(ImageIO.read(new File("src/main/resources/speed.png"))).getImage());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		menuPanel = new MenuPanel();
 		add(menuPanel);
 		

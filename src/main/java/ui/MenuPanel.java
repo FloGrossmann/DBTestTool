@@ -45,10 +45,13 @@ public class MenuPanel extends JPanel {
 	public void createMariaDBPanel() {
 		mariaDBConnectionLabel = new JLabel("mariaDBConnectionString:");
 		mariaDBConnectionTextField = new JTextField(50);
+		mariaDBConnectionTextField.setText("localhost:3306");
 		mariaDBUsernameLabel = new JLabel("Benutzername:");
 		mariaDBPasswordLabel = new JLabel("Passwort:");
 		mariaDBPasswordTextField = new JTextField(50);
+		mariaDBPasswordTextField.setText("root");
 		mariaDBUsernameTextField = new JTextField(50);
+		mariaDBUsernameTextField.setText("root");
 		mariaDBConnectionButton = new JButton("Test MariaDB Connection");
 		mariaDBConnectionButton.addActionListener(alDBTestConnection);
 		add(mariaDBConnectionLabel);
@@ -59,8 +62,8 @@ public class MenuPanel extends JPanel {
 		add(mariaDBUsernameTextField);
 		add(mariaDBConnectionButton);
 	}
-
-	public MenuPanel() {
+	
+	public void createMongoDBPanel() {
 		mongoDBConnectionLabel = new JLabel("mongoDBConnectionString:");
 		add(mongoDBConnectionLabel);
 		mongoDBConnectionErrorText = new JTextArea();
@@ -83,6 +86,10 @@ public class MenuPanel extends JPanel {
 		mongoDBStartTestButton.addActionListener(alMongoDBSetup);
 		mongoDBStartTestButton.setVisible(false);
 		add(mongoDBStartTestButton);
+	}
+
+	public MenuPanel() {
+		createMongoDBPanel();
 		createMariaDBPanel();
 	}
 
@@ -155,6 +162,7 @@ public class MenuPanel extends JPanel {
 			mongoTest.addKunde(new Kunde("12", "email@web.de", "07234723", "Vorname", "Nachname", new Adresse("ortschaft", "hausnummer", "Straße", "712231")));
 			mongoTest.addKauf(new Kauf("12", "22", new Date(new java.util.Date().getTime()), 43.43, 2));
 			mongoTest.addBewertung(new Bewertung("12", "22", 5, "war okay"));
+			mongoTest.deleteAdresseByKundenNr("12");
 		}
 	};
 

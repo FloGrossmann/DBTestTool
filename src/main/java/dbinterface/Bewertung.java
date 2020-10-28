@@ -60,7 +60,7 @@ public class Bewertung {
 	
 	@Override
 	public String toString() {
-		return "\nBewertung für Artikel mit der Artikelnummer: "+artikelNummer+" vom Kunden mit der Kundennummer: "+kundenNummer+"\nSterne: "+sterne+"\nBewertung: "+bewertung;
+		return "\nBewertung fuer Artikel mit der Artikelnummer: "+artikelNummer+" vom Kunden mit der Kundennummer: "+kundenNummer+"\nSterne: "+sterne+"\nBewertung: "+bewertung;
 		
 	}
 

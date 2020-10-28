@@ -28,7 +28,7 @@ public class Kauf {
 		this.kundenNr = kundenNr;
 		this.artikelNr = artikelNr;
 		this.kaufdatum = kaufdatum;
-		this.kaufPreis = einzelpreis*menge;
+		this.kaufPreis = kaufPreis;
 		this.menge = menge;
 	}
 
@@ -74,7 +74,7 @@ public class Kauf {
 	
 	@Override
 	public String toString() {
-		return "\nTransaktion f�r den Artikel mit der Artikelnummer: "+artikelNr+" vom Kunden mit der Kundennummer: "+kundenNr+"\nAnzahl der gekauften Artikel: "+menge+"\nGesamtpreis: "+kaufPreis;
+		return "\nTransaktion fuer den Artikel mit der Artikelnummer: "+artikelNr+" vom Kunden mit der Kundennummer: "+kundenNr+"\nAnzahl der gekauften Artikel: "+menge+"\nGesamtpreis: "+kaufPreis;
 		
 	}
 

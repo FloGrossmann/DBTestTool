@@ -29,7 +29,8 @@ public class CsvBeanWriter {
 	}
 
 	public static void writeCsvFromAccessTimeExample(List<AccessTime> list) throws Exception {
-		Path path = Paths.get("./messdaten_"+ LocalTime.now().toString()+".csv");
+		LocalTime time=LocalTime.now();
+		Path path = Paths.get("./messdaten_"+time.getHour()+"_"+time.getMinute()+"_"+time.getSecond()+".csv");
 		writeCsvFromAccessTime(path, list);
 	}
 }

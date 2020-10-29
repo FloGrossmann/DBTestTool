@@ -11,7 +11,7 @@ public class AccessTime extends CsvBean{
 	@CsvBindByName(column = "Beschreibung", required = true)
 	String beschreibung;
 	
-	@CsvBindByName(column = "Zeit in ms", required = true)
+	@CsvBindByName(column = "Zeit in Nanosekunden", required = true)
 	long zugriffszeitZeit;
 	
 	public AccessTime(String beschreibung, long zeit, CRUDoperation kategorie) {

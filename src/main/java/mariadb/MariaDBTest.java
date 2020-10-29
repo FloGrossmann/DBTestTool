@@ -80,62 +80,38 @@ public class MariaDBTest implements DBInterface {
 				// Delete Operations -> müssen in der Reihenfolge ausgeführt werden
 				System.out.println("Löschen");
 
-				start = Instant.now();
-				this.deleteKaufByArtikelNrAndKundenNr(artikel.getArtikelNummer(), kunde.getKundenNummer());
-				end = Instant.now();
-				timeMeasures.add(new AccessTime("Kauf by Artikel- und Kundennummer",
-						Duration.between(start, end).toMillis(), CRUDoperation.DELETE));// für die richtigen Zeiten
-																						// müssen noch die Sysouts aus
-																						// den Methoden genommen werden.
-				start = Instant.now();
-				this.deleteBewertungByArtikelNrAndKundenNr(artikel.getArtikelNummer(), kunde.getKundenNummer());
-				end = Instant.now();
-				timeMeasures.add(new AccessTime("Bewertung by Artikel- und Kundennummer",
-						Duration.between(start, end).toMillis(), CRUDoperation.DELETE));
+				long differenz = this.deleteKaufByArtikelNrAndKundenNr(artikel.getArtikelNummer(),kunde.getKundenNummer());
+				timeMeasures.add(new AccessTime("Kauf by Artikel- und Kundennummer", differenz, CRUDoperation.DELETE));
 
-				start = Instant.now();
-				this.deleteAdresseByKundenNr(kunde.getKundenNummer());
-				end = Instant.now();
-				timeMeasures.add(new AccessTime("Adresse by Kundennummer", Duration.between(start, end).toNanos(),
-						CRUDoperation.DELETE));
+				differenz = this.deleteBewertungByArtikelNrAndKundenNr(artikel.getArtikelNummer(),
+						kunde.getKundenNummer());
+				timeMeasures
+						.add(new AccessTime("Bewertung by Artikel- und Kundennummer", differenz, CRUDoperation.DELETE));
 
-				start = Instant.now();
-				this.deleteKundeByKundenNr(kunde.getKundenNummer());
-				end = Instant.now();
-				timeMeasures.add(new AccessTime("Kunde by Kundennummer", Duration.between(start, end).toNanos(),
-						CRUDoperation.DELETE));
+				differenz = this.deleteAdresseByKundenNr(kunde.getKundenNummer());
+				timeMeasures.add(new AccessTime("Adresse by Kundennummer", differenz, CRUDoperation.DELETE));
 
-				start = Instant.now();
-				this.deleteArtikelbyArtikelNr(artikel.getArtikelNummer());
-				end = Instant.now();
-				timeMeasures.add(new AccessTime("Artikel by Artikelnummer", Duration.between(start, end).toNanos(),
-						CRUDoperation.DELETE));
+				differenz = this.deleteKundeByKundenNr(kunde.getKundenNummer());
+				timeMeasures.add(new AccessTime("Kunde by Kundennummer", differenz, CRUDoperation.DELETE));
+
+				differenz = this.deleteArtikelbyArtikelNr(artikel.getArtikelNummer());
+				timeMeasures.add(new AccessTime("Artikel by Artikelnummer", differenz, CRUDoperation.DELETE));
 
 				// Insert Operations
 				System.out.println("Hinzufügen");
 
-				start = Instant.now();
-				this.addKunde(kunde);
-				end = Instant.now();
-				timeMeasures
-						.add(new AccessTime("Kunde", Duration.between(start, end).toNanos(), CRUDoperation.INSERT));
+				differenz = this.addKunde(kunde);
+				timeMeasures.add(new AccessTime("Kunde", differenz, CRUDoperation.INSERT));
 
-				start = Instant.now();
 				this.addArtikel(artikel);
-				end = Instant.now();
+				timeMeasures.add(new AccessTime("Artikel", differenz, CRUDoperation.INSERT));
+
+				differenz=this.addBewertung(bewertung);
 				timeMeasures
-						.add(new AccessTime("Artikel", Duration.between(start, end).toNanos(), CRUDoperation.INSERT));
+						.add(new AccessTime("Bewertung", differenz, CRUDoperation.INSERT));
 
-				start = Instant.now();
-				this.addBewertung(bewertung);
-				end = Instant.now();
-				timeMeasures.add(
-						new AccessTime("Bewertung", Duration.between(start, end).toNanos(), CRUDoperation.INSERT));
-
-				start = Instant.now();
-				this.addKauf(kauf);
-				end = Instant.now();
-				timeMeasures.add(new AccessTime("Kauf", Duration.between(start, end).toNanos(), CRUDoperation.INSERT));
+				differenz=this.addKauf(kauf);
+				timeMeasures.add(new AccessTime("Kauf", differenz, CRUDoperation.INSERT));
 
 				try {
 					CsvBeanWriter.writeCsvFromAccessTimeExample(timeMeasures);
@@ -247,18 +223,45 @@ public class MariaDBTest implements DBInterface {
 	}
 
 	public long addKunde(Kunde kunde) {
+		
+		Adresse adresse = kunde.getAdresse();
+		String sqlKunde = "INSERT INTO " + databaseName
+				+ ".Kunde (Kundennummer, Vorname, Nachname, Email, Telefonnummer) VALUES(?,?,?,?,?)";
+		PreparedStatement prestKunde;
+		String sqlAdresse="INSERT INTO " + databaseName
+				+ ".Adresse (PLZ, Strasse, Hausnummer, Ortschaft, Kundennummer) VALUES(?,?,?,?,?)";
+		PreparedStatement prestAdresse;
 		try {
-			Adresse adresse = kunde.getAdresse();
+			prestKunde = mariaDbConnection.prepareStatement(sqlKunde);
+			prestAdresse = mariaDbConnection.prepareStatement(sqlAdresse);
+			
+			prestKunde.setString(1, kunde.getKundenNummer());
+			prestKunde.setString(2, kunde.getVorname());
+			prestKunde.setString(3, kunde.getNachname());
+			prestKunde.setString(4, kunde.getEmail());
+			prestKunde.setString(5, kunde.getTelefonNummer());
+			
+			prestAdresse.setString(1, adresse.getPlz());
+			prestAdresse.setString(2, adresse.getStrasse());
+			prestAdresse.setString(3, adresse.getHausnummer());
+			prestAdresse.setString(4, adresse.getOrtschaft());
+			prestAdresse.setString(5, kunde.getKundenNummer());
+			
 			start = Instant.now();
-			statement.executeUpdate("INSERT INTO " + databaseName
-					+ ".Kunde (Kundennummer, Vorname, Nachname, Email, Telefonnummer) VALUES('"
-					+ kunde.getKundenNummer() + "', '" + kunde.getVorname() + "', '" + kunde.getNachname() + "', '"
-					+ kunde.getEmail() + "', '" + kunde.getTelefonNummer() + "')");
-			statement.executeUpdate("INSERT INTO " + databaseName
-					+ ".Adresse (PLZ, Strasse, Hausnummer, Ortschaft, Kundennummer) VALUES('" + adresse.getPlz()
-					+ "', '" + adresse.getStrasse() + "', '" + adresse.getHausnummer() + "', '" + adresse.getOrtschaft()
-					+ "', '" + kunde.getKundenNummer() + "')");
+			prestKunde.executeUpdate();
+			prestAdresse.executeUpdate();
 			end = Instant.now();
+//		try {
+//			start = Instant.now();
+//			statement.executeUpdate("INSERT INTO " + databaseName
+//					+ ".Kunde (Kundennummer, Vorname, Nachname, Email, Telefonnummer) VALUES('"
+//					+ kunde.getKundenNummer() + "', '" + kunde.getVorname() + "', '" + kunde.getNachname() + "', '"
+//					+ kunde.getEmail() + "', '" + kunde.getTelefonNummer() + "')");
+//			statement.executeUpdate("INSERT INTO " + databaseName
+//					+ ".Adresse (PLZ, Strasse, Hausnummer, Ortschaft, Kundennummer) VALUES('" + adresse.getPlz()
+//					+ "', '" + adresse.getStrasse() + "', '" + adresse.getHausnummer() + "', '" + adresse.getOrtschaft()
+//					+ "', '" + kunde.getKundenNummer() + "')");
+//			end = Instant.now();
 			return Duration.between(start, end).toNanos();
 		} catch (SQLException e) {
 			System.err.println(e);
@@ -267,13 +270,30 @@ public class MariaDBTest implements DBInterface {
 	}
 
 	public long addArtikel(Artikel artikel) {
+		
+		String sql="INSERT INTO " + databaseName
+				+ ".Artikel (Artikelnummer, Artikelname, Einzelpreis, Waehrung, Beschreibung) VALUES(?,?,?,?,?)";
+		PreparedStatement prest;
 		try {
+			prest = mariaDbConnection.prepareStatement(sql);
+			
+			prest.setString(1, artikel.getArtikelNummer());
+			prest.setString(2, artikel.getArtikelName());
+			prest.setDouble(3, artikel.getEinzelPreis());
+			prest.setString(4, artikel.getWaehrung());
+			prest.setString(5, artikel.getBeschreibung());
+			
 			start = Instant.now();
-			statement.executeUpdate("INSERT INTO " + databaseName
-					+ ".Artikel (Artikelnummer, Artikelname, Einzelpreis, Waehrung, Beschreibung) VALUES('"
-					+ artikel.getArtikelNummer() + "', '" + artikel.getArtikelName() + "', " + artikel.getEinzelPreis()
-					+ ", '" + artikel.getWaehrung() + "', '" + artikel.getBeschreibung() + "')");
+			prest.executeUpdate();
 			end = Instant.now();
+//		
+//		try {
+//			start = Instant.now();
+//			statement.executeUpdate("INSERT INTO " + databaseName
+//					+ ".Artikel (Artikelnummer, Artikelname, Einzelpreis, Waehrung, Beschreibung) VALUES('"
+//					+ artikel.getArtikelNummer() + "', '" + artikel.getArtikelName() + "', " + artikel.getEinzelPreis()
+//					+ ", '" + artikel.getWaehrung() + "', '" + artikel.getBeschreibung() + "')");
+//			end = Instant.now();
 			return Duration.between(start, end).toNanos();
 		} catch (SQLException e) {
 			System.err.println(e);
@@ -282,13 +302,28 @@ public class MariaDBTest implements DBInterface {
 	}
 
 	public long addBewertung(Bewertung bewertung) {
+		
+		String sql="INSERT INTO " + databaseName
+				+ ".Bewertung (Sterne, Bewertung, Kundennummer, Artikelnummer) VALUES(?,?,?,?)";
+		PreparedStatement prest;
 		try {
+			prest = mariaDbConnection.prepareStatement(sql);
+			
+			prest.setInt(1, bewertung.getSterne());
+			prest.setString(2, bewertung.getBewertung());
+			prest.setString(3, bewertung.getKundenNummer());
+			prest.setString(4, bewertung.getArtikelNummer());
+			
 			start = Instant.now();
-			statement.executeUpdate("INSERT INTO " + databaseName
-					+ ".Bewertung (Sterne, Bewertung, Kundennummer, Artikelnummer) VALUES(" + bewertung.getSterne()
-					+ ", '" + bewertung.getBewertung() + "', '" + bewertung.getKundenNummer() + "', '"
-					+ bewertung.getArtikelNummer() + "')");
+			prest.executeUpdate();
 			end = Instant.now();
+//		try {
+//			start = Instant.now();
+//			statement.executeUpdate("INSERT INTO " + databaseName
+//					+ ".Bewertung (Sterne, Bewertung, Kundennummer, Artikelnummer) VALUES(" + bewertung.getSterne()
+//					+ ", '" + bewertung.getBewertung() + "', '" + bewertung.getKundenNummer() + "', '"
+//					+ bewertung.getArtikelNummer() + "')");
+//			end = Instant.now();
 			return Duration.between(start, end).toNanos();
 		} catch (SQLException e) {
 			System.err.println(e);
@@ -309,35 +344,33 @@ public class MariaDBTest implements DBInterface {
 			prest.setDouble(2, kauf.getKaufPreis());
 			prest.setInt(3, kauf.getMenge());
 			prest.setString(4, kauf.getKundenNummer());
-			prest.setString(5, kauf.getArtikelNummer());
+			prest.setString(5, kauf.getArtikelNummer());    // 80781700 ns für die Methode
 			start = Instant.now();
 			prest.executeUpdate();
 			end = Instant.now();
+
+
+//			start=Instant.now();
+//			statement.executeUpdate("INSERT INTO " + databaseName			//1039883600 für die Methode
+//						+ ".Kauf (Kaufdatum, Kaufpreis, Menge, Kundennummer, Artikelnummer) VALUES('" + kauf.getKaufdatum()
+//						+ "', " + kauf.getKaufPreis() + ", " + kauf.getMenge() + ", '" + kauf.getKundenNummer() + "', '"
+//						+ kauf.getArtikelNummer() + "')");
+//			end =Instant.now();
+//			System.out.println("Zweite Methode: "+Duration.between(start, end).toNanos()+" ns");
+
 			return Duration.between(start, end).toNanos();
 		} catch (SQLException e) {
 			System.err.println(e);
 			return Long.MAX_VALUE;
 		}
-//	    
-//		try {
-//			statement.executeUpdate("INSERT INTO " + databaseName
-//					+ ".Kauf (Kaufdatum, Kaufpreis, Menge, Kundennummer, Artikelnummer) VALUES('" + kauf.getKaufdatum()
-//					+ "', " + kauf.getKaufPreis() + ", " + kauf.getMenge() + ", '" + kauf.getKundenNr() + "', '"
-//					+ kauf.getArtikelNr() + "')");
-//			return kauf;
-//		} catch (SQLException e) {
-//			e.printStackTrace();
-//			return null;
-//		}
+
 	}
 
 	public long getKundeByKundenNr(String kundenNr) {
 		try {
 			start = Instant.now();
-			statement
-					.executeQuery("SELECT * FROM " + databaseName + ".Kunde WHERE Kundennummer='" + kundenNr + "'");
-			statement
-					.executeQuery("SELECT * FROM " + databaseName + ".Adresse WHERE Kundennummer='" + kundenNr + "'");
+			statement.executeQuery("SELECT * FROM " + databaseName + ".Kunde WHERE Kundennummer='" + kundenNr + "'");
+			statement.executeQuery("SELECT * FROM " + databaseName + ".Adresse WHERE Kundennummer='" + kundenNr + "'");
 //					+ "FULL JOIN "+ databaseName + ".Adresse WHERE Kundennummer='" + kundenNr + "'"); Für die Adresse mit hinzu
 			end = Instant.now();
 			return Duration.between(start, end).toNanos();
@@ -365,8 +398,8 @@ public class MariaDBTest implements DBInterface {
 	public long getKundeByEmail(String email) {
 		try {
 			start = Instant.now();
-			statement.executeQuery("SELECT * FROM " + databaseName + ".Kunde FULL JOIN "
-					+ databaseName + ".Adresse WHERE Email='" + email + "'");
+			statement.executeQuery("SELECT * FROM " + databaseName + ".Kunde FULL JOIN " + databaseName
+					+ ".Adresse WHERE Email='" + email + "'");
 			end = Instant.now();
 			return Duration.between(start, end).toNanos();
 //			while (resultSet.next()) {
@@ -391,8 +424,8 @@ public class MariaDBTest implements DBInterface {
 	public long getKundenByPlz(String plz) {
 		try {
 			start = Instant.now();
-			statement.executeQuery("SELECT * FROM " + databaseName + ".Kunde FULL JOIN "
-					+ databaseName + ".Adresse WHERE PLZ='" + plz + "'");
+			statement.executeQuery("SELECT * FROM " + databaseName + ".Kunde FULL JOIN " + databaseName
+					+ ".Adresse WHERE PLZ='" + plz + "'");
 			end = Instant.now();
 			return Duration.between(start, end).toNanos();
 //			while (resultSet.next()) {
@@ -419,8 +452,8 @@ public class MariaDBTest implements DBInterface {
 	public long getKundenByNachName(String nachName) {
 		try {
 			start = Instant.now();
-			statement.executeQuery("SELECT * FROM " + databaseName + ".Kunde FULL JOIN "
-					+ databaseName + ".Adresse WHERE Nachname='" + nachName + "'");
+			statement.executeQuery("SELECT * FROM " + databaseName + ".Kunde FULL JOIN " + databaseName
+					+ ".Adresse WHERE Nachname='" + nachName + "'");
 			end = Instant.now();
 			return Duration.between(start, end).toNanos();
 //			while (resultSet.next()) {
@@ -465,7 +498,8 @@ public class MariaDBTest implements DBInterface {
 	public long getArtikelByArtikelNummer(String artikelNummer) {
 		try {
 			start = Instant.now();
-			statement.executeQuery("SELECT * FROM " + databaseName + ".Artikel WHERE Artikelnummer='" + artikelNummer + "'");
+			statement.executeQuery(
+					"SELECT * FROM " + databaseName + ".Artikel WHERE Artikelnummer='" + artikelNummer + "'");
 			end = Instant.now();
 			return Duration.between(start, end).toNanos();
 //			while (resultSet.next()) {
@@ -485,7 +519,8 @@ public class MariaDBTest implements DBInterface {
 	public long getArtikelByArtikelName(String artikelName) {
 		try {
 			start = Instant.now();
-			statement.executeQuery("SELECT * FROM " + databaseName + ".Artikel WHERE Artikelname='" + artikelName + "'");
+			statement
+					.executeQuery("SELECT * FROM " + databaseName + ".Artikel WHERE Artikelname='" + artikelName + "'");
 			end = Instant.now();
 			return Duration.between(start, end).toNanos();
 //			while (resultSet.next()) {
@@ -528,8 +563,8 @@ public class MariaDBTest implements DBInterface {
 	public long getBewertungByKundenNrAndArtikelNr(String artikelNummer, String kundenNummer) {
 		try {
 			start = Instant.now();
-			statement.executeQuery("SELECT * FROM " + databaseName
-					+ ".Bewertung WHERE Artikelnummer='" + artikelNummer + "' AND Kundennummer='" + kundenNummer + "'");
+			statement.executeQuery("SELECT * FROM " + databaseName + ".Bewertung WHERE Artikelnummer='" + artikelNummer
+					+ "' AND Kundennummer='" + kundenNummer + "'");
 			end = Instant.now();
 			return Duration.between(start, end).toNanos();
 //			while (resultSet.next()) {
@@ -743,6 +778,7 @@ public class MariaDBTest implements DBInterface {
 
 	public long deleteKaufByArtikelNrAndKundenNr(String artikelNr, String kundennummer) {
 		try {
+			start=Instant.now();
 			statement.executeUpdate("DELETE FROM " + databaseName + ".Kauf WHERE Kundennummer='" + kundennummer
 					+ "' AND Artikelnummer='" + artikelNr + "'");
 			end = Instant.now();

@@ -155,17 +155,16 @@ public class MariaDBTest implements DBInterface {
 				differenz = this.getBewertungenByArtikelNr(artikel.getArtikelNummer());
 				timeMeasures.add(new AccessTime("get Bewertung by Artikelnummer", differenz, CRUDoperation.SELECT));
 				differenz = this.getBewertungenByKundenNr(kunde.getKundenNummer());
-				timeMeasures.add(new AccessTime("get Bewertung by Kundennummer", differenz,
-						CRUDoperation.SELECT));
+				timeMeasures.add(new AccessTime("get Bewertung by Kundennummer", differenz, CRUDoperation.SELECT));
 				differenz = this.getBewertungenByAnzahlSterne(bewertung.getSterne());
 				timeMeasures.add(new AccessTime("get Bewertung by Sterne", differenz, CRUDoperation.SELECT));
 
 				// Kauf
 				System.out.println("Alle für Kauf: \n\n");
-				
-				differenz=this.getEinkaeufeForKunde(kunde.getKundenNummer());
+
+				differenz = this.getEinkaeufeForKunde(kunde.getKundenNummer());
 				timeMeasures.add(new AccessTime("get Kaeufe for Kundennummer", differenz, CRUDoperation.SELECT));
-				differenz=this.getVerkauefeForArtikel(artikel.getArtikelNummer());
+				differenz = this.getVerkauefeForArtikel(artikel.getArtikelNummer());
 				timeMeasures.add(new AccessTime("get Verkaeufe for Artikel", differenz, CRUDoperation.SELECT));
 
 				try {
@@ -389,11 +388,12 @@ public class MariaDBTest implements DBInterface {
 	}
 
 	public long getKundeByKundenNr(String kundenNr) {
+
+		String sql = "SELECT * FROM " + databaseName + ".Kunde, " + databaseName + ".Adresse WHERE Kunde.Kundennummer='"
+				+ kundenNr + "'";
 		try {
 			start = Instant.now();
-			statement.executeQuery("SELECT * FROM " + databaseName + ".Kunde WHERE Kundennummer='" + kundenNr + "'");
-			statement.executeQuery("SELECT * FROM " + databaseName + ".Adresse WHERE Kundennummer='" + kundenNr + "'");
-//					+ "FULL JOIN "+ databaseName + ".Adresse WHERE Kundennummer='" + kundenNr + "'"); Für die Adresse mit hinzu
+			ResultSet resultSet = statement.executeQuery(sql);
 			end = Instant.now();
 			return Duration.between(start, end).toNanos();
 //			while (resultSet.next()) {
@@ -418,10 +418,12 @@ public class MariaDBTest implements DBInterface {
 	}
 
 	public long getKundeByEmail(String email) {
+
+		String sql = "SELECT * FROM " + databaseName + ".Kunde, " + databaseName + ".Adresse WHERE Kunde.Email='"
+				+ email + "'";
 		try {
 			start = Instant.now();
-			statement.executeQuery("SELECT * FROM " + databaseName + ".Kunde FULL JOIN " + databaseName
-					+ ".Adresse WHERE Email='" + email + "'");
+			statement.executeQuery(sql);
 			end = Instant.now();
 			return Duration.between(start, end).toNanos();
 //			while (resultSet.next()) {
@@ -444,10 +446,12 @@ public class MariaDBTest implements DBInterface {
 	}
 
 	public long getKundenByPlz(String plz) {
+		
+		String sql="SELECT * FROM " + databaseName + ".Kunde, " + databaseName
+				+ ".Adresse WHERE Adresse.PLZ='" + plz + "'";
 		try {
 			start = Instant.now();
-			statement.executeQuery("SELECT * FROM " + databaseName + ".Adresse FULL JOIN " + databaseName
-					+ ".Kunde WHERE PLZ='" + plz + "'");
+			statement.executeQuery(sql);
 			end = Instant.now();
 			return Duration.between(start, end).toNanos();
 //			while (resultSet.next()) {
@@ -472,10 +476,12 @@ public class MariaDBTest implements DBInterface {
 	}
 
 	public long getKundenByNachName(String nachName) {
+		
+		String sql="SELECT * FROM " + databaseName + ".Kunde, " + databaseName
+				+ ".Adresse WHERE Kunde.Nachname='" + nachName + "'";
 		try {
 			start = Instant.now();
-			statement.executeQuery("SELECT * FROM " + databaseName + ".Kunde FULL JOIN " + databaseName
-					+ ".Adresse WHERE Nachname='" + nachName + "'");
+			statement.executeQuery(sql);
 			end = Instant.now();
 			return Duration.between(start, end).toNanos();
 //			while (resultSet.next()) {
@@ -500,10 +506,10 @@ public class MariaDBTest implements DBInterface {
 	}
 
 	public long getDistinctOrte() {
+		String sql="SELECT Ortschaft FROM " + databaseName + ".Adresse";
 		try {
 			start = Instant.now();
-			statement.executeQuery("SELECT Ortschaft FROM " + databaseName + ".Adresse");
-			// WHERE Ortschaft='" + ??? + "'");Soll da was anderes gemacht werden?
+			statement.executeQuery(sql);
 			end = Instant.now();
 			return Duration.between(start, end).toNanos();
 //			while (resultSet.next()) {
@@ -518,10 +524,10 @@ public class MariaDBTest implements DBInterface {
 	}
 
 	public long getArtikelByArtikelNummer(String artikelNummer) {
+		String sql="SELECT * FROM " + databaseName + ".Artikel WHERE Artikelnummer='" + artikelNummer + "'";
 		try {
 			start = Instant.now();
-			statement.executeQuery(
-					"SELECT * FROM " + databaseName + ".Artikel WHERE Artikelnummer='" + artikelNummer + "'");
+			statement.executeQuery(sql);
 			end = Instant.now();
 			return Duration.between(start, end).toNanos();
 //			while (resultSet.next()) {
@@ -539,10 +545,11 @@ public class MariaDBTest implements DBInterface {
 	}
 
 	public long getArtikelByArtikelName(String artikelName) {
+		String sql="SELECT * FROM " + databaseName + ".Artikel WHERE Artikelname='" + artikelName + "'";
 		try {
 			start = Instant.now();
 			statement
-					.executeQuery("SELECT * FROM " + databaseName + ".Artikel WHERE Artikelname='" + artikelName + "'");
+					.executeQuery(sql);
 			end = Instant.now();
 			return Duration.between(start, end).toNanos();
 //			while (resultSet.next()) {
@@ -561,10 +568,11 @@ public class MariaDBTest implements DBInterface {
 
 	public long getArtikelWhichCostMoreThan(Double price) {
 		List<Artikel> artikelList = new ArrayList<Artikel>();
+		String sql="SELECT * FROM " + databaseName + ".Artikel WHERE Einzelpreis>" + price;
 		try {
 			start = Instant.now();
 			ResultSet resultSet = statement
-					.executeQuery("SELECT * FROM " + databaseName + ".Artikel WHERE Einzelpreis>" + price);
+					.executeQuery(sql);
 			while (resultSet.next()) {
 				Artikel artikel = new Artikel();
 				artikel.setArtikelNummer(resultSet.getString("Artikelnummer"));
@@ -583,10 +591,11 @@ public class MariaDBTest implements DBInterface {
 	}
 
 	public long getBewertungByKundenNrAndArtikelNr(String artikelNummer, String kundenNummer) {
+		String sql="SELECT * FROM " + databaseName + ".Bewertung WHERE Artikelnummer='" + artikelNummer
+				+ "' AND Kundennummer='" + kundenNummer + "'";
 		try {
 			start = Instant.now();
-			statement.executeQuery("SELECT * FROM " + databaseName + ".Bewertung WHERE Artikelnummer='" + artikelNummer
-					+ "' AND Kundennummer='" + kundenNummer + "'");
+			statement.executeQuery(sql);
 			end = Instant.now();
 			return Duration.between(start, end).toNanos();
 //			while (resultSet.next()) {
@@ -601,13 +610,14 @@ public class MariaDBTest implements DBInterface {
 			return Long.MAX_VALUE;
 		}
 	}
-
+	// wir müssen uns noch entscheiden ob wir jetzt die Verarbeitung mitmessen oder nicht
 	public long getBewertungenByAnzahlSterne(int sterne) {
 		List<Bewertung> bewertungList = new ArrayList<Bewertung>();
+		String sql="SELECT * FROM " + databaseName + ".Bewertung WHERE Sterne=" + sterne;
 		try {
 			start = Instant.now();
 			ResultSet resultSet = statement
-					.executeQuery("SELECT * FROM " + databaseName + ".Bewertung WHERE Sterne=" + sterne);
+					.executeQuery();
 			while (resultSet.next()) {
 				Bewertung bewertung = new Bewertung();
 				bewertung.setArtikelNummer(resultSet.getString("Artikelnummer"));
@@ -626,10 +636,10 @@ public class MariaDBTest implements DBInterface {
 
 	public long getBewertungenByKundenNr(String kundenNummer) {
 		List<Bewertung> bewertungList = new ArrayList<Bewertung>();
+		String sql="SELECT * FROM " + databaseName + ".Bewertung WHERE Kundennummer='" + kundenNummer + "'";
 		try {
 			start = Instant.now();
-			ResultSet resultSet = statement.executeQuery(
-					"SELECT * FROM " + databaseName + ".Bewertung WHERE Kundennummer='" + kundenNummer + "'");
+			ResultSet resultSet = statement.executeQuery(sql);
 			while (resultSet.next()) {
 				Bewertung bewertung = new Bewertung();
 				bewertung.setArtikelNummer(resultSet.getString("Artikelnummer"));
@@ -648,10 +658,10 @@ public class MariaDBTest implements DBInterface {
 
 	public long getBewertungenByArtikelNr(String artikelNummer) {
 		List<Bewertung> bewertungList = new ArrayList<Bewertung>();
+		String sql="SELECT * FROM " + databaseName + ".Bewertung WHERE Artikelnummer='" + artikelNummer + "'";
 		try {
 			start = Instant.now();
-			ResultSet resultSet = statement.executeQuery(
-					"SELECT * FROM " + databaseName + ".Bewertung WHERE Artikelnummer='" + artikelNummer + "'");
+			ResultSet resultSet = statement.executeQuery(sql);
 			while (resultSet.next()) {
 				Bewertung bewertung = new Bewertung();
 				bewertung.setArtikelNummer(resultSet.getString("Artikelnummer"));
@@ -670,10 +680,11 @@ public class MariaDBTest implements DBInterface {
 
 	public long getEinkaeufeForKunde(String kundenNummer) {
 		List<Kauf> kaufList = new ArrayList<Kauf>();
+		String sql="SELECT * FROM " + databaseName + ".Kauf WHERE Kundennummer='" + kundenNummer + "'";
 		try {
 			start = Instant.now();
 			ResultSet resultSet = statement
-					.executeQuery("SELECT * FROM " + databaseName + ".Kauf WHERE Kundennummer='" + kundenNummer + "'");
+					.executeQuery(sql);
 			while (resultSet.next()) {
 				Kauf kauf = new Kauf();
 				kauf.setArtikelNummer(resultSet.getString("Artikelnummer"));
@@ -693,10 +704,10 @@ public class MariaDBTest implements DBInterface {
 
 	public long getVerkauefeForArtikel(String artikelNummer) {
 		List<Kauf> kaufList = new ArrayList<Kauf>();
+		String sql="SELECT * FROM " + databaseName + ".Kauf WHERE Artikelnummer='" + artikelNummer + "'";
 		try {
 			start = Instant.now();
-			ResultSet resultSet = statement.executeQuery(
-					"SELECT * FROM " + databaseName + ".Kauf WHERE Artikelnummer='" + artikelNummer + "'");
+			ResultSet resultSet = statement.executeQuery(sql);
 			while (resultSet.next()) {
 				Kauf kauf = new Kauf();
 				kauf.setArtikelNummer(resultSet.getString("Artikelnummer"));

@@ -4,6 +4,7 @@ import java.io.FileWriter;
 import java.io.Writer;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,7 +29,7 @@ public class CsvBeanWriter {
 	}
 
 	public static void writeCsvFromAccessTimeExample(List<AccessTime> list) throws Exception {
-		Path path = Paths.get("messdaten.csv");
+		Path path = Paths.get("./messdaten"+ LocalTime.now().toString()+".csv");
 		writeCsvFromAccessTime(path, list);
 	}
 }

@@ -8,24 +8,36 @@ public class AccessTime extends CsvBean{
 	@CsvBindByName(column = "Kategorie", required = true)
 	CRUDoperation kategorie;
 	
-	@CsvBindByName(column = "Beschreibung", required = true)
-	String beschreibung;
+	@CsvBindByName(column = "Objekt", required = true)
+	ObjectCategory objektKategorie;
+	
+	@CsvBindByName(column = "Methode", required = true)
+	MethodType methode;
 	
 	@CsvBindByName(column = "Zeit in Nanosekunden", required = true)
 	long zugriffszeitZeit;
 	
-	public AccessTime(String beschreibung, long zeit, CRUDoperation kategorie) {
-		this.beschreibung =beschreibung;
-		this.zugriffszeitZeit=zeit;
-		this.kategorie=kategorie;
+	public AccessTime(CRUDoperation crudCategory, ObjectCategory objectCategory, long time, MethodType methodType) {
+		this.methode = methodType;
+		this.zugriffszeitZeit = time;
+		this.kategorie=crudCategory;
+		this.objektKategorie = objectCategory;
+	}
+	
+	public ObjectCategory getObjektKategorie() {
+		return objektKategorie;
 	}
 
-	public String getBeschreibung() {
-		return beschreibung;
+	public void setObjektKategorie(ObjectCategory objektKategorie) {
+		this.objektKategorie = objektKategorie;
 	}
 
-	public void setBeschreibung(String beschreibung) {
-		this.beschreibung = beschreibung;
+	public MethodType getMethode() {
+		return methode;
+	}
+
+	public void setMethode(MethodType methode) {
+		this.methode = methode;
 	}
 
 	public long getZugriffszeitZeit() {

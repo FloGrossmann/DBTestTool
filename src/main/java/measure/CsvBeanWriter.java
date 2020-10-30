@@ -1,5 +1,6 @@
 package measure;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.Writer;
 import java.nio.file.Path;
@@ -13,6 +14,8 @@ import com.opencsv.bean.StatefulBeanToCsv;
 import com.opencsv.bean.StatefulBeanToCsvBuilder;
 
 public class CsvBeanWriter {
+	
+	private static final String DIRECTORY_DIR = "./messdaten";
 
 	private static void writeCsvFromAccessTime(Path path, List<AccessTime> zugriffszeiten) throws Exception {
 		Writer writer = new FileWriter(path.toString());
@@ -27,10 +30,18 @@ public class CsvBeanWriter {
 		sbc.write(list);
 		writer.close();
 	}
+	
+	private static void createDirectory() {
+		File directory = new File(DIRECTORY_DIR);
+	    if (! directory.exists()){
+	        directory.mkdir();
+	    }
+	}
 
-	public static void writeCsvFromAccessTimeExample(List<AccessTime> list) throws Exception {
+	public static void writeCsvFromAccessTimeExample(List<AccessTime> list, String fileName) throws Exception {
+		createDirectory();
 		LocalTime time=LocalTime.now();
-		Path path = Paths.get("./messdaten_"+time.getHour()+"_"+time.getMinute()+"_"+time.getSecond()+".csv");
+		Path path = Paths.get(DIRECTORY_DIR +"./" + fileName + "_" +time.getHour()+"_"+time.getMinute()+"_"+time.getSecond()+".csv");
 		writeCsvFromAccessTime(path, list);
 	}
 }

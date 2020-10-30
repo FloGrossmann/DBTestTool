@@ -3,7 +3,6 @@ package ui;
 import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.sql.Date;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -13,17 +12,14 @@ import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
-import dbinterface.Adresse;
-import dbinterface.Artikel;
-import dbinterface.Bewertung;
-import dbinterface.Kauf;
-import dbinterface.Kunde;
-import mariadb.MariaDBTest;
+import measure.DBTest;
 import monogdb.MongoDBTest;
 
 public class MenuPanel extends JPanel {
 
 	private static final long serialVersionUID = 448371628021809323L;
+	
+	private DBTest dbTest = new DBTest();
 
 	Container c;
 	JTextField mongoDBConnectionTextField;
@@ -34,13 +30,13 @@ public class MenuPanel extends JPanel {
 	JLabel mariaDBConnectionLabel;
 	JLabel mariaDBUsernameLabel;
 	JLabel mariaDBPasswordLabel;
-	JTextArea mongoDBConnectionErrorText;
+	JTextArea errorLabel;
 	JButton mongoDBTestConnectionButton;
 	JButton mongoDBClearDBButton;
-	JButton mongoDBStartTestButton;
-
+	
 	MongoDBTest mongoTest;
-	JButton mariaDBConnectionButton;
+
+	JButton startTestButton;
 
 	public void createMariaDBPanel() {
 		mariaDBConnectionLabel = new JLabel("mariaDBConnectionString:");
@@ -52,75 +48,34 @@ public class MenuPanel extends JPanel {
 		mariaDBPasswordTextField.setText("root");
 		mariaDBUsernameTextField = new JTextField(50);
 		mariaDBUsernameTextField.setText("root");
-		mariaDBConnectionButton = new JButton("Test MariaDB Connection");
-		mariaDBConnectionButton.addActionListener(alDBTestConnection);
 		add(mariaDBConnectionLabel);
 		add(mariaDBConnectionTextField);
 		add(mariaDBPasswordLabel);
 		add(mariaDBPasswordTextField);
 		add(mariaDBUsernameLabel);
 		add(mariaDBUsernameTextField);
-		add(mariaDBConnectionButton);
 	}
 	
 	public void createMongoDBPanel() {
 		mongoDBConnectionLabel = new JLabel("mongoDBConnectionString:");
 		add(mongoDBConnectionLabel);
-		mongoDBConnectionErrorText = new JTextArea();
-		mongoDBConnectionErrorText.setEditable(false);
+		errorLabel = new JTextArea();
+		errorLabel.setEditable(false);
 		mongoDBConnectionTextField = new JTextField(50);
 		mongoDBConnectionTextField.setText("mongodb://localhost:27017/?readPreference=primary&ssl=false");
 		mongoDBConnectionTextField.getDocument().addDocumentListener(alMongoDBConnectionStringUpdate);
 		add(mongoDBConnectionTextField);
-		add(mongoDBConnectionErrorText);
-
-		mongoDBTestConnectionButton = new JButton("Test MongoDB Connection");
-		mongoDBTestConnectionButton.addActionListener(alMongoDBTestConnection);
-		add(mongoDBTestConnectionButton);
-
-		mongoDBClearDBButton = new JButton("MongoDB test-DB loeschen");
-		mongoDBClearDBButton.addActionListener(alMongoDBClear);
-		mongoDBClearDBButton.setVisible(false);
-		add(mongoDBClearDBButton);
-		mongoDBStartTestButton = new JButton("Start MongoDB Test");
-		mongoDBStartTestButton.addActionListener(alMongoDBSetup);
-		mongoDBStartTestButton.setVisible(false);
-		add(mongoDBStartTestButton);
+		add(errorLabel);
 	}
 
 	public MenuPanel() {
 		createMongoDBPanel();
 		createMariaDBPanel();
+		
+		startTestButton = new JButton("Start Testing");
+		startTestButton.addActionListener(alStartTest);
+		add(startTestButton);
 	}
-
-	ActionListener alMongoDBTestConnection = new ActionListener() {
-
-		public void actionPerformed(ActionEvent e) {
-			MongoDBTest mongoDBTest = new MongoDBTest();
-			try {
-				boolean success = mongoDBTest.connect(mongoDBConnectionTextField.getText());
-				if (success) {
-					mongoTest = mongoDBTest;
-					mongoDBConnectionErrorText.setText("Connection successful");
-					mongoDBClearDBButton.setVisible(true);
-					mongoDBStartTestButton.setVisible(true);
-				}
-			} catch (Exception ex) {
-				System.out.println(ex);
-				mongoDBConnectionErrorText.setText(ex.getMessage());
-
-			}
-		}
-	};
-
-	ActionListener alDBTestConnection = new ActionListener() {
-
-		public void actionPerformed(ActionEvent e) {
-			MariaDBTest mariaDBTest = new MariaDBTest(mariaDBConnectionTextField.getText(),
-					mariaDBUsernameTextField.getText(), mariaDBPasswordTextField.getText());
-			mariaDBTest.connect();
-		}
-	};
 
 	DocumentListener alMongoDBConnectionStringUpdate = new DocumentListener() {
 
@@ -139,30 +94,24 @@ public class MenuPanel extends JPanel {
 		public void testConnectionString() {
 			if (!mongoDBConnectionTextField.getText().startsWith("mongodb://")
 					&& !mongoDBConnectionTextField.getText().startsWith("mongodb+srv://")) {
-				mongoDBConnectionErrorText.setText(
+				errorLabel.setText(
 						"The connection string is invalid. Connection strings must start with either 'mongodb://' or 'mongodb+srv://");
 			} else {
-				mongoDBConnectionErrorText.setText("");
+				errorLabel.setText("");
 			}
 		}
 	};
 
-	ActionListener alMongoDBClear = new ActionListener() {
+	ActionListener alStartTest = new ActionListener() {
 
-		public void actionPerformed(ActionEvent e) {
-			mongoTest.cleanData();
-		}
-	};
-
-	ActionListener alMongoDBSetup = new ActionListener() {
-
-		public void actionPerformed(ActionEvent e) {
-			mongoTest.setupDB();
-			mongoTest.addArtikel(new Artikel("22", "artikelName", 42.42, "euro", "ein Artikel"));
-			mongoTest.addKunde(new Kunde("12", "email@web.de", "07234723", "Vorname", "Nachname", new Adresse("ortschaft", "hausnummer", "Straße", "712231")));
-			mongoTest.addKauf(new Kauf("12", "22", new Date(new java.util.Date().getTime()), 43.43, 2));
-			mongoTest.addBewertung(new Bewertung("12", "22", 5, "war okay"));
-			mongoTest.deleteAdresseByKundenNr("12");
+		public void actionPerformed(ActionEvent action) {
+			System.out.println("Start Testing");
+			try {
+				dbTest.startTest(mongoDBConnectionTextField.getText(), mariaDBConnectionTextField.getText(), mariaDBUsernameTextField.getText(), mariaDBPasswordTextField.getText());
+			} catch (Exception e) {
+				e.printStackTrace();
+				errorLabel.setText(e.getMessage());
+			}
 		}
 	};
 

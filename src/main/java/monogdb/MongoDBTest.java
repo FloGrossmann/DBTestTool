@@ -110,7 +110,7 @@ public class MongoDBTest implements DBInterface {
 			return Duration.between(start, end).toNanos();
 		} catch (Exception e) {
 			System.err.println(e);
-			return Long.MAX_VALUE;
+			return -1l;
 		}
 	}
 
@@ -122,7 +122,7 @@ public class MongoDBTest implements DBInterface {
 			return Duration.between(start, end).toNanos();
 		} catch (Exception e) {
 			System.err.println(e);
-			return Long.MAX_VALUE;
+			return -1l;
 		}
 	}
 
@@ -134,7 +134,7 @@ public class MongoDBTest implements DBInterface {
 			return Duration.between(start, end).toNanos();
 		} catch (Exception e) {
 			System.err.println(e);
-			return Long.MAX_VALUE;
+			return -1l;
 		}
 	}
 
@@ -143,11 +143,10 @@ public class MongoDBTest implements DBInterface {
 			start = Instant.now();
 			kaufCollection.insertOne(kauf);
 			end = Instant.now();
-			System.out.println(Duration.between(start, end).toNanos());
 			return Duration.between(start, end).toNanos();
 		} catch (Exception e) {
 			System.err.println(e);
-			return Long.MAX_VALUE;
+			return -1l;
 		}
 	}
 

@@ -83,7 +83,7 @@ public class DBTest {
 		int size = 0;
 		
 		while (size < MAXIMUM) {
-			progress.setText("Adding next " + TESTEVERY*4 + " entries..");
+			progress.setText("Adding next " + TESTEVERY + "(*4 objects) entries..");
 			do {
 				//Add more entries
 				// Kunde

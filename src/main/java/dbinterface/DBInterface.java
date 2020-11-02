@@ -59,6 +59,14 @@ public interface DBInterface {
 	// Depends on randomness
 	long getVerkauefeForArtikel(String artikelNummer);
 
+	// READ - used for update
+	
+	Kunde getKundeByKundenNr_kunde(String kundenNr);
+	
+	Artikel getArtikelByArtikelNummer_artikel(String artikelNummer);
+	
+	Bewertung getBewertungByKundenNrAndArtikelNr_bewertung(String artikelNummer, String kundenNummer);
+	
 	// UPDATE
 
 	long updateKunde(Kunde kunde);

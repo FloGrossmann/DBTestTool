@@ -68,6 +68,7 @@ public class MariaDBTest implements DBInterface {
 
 	public boolean setupDB() {
 		try {
+			cleanData();
 			statement.execute("CREATE DATABASE IF NOT EXISTS " + databaseName);
 			statement.execute("CREATE TABLE IF NOT EXISTS " + databaseName
 					+ ".Kunde (Kundennummer varchar(255), Vorname varchar(255), Nachname varchar(255), Email varchar(255), Telefonnummer varchar(255), primary key (Kundennummer))");
@@ -185,7 +186,7 @@ public class MariaDBTest implements DBInterface {
 	public long addKauf(Kauf kauf) {
 
 		String sql = "INSERT INTO " + databaseName
-				+ ".Kauf (Kaufdatum, Kaufpreis, Menge, Kundennummer, Artikelnummer) VALUES(?,?,?,?,?)";
+				+ ".Kauf (Kaufdatum, Kaufpreis, Menge, Kundennummer, Artikelnummer) VALUES (?,?,?,?,?)";
 		PreparedStatement prest;
 		try {
 			prest = mariaDbConnection.prepareStatement(sql);
@@ -233,6 +234,34 @@ public class MariaDBTest implements DBInterface {
 		}
 	}
 
+	@Override
+	public Kunde getKundeByKundenNr_kunde(String kundenNr) {
+		String sql = "SELECT * FROM " + databaseName + ".Kunde, " + databaseName + ".Adresse WHERE Kunde.Kundennummer='"
+				+ kundenNr + "'";
+		try {
+			
+			ResultSet resultSet = statement.executeQuery(sql);
+			Kunde kunde = new Kunde();
+			
+			while (resultSet.next()) {
+				kunde.setKundenNummer(resultSet.getString("Kundennummer"));
+				kunde.setEmail(resultSet.getString("Email"));
+				kunde.setTelefonNummer(resultSet.getString("Telefonnummer"));
+				kunde.setVorname(resultSet.getString("Vorname"));
+				kunde.setNachname(resultSet.getString("Nachname"));
+			}
+		
+			while (resultSet.next())
+				kunde.setAdresse(
+						new Adresse(resultSet.getString("Ortschaft"), resultSet.getString("Hausnummer"),
+								resultSet.getString("Strasse"), resultSet.getString("PLZ")));
+			return kunde;
+		} catch (SQLException e) {
+			System.err.println(e);
+			return null;
+		}
+	}
+	
 	public long getKundeByEmail(String email) {
 
 		String sql = "SELECT * FROM " + databaseName + ".Kunde, " + databaseName + ".Adresse WHERE Kunde.Email='"
@@ -323,6 +352,26 @@ public class MariaDBTest implements DBInterface {
 			return Long.MAX_VALUE;
 		}
 	}
+	
+	@Override
+	public Artikel getArtikelByArtikelNummer_artikel(String artikelNummer) {
+		String sql = "SELECT * FROM " + databaseName + ".Artikel WHERE Artikelnummer='" + artikelNummer + "'";
+		try {
+			ResultSet resultSet = statement.executeQuery(sql);
+			Artikel artikel = new Artikel();
+			while (resultSet.next()) {
+				artikel .setArtikelNummer(resultSet.getString("Artikelnummer"));
+				artikel.setArtikelName(resultSet.getString("Artikelname"));
+				artikel.setEinzelPreis(resultSet.getDouble("Einzelpreis"));
+				artikel.setWaehrung(resultSet.getString("Waehrung"));
+				artikel.setBeschreibung(resultSet.getString("Beschreibung"));
+			}
+			return artikel;
+		} catch (SQLException e) {
+			System.err.println(e);
+			return null;
+		}
+	}
 
 	public long getArtikelByArtikelName(String artikelName) {
 		String sql = "SELECT * FROM " + databaseName + ".Artikel WHERE Artikelname='" + artikelName + "'";
@@ -386,6 +435,27 @@ public class MariaDBTest implements DBInterface {
 		} catch (SQLException e) {
 			System.err.println(e);
 			return Long.MAX_VALUE;
+		}
+	}
+	
+
+	@Override
+	public Bewertung getBewertungByKundenNrAndArtikelNr_bewertung(String artikelNummer, String kundenNummer) {
+		String sql = "SELECT * FROM " + databaseName + ".Bewertung WHERE Artikelnummer='" + artikelNummer
+				+ "' AND Kundennummer='" + kundenNummer + "'";
+		try {
+			ResultSet resultSet = statement.executeQuery(sql);
+			Bewertung bewertung = new Bewertung();
+			while (resultSet.next()) {
+				bewertung.setArtikelNummer(resultSet.getString("Artikelnummer"));
+				bewertung.setKundenNummer(resultSet.getString("Kundennummer"));
+				bewertung.setBewertung(resultSet.getString("Bewertung"));
+				bewertung.setSterne(resultSet.getInt("Sterne"));
+			}
+			return bewertung;
+		} catch (SQLException e) {
+			System.err.println(e);
+			return null;
 		}
 	}
 
@@ -553,7 +623,7 @@ public class MariaDBTest implements DBInterface {
 	public long updateKundenNachname(String kundenNummer, String nachName) {
 		try {
 			start = Instant.now();
-			statement.executeUpdate("UPDATE " + databaseName + ".Kunde SET Nachname='" + nachName
+			statement.executeUpdate("UPDATE " + databaseName + ".Kunde SET Nachname='" + nachName + "'"
 					+ " WHERE Kundennummer='" + kundenNummer + "'");
 			end = Instant.now();
 			return Duration.between(start, end).toNanos();
@@ -567,7 +637,7 @@ public class MariaDBTest implements DBInterface {
 	public long updateBewertungsText(String kundenNummer, String artikelNummer, String newText) {
 		try {
 			start = Instant.now();
-			statement.executeUpdate("UPDATE " + databaseName + ".Bewertung SET Bewertung='" + newText
+			statement.executeUpdate("UPDATE " + databaseName + ".Bewertung SET Bewertung='" + newText + "'"
 					+ " WHERE Artikelnummer='" + artikelNummer
 					+ "' AND Kundennummer='" + kundenNummer + "'");
 			end = Instant.now();
@@ -582,6 +652,7 @@ public class MariaDBTest implements DBInterface {
 	public long deleteKundeByKundenNr(String kundenNr) {
 		try {
 			start = Instant.now();
+			statement.executeUpdate("DELETE FROM " + databaseName + ".Adresse WHERE Kundennummer='" + kundenNr + "'");
 			statement.executeUpdate("DELETE FROM " + databaseName + ".Kunde WHERE Kundennummer='" + kundenNr + "'");
 			end = Instant.now();
 			return Duration.between(start, end).toNanos();
@@ -643,5 +714,4 @@ public class MariaDBTest implements DBInterface {
 		}
 
 	}
-
 }

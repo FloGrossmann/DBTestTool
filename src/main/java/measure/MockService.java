@@ -1,8 +1,10 @@
 package measure;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Random;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -33,6 +35,36 @@ public class MockService {
 	public static int currentStar = 1;
 	
 	public static LinkedList<CompPrimaryKey> bewertungPS = new LinkedList<CompPrimaryKey>();
+	// To keep track of duplicate keys
+	public static Set<CompPrimaryKey> kaufPS_SET = new HashSet<CompPrimaryKey>();
+	public static Set<CompPrimaryKey> bewertungPS_SET = new HashSet<CompPrimaryKey>();
+	
+	public static CompPrimaryKey getRandomUniqueCompKey_Kauf() {
+		String artikelNr;
+		String kundenNr;
+		CompPrimaryKey key = null;
+		do {
+			artikelNr = getRandomInsertedArtikelNummer();
+			kundenNr = getRandomInsertedKundenNummer();
+			key = new CompPrimaryKey(artikelNr, kundenNr);
+		} while (kaufPS_SET.contains(key));
+		kaufPS_SET.add(key);
+		return key;
+	}
+	
+	public static CompPrimaryKey getRandomUniqueCompKey_Bewertung() {
+		String artikelNr;
+		String kundenNr;
+		CompPrimaryKey key = null;
+		do {
+			artikelNr = getRandomInsertedArtikelNummer();
+			kundenNr = getRandomInsertedKundenNummer();
+			key = new CompPrimaryKey(artikelNr, kundenNr);
+		} while (bewertungPS_SET.contains(key));
+		bewertungPS.add(key);
+		bewertungPS_SET.add(key);
+		return key;
+	}
 	
 	public static int getNextCurrentStar() {
 		currentStar++;
@@ -83,7 +115,7 @@ public class MockService {
 		return LocalDate.ofEpochDay(randomDay);
 	}
 
-	public static Kunde getRandomKunde() {
+	public static Kunde genRandomInsertKunde() {
 
 		Kunde kunde = new Kunde();
 		String email = UUID.randomUUID().toString();
@@ -104,8 +136,23 @@ public class MockService {
 		kunde.setAdresse(adresse);
 		return kunde;
 	}
+	
+	public static Kunde randomizeFields(Kunde kunde) {
 
-	public static Artikel getRandomArtikel() {
+		kunde.setNachname(rndString.generate(7));
+		kunde.setVorname(rndString.generate(7));
+		kunde.setTelefonNummer(rndInt.generate(12).toString());
+
+		Adresse adresse = new Adresse();
+		adresse.setHausnummer(rndStringInt.generate(3));
+		adresse.setPlz(getRandomPLZ());
+		adresse.setOrtschaft(adresse.getPlz().startsWith("7") ? "Karlsruhe" : "Berlin");
+		adresse.setStrasse(rndString.generate(12));
+		kunde.setAdresse(adresse);
+		return kunde;
+	}
+
+	public static Artikel genRandomInsertArtikel() {
 		Artikel artikel = new Artikel();
 		String artikelName = rndString.generate(12);
 		artikel.setArtikelName(artikelName);
@@ -118,8 +165,16 @@ public class MockService {
 		artikel.setWaehrung(rndString.generate(4));
 		return artikel;
 	}
+	
+	public static Artikel randomizeFields(Artikel artikel) {
 
-	public static Kauf getRandomKauf() {
+		artikel.setBeschreibung(rndString.generate(40));
+		artikel.setEinzelPreis(Integer.valueOf(rndInt.generate(3)));
+		artikel.setWaehrung(rndString.generate(4));
+		return artikel;
+	}
+
+	public static Kauf genRandomInsertKauf() {
 		if (artikelNummern.size() == 0 || kundenNummern.size() == 0) {
 			throw new RuntimeException("No Kunde or artikel to assign the kauf object to");
 		}
@@ -127,26 +182,29 @@ public class MockService {
 		Kauf kauf = new Kauf();
 		kauf.setKaufPreis(Integer.valueOf(rndInt.generate(3)));
 		kauf.setKaufdatum(java.sql.Date.valueOf(getRandomDate()));
-		String artikelNr = getRandomInsertedArtikelNummer();
-		kauf.setArtikelNummer(artikelNr);
-		String kundenNr = getRandomInsertedKundenNummer();
-		kauf.setArtikelNummer(kundenNr);
+		CompPrimaryKey ps = getRandomUniqueCompKey_Kauf();
+		kauf.setArtikelNummer(ps.getArtikelNummer());
+		kauf.setKundenNummer(ps.getKundenNummer());
 		kauf.setMenge(ThreadLocalRandom.current().nextInt(0, 200));
 		return kauf;
 	}
 
-	public static Bewertung getRandomBewertung() {
+	public static Bewertung genRandomInsertBewertung() {
 		if (artikelNummern.size() == 0 || kundenNummern.size() == 0) {
 			throw new RuntimeException("No Kunde or artikel to assign the kauf object to");
 		}
 		Bewertung bewertung = new Bewertung();
 		bewertung.setBewertung(rndString.generate(600));
 		bewertung.setSterne(ThreadLocalRandom.current().nextInt(1, 11));
-		String artikelNr = getRandomInsertedArtikelNummer();
-		bewertung.setArtikelNummer(artikelNr);
-		String kundenNr = getRandomInsertedKundenNummer();
-		bewertung.setKundenNummer(kundenNr);
-		bewertungPS.add(new CompPrimaryKey(artikelNr, kundenNr));
+		CompPrimaryKey ps = getRandomUniqueCompKey_Bewertung();
+		bewertung.setArtikelNummer(ps.getArtikelNummer());
+		bewertung.setKundenNummer(ps.getKundenNummer());
+		return bewertung;
+	}
+	
+	public static Bewertung randomizeFields(Bewertung bewertung) {
+		bewertung.setBewertung(rndString.generate(600));
+		bewertung.setSterne(ThreadLocalRandom.current().nextInt(1, 11));
 		return bewertung;
 	}
 
@@ -164,10 +222,29 @@ public class MockService {
 
 	public static void removeBewertungPS(CompPrimaryKey ps) {
 		bewertungPS.remove(ps);
+		bewertungPS_SET.remove(ps);
+	}
+	
+	public static void removeKaufPS(String artikelNr, String kundenNr) {
+		removeKaufPS(new CompPrimaryKey(artikelNr, kundenNr));
+	}
+
+	public static void removeKaufPS(CompPrimaryKey ps) {
+		kaufPS_SET.remove(ps);
+	}
+	
+	public static void removeEmail(String email) {
+		emails.remove(email);
 	}
 
 	public static void clearIdLists() {
 		artikelNummern.clear();
 		kundenNummern.clear();
+		emails.clear();
+		artikelNamen.clear();
+		bewertungPS.clear();
+		currentStar = 1;
+		kaufPS_SET.clear();
+		bewertungPS_SET.clear();
 	}
 }

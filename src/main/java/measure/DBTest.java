@@ -4,6 +4,7 @@ import java.util.LinkedList;
 
 import dbinterface.Artikel;
 import dbinterface.Bewertung;
+import dbinterface.DBInterface;
 import dbinterface.Kauf;
 import dbinterface.Kunde;
 import mariadb.MariaDBTest;
@@ -15,9 +16,9 @@ public class DBTest {
 	public MongoDBTest mongoDBTest;
 	public MariaDBTest mariaDBTest;
 	public LinkedList<AccessTime> mongoDBTestList = new LinkedList<AccessTime>();
-	public static final int TESTEVERY = 10000;
-	public static final int REPETITIONS = 1000;
-	public static final int MAXIMUM = 50000;
+	public static final int TESTEVERY = 100;
+	public static final int REPETITIONS = 20;
+	public static final int MAXIMUM = 500;
 	
 	public void startTest(String mongoDBConnectionString, String mariaDBConnectionString,
 			String mariaDBUsername, String mariaDBPassword) throws Exception {
@@ -29,43 +30,44 @@ public class DBTest {
 		mariaDBTest.setupDB();
 		
 		
-		
-		mongoDBCreateTest();
+		databaseTest(mariaDBTest, "MariaDB");
+		MockService.clearIdLists();
+		databaseTest(mongoDBTest, "MongoDB");
 	}
 	
-	public void mongoDBCreateTest() {
+	public void databaseTest(DBInterface underTest, String databaseName) {
 		
 		//CREATE
-		LinkedList<AccessTime> mongoDB_Create_Kunde = new LinkedList<AccessTime>();
-		LinkedList<AccessTime> mongoDB_Create_Artikel = new LinkedList<AccessTime>();
-		LinkedList<AccessTime> mongoDB_Create_Kauf = new LinkedList<AccessTime>();
-		LinkedList<AccessTime> mongoDB_Create_Bewertung = new LinkedList<AccessTime>();
+		LinkedList<AccessTime> create_Kunde = new LinkedList<AccessTime>();
+		LinkedList<AccessTime> create_Artikel = new LinkedList<AccessTime>();
+		LinkedList<AccessTime> create_Kauf = new LinkedList<AccessTime>();
+		LinkedList<AccessTime> create_Bewertung = new LinkedList<AccessTime>();
 		
 		//DELETE
-		LinkedList<AccessTime> mongoDB_Delete_Kunde = new LinkedList<AccessTime>();
-		LinkedList<AccessTime> mongoDB_Delete_Artikel = new LinkedList<AccessTime>();
-		LinkedList<AccessTime> mongoDB_Delete_Kauf = new LinkedList<AccessTime>();
-		LinkedList<AccessTime> mongoDB_Delete_Bewertung = new LinkedList<AccessTime>();
+		LinkedList<AccessTime> delete_Kunde = new LinkedList<AccessTime>();
+		LinkedList<AccessTime> delete_Artikel = new LinkedList<AccessTime>();
+		LinkedList<AccessTime> delete_Kauf = new LinkedList<AccessTime>();
+		LinkedList<AccessTime> delete_Bewertung = new LinkedList<AccessTime>();
 		
 		//READ
-		LinkedList<AccessTime> mongoDB_Read_Kunde_ByKndNr = new LinkedList<AccessTime>();
-		LinkedList<AccessTime> mongoDB_Read_Kunde_ByEmail = new LinkedList<AccessTime>();
-		LinkedList<AccessTime> mongoDB_Read_Kunde_ByPLZ = new LinkedList<AccessTime>();
-		LinkedList<AccessTime> mongoDB_Read_Kunde_Distinct_Orte = new LinkedList<AccessTime>();
-		LinkedList<AccessTime> mongoDB_Read_Artikel_ByArtNr = new LinkedList<AccessTime>();
-		LinkedList<AccessTime> mongoDB_Read_Artikel_ByArtName = new LinkedList<AccessTime>();
-		LinkedList<AccessTime> mongoDB_Read_Artikel_WhichCostMoreThan = new LinkedList<AccessTime>();
-		LinkedList<AccessTime> mongoDB_Read_Kauf_ForKundeNr = new LinkedList<AccessTime>();
-		LinkedList<AccessTime> mongoDB_Read_Kauf_ForArtikelNr = new LinkedList<AccessTime>();
-		LinkedList<AccessTime> mongoDB_Read_Bewertung_ByANr_KNr = new LinkedList<AccessTime>();
-		LinkedList<AccessTime> mongoDB_Read_Bewertung_BySterne = new LinkedList<AccessTime>();
+		LinkedList<AccessTime> read_Kunde_ByKndNr = new LinkedList<AccessTime>();
+		LinkedList<AccessTime> read_Kunde_ByEmail = new LinkedList<AccessTime>();
+		LinkedList<AccessTime> read_Kunde_ByPLZ = new LinkedList<AccessTime>();
+		LinkedList<AccessTime> read_Kunde_Distinct_Orte = new LinkedList<AccessTime>();
+		LinkedList<AccessTime> read_Artikel_ByArtNr = new LinkedList<AccessTime>();
+		LinkedList<AccessTime> read_Artikel_ByArtName = new LinkedList<AccessTime>();
+		LinkedList<AccessTime> read_Artikel_WhichCostMoreThan = new LinkedList<AccessTime>();
+		LinkedList<AccessTime> read_Kauf_ForKundeNr = new LinkedList<AccessTime>();
+		LinkedList<AccessTime> read_Kauf_ForArtikelNr = new LinkedList<AccessTime>();
+		LinkedList<AccessTime> read_Bewertung_ByANr_KNr = new LinkedList<AccessTime>();
+		LinkedList<AccessTime> read_Bewertung_BySterne = new LinkedList<AccessTime>();
 		
 		//UPDATE
-		LinkedList<AccessTime> mongoDB_Update_Kunde_Complete = new LinkedList<AccessTime>();
-		LinkedList<AccessTime> mongoDB_Update_Kunde_Nachname = new LinkedList<AccessTime>();
-		LinkedList<AccessTime> mongoDB_Update_Artikel_Complete = new LinkedList<AccessTime>();
-		LinkedList<AccessTime> mongoDB_Update_Bewertung_Complete = new LinkedList<AccessTime>();
-		LinkedList<AccessTime> mongoDB_Update_Bewertung_Text = new LinkedList<AccessTime>();
+		LinkedList<AccessTime> update_Kunde_Complete = new LinkedList<AccessTime>();
+		LinkedList<AccessTime> update_Kunde_Nachname = new LinkedList<AccessTime>();
+		LinkedList<AccessTime> update_Artikel_Complete = new LinkedList<AccessTime>();
+		LinkedList<AccessTime> update_Bewertung_Complete = new LinkedList<AccessTime>();
+		LinkedList<AccessTime> update_Bewertung_Text = new LinkedList<AccessTime>();
 		
 		int size = 0;
 		
@@ -73,13 +75,13 @@ public class DBTest {
 			do {
 				//Add more entries
 				// Kunde
-				mongoDBTest.addKunde(MockService.getRandomKunde());
+				underTest.addKunde(MockService.genRandomInsertKunde());
 				// Artikel
-				mongoDBTest.addArtikel(MockService.getRandomArtikel());
+				underTest.addArtikel(MockService.genRandomInsertArtikel());
 				// Kauf
-				mongoDBTest.addKauf(MockService.getRandomKauf());
+				underTest.addKauf(MockService.genRandomInsertKauf());
 				// Bewertung
-				mongoDBTest.addBewertung(MockService.getRandomBewertung());
+				underTest.addBewertung(MockService.genRandomInsertBewertung());
 				size++;
 			} while (size % TESTEVERY != 0 || size == 0);
 			
@@ -115,337 +117,335 @@ public class DBTest {
 			for (int i = 0; i < REPETITIONS; i++) {
 
 				// Kunde
-				testListCreate_Kunde.add(testAddKunde());
-				testListDelete_Kunde.add(testDeleteKunde());
-				testListRead_KundeByKndNr.add(testReadKunde_byKundenNummer());
-				testListRead_KundeByEmail.add(testReadKunde_byEmail());
-				testListRead_Kunden_byPLZ.add(testReadKunden_byPLZ());
-				testList_GetDistinctOrte.add(testGetDistinctOrte());
-				testListUpdate_Kunde_Complete.add(testUpdateKunde_Complete());
-				testListUpdate_Kunde_Nachname.add(testUpdateKunde_Nachname());
+				testListCreate_Kunde.add(testAddKunde(underTest));
+				testListDelete_Kunde.add(testDeleteKunde(underTest));
+				testListRead_KundeByKndNr.add(testReadKunde_byKundenNummer(underTest));
+				testListRead_KundeByEmail.add(testReadKunde_byEmail(underTest));
+				testListRead_Kunden_byPLZ.add(testReadKunden_byPLZ(underTest));
+				testList_GetDistinctOrte.add(testGetDistinctOrte(underTest));
+				testListUpdate_Kunde_Complete.add(testUpdateKunde_Complete(underTest));
+				testListUpdate_Kunde_Nachname.add(testUpdateKunde_Nachname(underTest));
 				
 				// Artikel
-				testListCreate_Artikel.add(testAddArtikel());
-				testListDelete_Artikel.add(testDeleteArtikel());
-				testListRead_ArtikelByArtikelNr.add(testReadArtikel_byArtikelNummer());
-				testListRead_ArtikelByArtikelName.add(testReadArtikel_byArtikelName());
-				testListRead_ArtikelWhichCostMoreThan.add(testReadArtikel_whichCostMoreThan());
-				testListUpdate_Artikel_Complete.add(testUpdateArtikel_Complete());
+				testListCreate_Artikel.add(testAddArtikel(underTest));
+				testListDelete_Artikel.add(testDeleteArtikel(underTest));
+				testListRead_ArtikelByArtikelNr.add(testReadArtikel_byArtikelNummer(underTest));
+				testListRead_ArtikelByArtikelName.add(testReadArtikel_byArtikelName(underTest));
+				testListRead_ArtikelWhichCostMoreThan.add(testReadArtikel_whichCostMoreThan(underTest));
+				testListUpdate_Artikel_Complete.add(testUpdateArtikel_Complete(underTest));
 				
 				// Kauf
-				testListCreate_Kauf.add(testAddKauf());
-				testListDelete_Kauf.add(testDeleteKauf());
-				testListRead_Kauf_ForKundeNr.add(testReadEinkaeufeForKunde());
-				testListRead_Kauf_ForArtikelNr.add(testReadVerkaeufeForArtikel());
+				testListCreate_Kauf.add(testAddKauf(underTest));
+				testListDelete_Kauf.add(testDeleteKauf(underTest));
+				testListRead_Kauf_ForKundeNr.add(testReadEinkaeufeForKunde(underTest));
+				testListRead_Kauf_ForArtikelNr.add(testReadVerkaeufeForArtikel(underTest));
 				
 				// Bewertung
-				testListCreate_Bewertung.add(testAddBewertung());
-				testListDelete_Bewertung.add(testDeleteBewertung());
-				testListRead_BewertungByANr_KNr.add(testReadBewertungByKundenNrAndArtikelNr());
-				testListRead_BewertungBySterne.add(testReadBewertungByAnzahlSterne());
-				testListUpdate_Bewertung_Complete.add(testUpdateBewertung_Complete());
-				testListUpdate_Bewertung_Text.add(testUpdateBewertung_Text());
+				testListCreate_Bewertung.add(testAddBewertung(underTest));
+				testListDelete_Bewertung.add(testDeleteBewertung(underTest));
+				testListRead_BewertungByANr_KNr.add(testReadBewertungByKundenNrAndArtikelNr(underTest));
+				testListRead_BewertungBySterne.add(testReadBewertungByAnzahlSterne(underTest));
+				testListUpdate_Bewertung_Complete.add(testUpdateBewertung_Complete(underTest));
+				testListUpdate_Bewertung_Text.add(testUpdateBewertung_Text(underTest));
 				System.out.println("Repetition: " + i);
 			}
 			// Calculate & Store the results
 			// Create
-			mongoDB_Create_Kunde.add(new AccessTime(CRUDoperation.INSERT, ObjectCategory.KUNDE, MethodType.ADD_KUNDE, new Messreihe(testListCreate_Kunde), size));
-			mongoDB_Create_Artikel.add(new AccessTime(CRUDoperation.INSERT, ObjectCategory.ARTIKEL, MethodType.ADD_ARTIKEL, new Messreihe(testListCreate_Artikel), size));
-			mongoDB_Create_Bewertung.add(new AccessTime(CRUDoperation.INSERT, ObjectCategory.BEWERTUNG, MethodType.ADD_BEWERTUNG, new Messreihe(testListCreate_Bewertung), size));
-			mongoDB_Create_Kauf.add(new AccessTime(CRUDoperation.INSERT, ObjectCategory.KAUF, MethodType.ADD_KAUF, new Messreihe(testListCreate_Kauf), size));
+			create_Kunde.add(new AccessTime(CRUDoperation.INSERT, ObjectCategory.KUNDE, MethodType.ADD_KUNDE, new Messreihe(testListCreate_Kunde), size));
+			create_Artikel.add(new AccessTime(CRUDoperation.INSERT, ObjectCategory.ARTIKEL, MethodType.ADD_ARTIKEL, new Messreihe(testListCreate_Artikel), size));
+			create_Bewertung.add(new AccessTime(CRUDoperation.INSERT, ObjectCategory.BEWERTUNG, MethodType.ADD_BEWERTUNG, new Messreihe(testListCreate_Bewertung), size));
+			create_Kauf.add(new AccessTime(CRUDoperation.INSERT, ObjectCategory.KAUF, MethodType.ADD_KAUF, new Messreihe(testListCreate_Kauf), size));
 			
 			//Delete
-			mongoDB_Delete_Kunde.add(new AccessTime(CRUDoperation.DELETE, ObjectCategory.KUNDE, MethodType.DELETE_KUNDE_BYKUNDENNR, new Messreihe(testListDelete_Kunde), size));
-			mongoDB_Delete_Artikel.add(new AccessTime(CRUDoperation.DELETE, ObjectCategory.ARTIKEL, MethodType.DELETE_ARTIKEL_BYARTIKELNR, new Messreihe(testListDelete_Artikel), size));
-			mongoDB_Delete_Bewertung.add(new AccessTime(CRUDoperation.DELETE, ObjectCategory.BEWERTUNG, MethodType.DELETE_BEWERTUNG_BYARTIKELNRANDKUNDENNR, new Messreihe(testListDelete_Bewertung), size));
-			mongoDB_Delete_Kauf.add(new AccessTime(CRUDoperation.DELETE, ObjectCategory.KAUF, MethodType.DELETE_KAUF_BYARTIKELNRANDKUNDENNR, new Messreihe(testListDelete_Kauf), size));
+			delete_Kunde.add(new AccessTime(CRUDoperation.DELETE, ObjectCategory.KUNDE, MethodType.DELETE_KUNDE_BYKUNDENNR, new Messreihe(testListDelete_Kunde), size));
+			delete_Artikel.add(new AccessTime(CRUDoperation.DELETE, ObjectCategory.ARTIKEL, MethodType.DELETE_ARTIKEL_BYARTIKELNR, new Messreihe(testListDelete_Artikel), size));
+			delete_Bewertung.add(new AccessTime(CRUDoperation.DELETE, ObjectCategory.BEWERTUNG, MethodType.DELETE_BEWERTUNG_BYARTIKELNRANDKUNDENNR, new Messreihe(testListDelete_Bewertung), size));
+			delete_Kauf.add(new AccessTime(CRUDoperation.DELETE, ObjectCategory.KAUF, MethodType.DELETE_KAUF_BYARTIKELNRANDKUNDENNR, new Messreihe(testListDelete_Kauf), size));
 			
 			// Read
-			mongoDB_Read_Kunde_ByKndNr.add(new AccessTime(CRUDoperation.SELECT, ObjectCategory.KUNDE, MethodType.GET_KUNDE_BYKUNDENNR, new Messreihe(testListRead_KundeByKndNr), size));
-			mongoDB_Read_Kunde_ByEmail.add(new AccessTime(CRUDoperation.SELECT, ObjectCategory.KUNDE, MethodType.GET_KUNDE_BYEMAIL, new Messreihe(testListRead_KundeByEmail), size));
-			mongoDB_Read_Kunde_ByPLZ.add(new AccessTime(CRUDoperation.SELECT, ObjectCategory.KUNDE, MethodType.GET_KUNDEN_BYPLZ, new Messreihe(testListRead_Kunden_byPLZ), size));
-			mongoDB_Read_Kunde_Distinct_Orte.add(new AccessTime(CRUDoperation.SELECT, ObjectCategory.KUNDE, MethodType.GET_DISTINCTORTE, new Messreihe(testList_GetDistinctOrte), size));
-			mongoDB_Read_Artikel_ByArtNr.add(new AccessTime(CRUDoperation.SELECT, ObjectCategory.ARTIKEL, MethodType.GET_ARTIKEL_BYARTIKELNUMMER, new Messreihe(testListRead_ArtikelByArtikelNr), size));
-			mongoDB_Read_Artikel_ByArtName.add(new AccessTime(CRUDoperation.SELECT, ObjectCategory.ARTIKEL, MethodType.GET_ARTIKEL_BYARTIKELNAME, new Messreihe(testListRead_ArtikelByArtikelName), size));
-			mongoDB_Read_Artikel_WhichCostMoreThan.add(new AccessTime(CRUDoperation.SELECT, ObjectCategory.ARTIKEL, MethodType.GET_ARTIKEL_WHICHCOSTMORETHAN, new Messreihe(testListRead_ArtikelWhichCostMoreThan), size));
-			mongoDB_Read_Kauf_ForKundeNr.add(new AccessTime(CRUDoperation.SELECT, ObjectCategory.KAUF, MethodType.GET_EINKAEUFE_FORKUNDEN, new Messreihe(testListRead_Kauf_ForKundeNr), size));
-			mongoDB_Read_Kauf_ForArtikelNr.add(new AccessTime(CRUDoperation.SELECT, ObjectCategory.KAUF, MethodType.GET_EINKAUEFE_FORARTIKEL, new Messreihe(testListRead_Kauf_ForArtikelNr), size));
-			mongoDB_Read_Bewertung_ByANr_KNr.add(new AccessTime(CRUDoperation.SELECT, ObjectCategory.BEWERTUNG, MethodType.GET_BEWERTUNG_BYKUNDENNRANDARTIKELNR, new Messreihe(testListRead_BewertungByANr_KNr), size));
-			mongoDB_Read_Bewertung_BySterne.add(new AccessTime(CRUDoperation.SELECT, ObjectCategory.BEWERTUNG, MethodType.GET_KUNDE_BYKUNDENNR, new Messreihe(testListRead_BewertungBySterne), size));
+			read_Kunde_ByKndNr.add(new AccessTime(CRUDoperation.SELECT, ObjectCategory.KUNDE, MethodType.GET_KUNDE_BYKUNDENNR, new Messreihe(testListRead_KundeByKndNr), size));
+			read_Kunde_ByEmail.add(new AccessTime(CRUDoperation.SELECT, ObjectCategory.KUNDE, MethodType.GET_KUNDE_BYEMAIL, new Messreihe(testListRead_KundeByEmail), size));
+			read_Kunde_ByPLZ.add(new AccessTime(CRUDoperation.SELECT, ObjectCategory.KUNDE, MethodType.GET_KUNDEN_BYPLZ, new Messreihe(testListRead_Kunden_byPLZ), size));
+			read_Kunde_Distinct_Orte.add(new AccessTime(CRUDoperation.SELECT, ObjectCategory.KUNDE, MethodType.GET_DISTINCTORTE, new Messreihe(testList_GetDistinctOrte), size));
+			read_Artikel_ByArtNr.add(new AccessTime(CRUDoperation.SELECT, ObjectCategory.ARTIKEL, MethodType.GET_ARTIKEL_BYARTIKELNUMMER, new Messreihe(testListRead_ArtikelByArtikelNr), size));
+			read_Artikel_ByArtName.add(new AccessTime(CRUDoperation.SELECT, ObjectCategory.ARTIKEL, MethodType.GET_ARTIKEL_BYARTIKELNAME, new Messreihe(testListRead_ArtikelByArtikelName), size));
+			read_Artikel_WhichCostMoreThan.add(new AccessTime(CRUDoperation.SELECT, ObjectCategory.ARTIKEL, MethodType.GET_ARTIKEL_WHICHCOSTMORETHAN, new Messreihe(testListRead_ArtikelWhichCostMoreThan), size));
+			read_Kauf_ForKundeNr.add(new AccessTime(CRUDoperation.SELECT, ObjectCategory.KAUF, MethodType.GET_EINKAEUFE_FORKUNDEN, new Messreihe(testListRead_Kauf_ForKundeNr), size));
+			read_Kauf_ForArtikelNr.add(new AccessTime(CRUDoperation.SELECT, ObjectCategory.KAUF, MethodType.GET_EINKAUEFE_FORARTIKEL, new Messreihe(testListRead_Kauf_ForArtikelNr), size));
+			read_Bewertung_ByANr_KNr.add(new AccessTime(CRUDoperation.SELECT, ObjectCategory.BEWERTUNG, MethodType.GET_BEWERTUNG_BYKUNDENNRANDARTIKELNR, new Messreihe(testListRead_BewertungByANr_KNr), size));
+			read_Bewertung_BySterne.add(new AccessTime(CRUDoperation.SELECT, ObjectCategory.BEWERTUNG, MethodType.GET_KUNDE_BYKUNDENNR, new Messreihe(testListRead_BewertungBySterne), size));
 			
 			//Update
-			mongoDB_Update_Kunde_Complete.add(new AccessTime(CRUDoperation.UPDATE, ObjectCategory.KUNDE, MethodType.UPDATE_KUNDE_COMPLETE, new Messreihe(testListUpdate_Kunde_Complete), size));
-			mongoDB_Update_Kunde_Nachname.add(new AccessTime(CRUDoperation.UPDATE, ObjectCategory.KUNDE, MethodType.UPDATE_KUNDE_NACHNAME, new Messreihe(testListUpdate_Kunde_Nachname), size));
-			mongoDB_Update_Artikel_Complete.add(new AccessTime(CRUDoperation.UPDATE, ObjectCategory.ARTIKEL, MethodType.UPDATE_ARTIKEL_COMPLETE, new Messreihe(testListUpdate_Artikel_Complete), size));
-			mongoDB_Update_Bewertung_Complete.add(new AccessTime(CRUDoperation.UPDATE, ObjectCategory.BEWERTUNG, MethodType.UPDATE_BEWERTUNG_COMPLETE, new Messreihe(testListUpdate_Bewertung_Complete), size));
-			mongoDB_Update_Bewertung_Text.add(new AccessTime(CRUDoperation.UPDATE, ObjectCategory.BEWERTUNG, MethodType.UPDATE_BEWERTUNG_TEXT, new Messreihe(testListUpdate_Bewertung_Text), size));
+			update_Kunde_Complete.add(new AccessTime(CRUDoperation.UPDATE, ObjectCategory.KUNDE, MethodType.UPDATE_KUNDE_COMPLETE, new Messreihe(testListUpdate_Kunde_Complete), size));
+			update_Kunde_Nachname.add(new AccessTime(CRUDoperation.UPDATE, ObjectCategory.KUNDE, MethodType.UPDATE_KUNDE_NACHNAME, new Messreihe(testListUpdate_Kunde_Nachname), size));
+			update_Artikel_Complete.add(new AccessTime(CRUDoperation.UPDATE, ObjectCategory.ARTIKEL, MethodType.UPDATE_ARTIKEL_COMPLETE, new Messreihe(testListUpdate_Artikel_Complete), size));
+			update_Bewertung_Complete.add(new AccessTime(CRUDoperation.UPDATE, ObjectCategory.BEWERTUNG, MethodType.UPDATE_BEWERTUNG_COMPLETE, new Messreihe(testListUpdate_Bewertung_Complete), size));
+			update_Bewertung_Text.add(new AccessTime(CRUDoperation.UPDATE, ObjectCategory.BEWERTUNG, MethodType.UPDATE_BEWERTUNG_TEXT, new Messreihe(testListUpdate_Bewertung_Text), size));
 			System.out.println("Round " + size + " -+-+-+-+-+-+-");
 		}
 		
 		// Write to csv
 		try {
-			CsvBeanWriter.writeCsvFromAccessTimeExample(mongoDB_Create_Kunde, "mongoDB_Create_Kunde");
-			CsvBeanWriter.writeCsvFromAccessTimeExample(mongoDB_Create_Artikel, "mongoDB_Create_Artikel");
-			CsvBeanWriter.writeCsvFromAccessTimeExample(mongoDB_Create_Bewertung, "mongoDB_Create_Bewertung");
-			CsvBeanWriter.writeCsvFromAccessTimeExample(mongoDB_Create_Kauf, "mongoDB_Create_Kauf");
+			CsvBeanWriter.writeCsvFromAccessTimeExample(create_Kunde, databaseName, databaseName + "_Create_Kunde");
+			CsvBeanWriter.writeCsvFromAccessTimeExample(create_Artikel, databaseName, databaseName + "_Create_Artikel");
+			CsvBeanWriter.writeCsvFromAccessTimeExample(create_Bewertung, databaseName, databaseName + "_Create_Bewertung");
+			CsvBeanWriter.writeCsvFromAccessTimeExample(create_Kauf, databaseName, databaseName + "_Create_Kauf");
 			
-			CsvBeanWriter.writeCsvFromAccessTimeExample(mongoDB_Delete_Kunde, "mongoDB_Delete_Kunde");
-			CsvBeanWriter.writeCsvFromAccessTimeExample(mongoDB_Delete_Artikel, "mongoDB_Delete_Artikel");
-			CsvBeanWriter.writeCsvFromAccessTimeExample(mongoDB_Delete_Bewertung, "mongoDB_Delete_Bewertung");
-			CsvBeanWriter.writeCsvFromAccessTimeExample(mongoDB_Delete_Kauf, "mongoDB_Delete_Kauf");
+			CsvBeanWriter.writeCsvFromAccessTimeExample(delete_Kunde, databaseName, databaseName + "_Delete_Kunde");
+			CsvBeanWriter.writeCsvFromAccessTimeExample(delete_Artikel, databaseName, databaseName + "_Delete_Artikel");
+			CsvBeanWriter.writeCsvFromAccessTimeExample(delete_Bewertung, databaseName, databaseName + "_Delete_Bewertung");
+			CsvBeanWriter.writeCsvFromAccessTimeExample(delete_Kauf, databaseName, databaseName + "_Delete_Kauf");
 			
-			CsvBeanWriter.writeCsvFromAccessTimeExample(mongoDB_Read_Kunde_ByKndNr, "mongoDB_Read_Kunde_ByKndNr");
-			CsvBeanWriter.writeCsvFromAccessTimeExample(mongoDB_Read_Kunde_ByEmail, "mongoDB_Read_Kunde_ByEmail");
-			CsvBeanWriter.writeCsvFromAccessTimeExample(mongoDB_Read_Kunde_ByPLZ, "mongoDB_Read_Kunde_ByPLZ");
-			CsvBeanWriter.writeCsvFromAccessTimeExample(mongoDB_Read_Kunde_Distinct_Orte, "mongoDB_Read_Kunde_Distinct_Orte");
-			CsvBeanWriter.writeCsvFromAccessTimeExample(mongoDB_Read_Artikel_ByArtNr, "mongoDB_Read_Artikel_ByArtNr");
-			CsvBeanWriter.writeCsvFromAccessTimeExample(mongoDB_Read_Artikel_ByArtName, "mongoDB_Read_Artikel_ByArtName");
-			CsvBeanWriter.writeCsvFromAccessTimeExample(mongoDB_Read_Artikel_WhichCostMoreThan, "mongoDB_Read_Artikel_WhichCostMoreThan");
-			CsvBeanWriter.writeCsvFromAccessTimeExample(mongoDB_Read_Kauf_ForKundeNr, "mongoDB_Read_Kauf_ForKundeNr");
-			CsvBeanWriter.writeCsvFromAccessTimeExample(mongoDB_Read_Kauf_ForArtikelNr, "mongoDB_Read_Kauf_ForArtikelNr");
-			CsvBeanWriter.writeCsvFromAccessTimeExample(mongoDB_Read_Bewertung_ByANr_KNr, "mongoDB_Read_Bewertung_ByANr_KNr");
-			CsvBeanWriter.writeCsvFromAccessTimeExample(mongoDB_Read_Bewertung_BySterne, "mongoDB_Read_Bewertung_BySterne");
+			CsvBeanWriter.writeCsvFromAccessTimeExample(read_Kunde_ByKndNr, databaseName, databaseName + "_Read_Kunde_ByKndNr");
+			CsvBeanWriter.writeCsvFromAccessTimeExample(read_Kunde_ByEmail, databaseName, databaseName + "_Read_Kunde_ByEmail");
+			CsvBeanWriter.writeCsvFromAccessTimeExample(read_Kunde_ByPLZ, databaseName, databaseName + "_Read_Kunde_ByPLZ");
+			CsvBeanWriter.writeCsvFromAccessTimeExample(read_Kunde_Distinct_Orte, databaseName, databaseName + "_Read_Kunde_Distinct_Orte");
+			CsvBeanWriter.writeCsvFromAccessTimeExample(read_Artikel_ByArtNr, databaseName, databaseName + "_Read_Artikel_ByArtNr");
+			CsvBeanWriter.writeCsvFromAccessTimeExample(read_Artikel_ByArtName, databaseName, databaseName + "_Read_Artikel_ByArtName");
+			CsvBeanWriter.writeCsvFromAccessTimeExample(read_Artikel_WhichCostMoreThan, databaseName, databaseName + "_Read_Artikel_WhichCostMoreThan");
+			CsvBeanWriter.writeCsvFromAccessTimeExample(read_Kauf_ForKundeNr, databaseName, databaseName + "_Read_Kauf_ForKundeNr");
+			CsvBeanWriter.writeCsvFromAccessTimeExample(read_Kauf_ForArtikelNr, databaseName, databaseName + "_Read_Kauf_ForArtikelNr");
+			CsvBeanWriter.writeCsvFromAccessTimeExample(read_Bewertung_ByANr_KNr, databaseName, databaseName + "_Read_Bewertung_ByANr_KNr");
+			CsvBeanWriter.writeCsvFromAccessTimeExample(read_Bewertung_BySterne, databaseName, databaseName + "_Read_Bewertung_BySterne");
 			
-			CsvBeanWriter.writeCsvFromAccessTimeExample(mongoDB_Update_Kunde_Complete, "mongoDB_Update_Kunde_Complete");
-			CsvBeanWriter.writeCsvFromAccessTimeExample(mongoDB_Update_Kunde_Nachname, "mongoDB_Update_Kunde_Nachname");
-			CsvBeanWriter.writeCsvFromAccessTimeExample(mongoDB_Update_Artikel_Complete, "mongoDB_Update_Artikel_Complete");
-			CsvBeanWriter.writeCsvFromAccessTimeExample(mongoDB_Update_Bewertung_Complete, "mongoDB_Update_Bewertung_Complete");
-			CsvBeanWriter.writeCsvFromAccessTimeExample(mongoDB_Update_Bewertung_Text, "mongoDB_Update_Bewertung_Text");
+			CsvBeanWriter.writeCsvFromAccessTimeExample(update_Kunde_Complete, databaseName, databaseName + "_Update_Kunde_Complete");
+			CsvBeanWriter.writeCsvFromAccessTimeExample(update_Kunde_Nachname, databaseName, databaseName + "_Update_Kunde_Nachname");
+			CsvBeanWriter.writeCsvFromAccessTimeExample(update_Artikel_Complete, databaseName, databaseName + "_Update_Artikel_Complete");
+			CsvBeanWriter.writeCsvFromAccessTimeExample(update_Bewertung_Complete, databaseName, databaseName + "_Update_Bewertung_Complete");
+			CsvBeanWriter.writeCsvFromAccessTimeExample(update_Bewertung_Text, databaseName, databaseName + "_Update_Bewertung_Text");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
-	private long testAddKunde() {
+	private long testAddKunde(DBInterface underTest) {
 		long timeTook_CREATE;
-		Kunde testKunde = MockService.getRandomKunde();
 		do {				
-			timeTook_CREATE = mongoDBTest.addKunde(testKunde);
-			mongoDBTest.deleteKundeByKundenNr(testKunde.getKundenNummer());
+			Kunde testKunde = MockService.genRandomInsertKunde();
+			timeTook_CREATE = underTest.addKunde(testKunde);
+			underTest.deleteKundeByKundenNr(testKunde.getKundenNummer());
 			MockService.removeKundenNr(testKunde.getKundenNummer());
 		} while (timeTook_CREATE == 0);
 		return timeTook_CREATE;
 	}
 	
-	private long testDeleteKunde() {
+	private long testDeleteKunde(DBInterface underTest) {
 		long timeTook_DELETE;
-		Kunde testKunde = MockService.getRandomKunde();
 		do {
-			mongoDBTest.addKunde(testKunde);
-			timeTook_DELETE = mongoDBTest.deleteKundeByKundenNr(testKunde.getKundenNummer());
+			Kunde testKunde = MockService.genRandomInsertKunde();
+			underTest.addKunde(testKunde);
+			timeTook_DELETE = underTest.deleteKundeByKundenNr(testKunde.getKundenNummer());
 			MockService.removeKundenNr(testKunde.getKundenNummer());
 		} while (timeTook_DELETE == 0);
 		return timeTook_DELETE;
 	}
 	
-	private long testAddArtikel() {
-		Artikel testArtikel = MockService.getRandomArtikel();
+	private long testAddArtikel(DBInterface underTest) {
 		long timeTook_CREATE = 0;
 		do {				
-			timeTook_CREATE = mongoDBTest.addArtikel(testArtikel);
-			mongoDBTest.deleteArtikelbyArtikelNr(testArtikel.getArtikelNummer());
+			Artikel testArtikel = MockService.genRandomInsertArtikel();
+			timeTook_CREATE = underTest.addArtikel(testArtikel);
+			underTest.deleteArtikelbyArtikelNr(testArtikel.getArtikelNummer());
 			MockService.removeArtikelNr(testArtikel.getArtikelNummer());
 		} while (timeTook_CREATE == 0);
 		return timeTook_CREATE;
 	}
 	
-	private long testDeleteArtikel() {
+	private long testDeleteArtikel(DBInterface underTest) {
 		long timeTook_DELETE;
-		Artikel testArtikel = MockService.getRandomArtikel();
 		do {
-			mongoDBTest.addArtikel(testArtikel);
-			timeTook_DELETE = mongoDBTest.deleteArtikelbyArtikelNr(testArtikel.getArtikelNummer());
-			MockService.removeKundenNr(testArtikel.getArtikelNummer());
+			Artikel testArtikel = MockService.genRandomInsertArtikel();
+			underTest.addArtikel(testArtikel);
+			timeTook_DELETE = underTest.deleteArtikelbyArtikelNr(testArtikel.getArtikelNummer());
+			MockService.removeArtikelNr(testArtikel.getArtikelNummer());
 		} while (timeTook_DELETE == 0);
 		return timeTook_DELETE;
 	}
 	
-	private long testAddKauf() {
-		Kauf testKauf = MockService.getRandomKauf();
+	private long testAddKauf(DBInterface underTest) {
 		long timeTook_CREATE = 0;
-		do {				
-			timeTook_CREATE = mongoDBTest.addKauf(testKauf);
-			mongoDBTest.deleteKaufByArtikelNrAndKundenNr(testKauf.getArtikelNummer(), testKauf.getKundenNummer());
+		do {
+			Kauf testKauf = MockService.genRandomInsertKauf();
+			timeTook_CREATE = underTest.addKauf(testKauf);
+			underTest.deleteKaufByArtikelNrAndKundenNr(testKauf.getArtikelNummer(), testKauf.getKundenNummer());
+			MockService.removeKaufPS(testKauf.getArtikelNummer(), testKauf.getKundenNummer());
 		} while (timeTook_CREATE == 0);
 		return timeTook_CREATE;
 	}
 	
-	private long testDeleteKauf() {
+	private long testDeleteKauf(DBInterface underTest) {
 		long timeTook_DELETE;
-		Kauf testKauf = MockService.getRandomKauf();
 		do {
-			mongoDBTest.addKauf(testKauf);
-			timeTook_DELETE = mongoDBTest.deleteKaufByArtikelNrAndKundenNr(testKauf.getArtikelNummer(), testKauf.getKundenNummer());
+			Kauf testKauf = MockService.genRandomInsertKauf();
+			underTest.addKauf(testKauf);
+			timeTook_DELETE = underTest.deleteKaufByArtikelNrAndKundenNr(testKauf.getArtikelNummer(), testKauf.getKundenNummer());
+			MockService.removeKaufPS(testKauf.getArtikelNummer(), testKauf.getKundenNummer());
 		} while (timeTook_DELETE == 0);
 		return timeTook_DELETE;
 	}
 	
-	private long testAddBewertung() {
-		Bewertung testBewertung = MockService.getRandomBewertung();
+	private long testAddBewertung(DBInterface underTest) {
 		long timeTook_CREATE = 0;
 		do {				
-			timeTook_CREATE = mongoDBTest.addBewertung(testBewertung);
-			mongoDBTest.deleteBewertungByArtikelNrAndKundenNr(testBewertung.getArtikelNummer(), testBewertung.getKundenNummer());
+			Bewertung testBewertung = MockService.genRandomInsertBewertung();
+			timeTook_CREATE = underTest.addBewertung(testBewertung);
+			underTest.deleteBewertungByArtikelNrAndKundenNr(testBewertung.getArtikelNummer(), testBewertung.getKundenNummer());
 			MockService.removeBewertungPS(testBewertung.getArtikelNummer(), testBewertung.getKundenNummer());
 		} while (timeTook_CREATE == 0);
 		return timeTook_CREATE;
 	}
 	
-	private long testDeleteBewertung() {
+	private long testDeleteBewertung(DBInterface underTest) {
 		long timeTook_DELETE;
-		Bewertung testBewertung = MockService.getRandomBewertung();
 		do {
-			mongoDBTest.addBewertung(testBewertung);
-			timeTook_DELETE = mongoDBTest.deleteBewertungByArtikelNrAndKundenNr(testBewertung.getArtikelNummer(), testBewertung.getKundenNummer());
+			Bewertung testBewertung = MockService.genRandomInsertBewertung();
+			underTest.addBewertung(testBewertung);
+			timeTook_DELETE = underTest.deleteBewertungByArtikelNrAndKundenNr(testBewertung.getArtikelNummer(), testBewertung.getKundenNummer());
 			MockService.removeBewertungPS(testBewertung.getArtikelNummer(), testBewertung.getKundenNummer());
 		} while (timeTook_DELETE == 0);
 		return timeTook_DELETE;
 	}
 	
-	private long testReadKunde_byKundenNummer() {
+	private long testReadKunde_byKundenNummer(DBInterface underTest) {
 		long timeTook_READ;
 		String kundenNr = MockService.getRandomInsertedKundenNummer();
 		do {
-			timeTook_READ = mongoDBTest.getKundeByKundenNr(kundenNr);
+			timeTook_READ = underTest.getKundeByKundenNr(kundenNr);
 		} while (timeTook_READ == 0);
 		return timeTook_READ;
 	}
 	
-	private long testReadKunde_byEmail() {
+	private long testReadKunde_byEmail(DBInterface underTest) {
 		long timeTook_READ;
 		String email = MockService.getRandomInsertedEmail();
 		do {
-			timeTook_READ = mongoDBTest.getKundeByEmail(email);
+			timeTook_READ = underTest.getKundeByEmail(email);
 		} while (timeTook_READ == 0);
 		return timeTook_READ;
 	}
 	
-	private long testReadKunden_byPLZ() {
+	private long testReadKunden_byPLZ(DBInterface underTest) {
 		long timeTook_READ;
 		String plz = MockService.getRandomPLZ();
 		do {
-			timeTook_READ = mongoDBTest.getKundenByPlz(plz);
+			timeTook_READ = underTest.getKundenByPlz(plz);
 		} while (timeTook_READ == 0);
 		return timeTook_READ;
 	}
 	
-	private long testGetDistinctOrte() {
+	private long testGetDistinctOrte(DBInterface underTest) {
 		long timeTook_READ;
 		do {
-			timeTook_READ = mongoDBTest.getDistinctOrte();
+			timeTook_READ = underTest.getDistinctOrte();
 		} while (timeTook_READ == 0);
 		return timeTook_READ;
 	}
 	
-	private long testReadArtikel_byArtikelNummer() {
+	private long testReadArtikel_byArtikelNummer(DBInterface underTest) {
 		long timeTook_READ;
 		String artikelNr = MockService.getRandomInsertedArtikelNummer();
 		do {
-			timeTook_READ = mongoDBTest.getArtikelByArtikelNummer(artikelNr);
+			timeTook_READ = underTest.getArtikelByArtikelNummer(artikelNr);
 		} while (timeTook_READ == 0);
 		return timeTook_READ;
 	}
 
-	private long testReadArtikel_byArtikelName() {
+	private long testReadArtikel_byArtikelName(DBInterface underTest) {
 		long timeTook_READ;
 		String artikelName = MockService.getRandomInsertedArtikelName();
 		do {
-			timeTook_READ = mongoDBTest.getArtikelByArtikelName(artikelName);
+			timeTook_READ = underTest.getArtikelByArtikelName(artikelName);
 		} while (timeTook_READ == 0);
 		return timeTook_READ;
 	}
 	
-	private long testReadArtikel_whichCostMoreThan() {
+	private long testReadArtikel_whichCostMoreThan(DBInterface underTest) {
 		long timeTook_READ;
 		do {
-			timeTook_READ = mongoDBTest.getArtikelWhichCostMoreThan(500d); //500 should be half
+			timeTook_READ = underTest.getArtikelWhichCostMoreThan(500d); //500 should be half
 		} while (timeTook_READ == 0);
 		return timeTook_READ;
 	}
 	
-	private long testReadBewertungByKundenNrAndArtikelNr() {
+	private long testReadBewertungByKundenNrAndArtikelNr(DBInterface underTest) {
 		long timeTook_READ;
 		CompPrimaryKey ps = MockService.getRandombewertungPS();
 		do {
-			timeTook_READ = mongoDBTest.getBewertungByKundenNrAndArtikelNr(ps.getArtikelNummer(), ps.getKundenNummer());
+			timeTook_READ = underTest.getBewertungByKundenNrAndArtikelNr(ps.getArtikelNummer(), ps.getKundenNummer());
 		} while (timeTook_READ == 0);
 		return timeTook_READ;
 	}
 	
-	private long testReadBewertungByAnzahlSterne() {
+	private long testReadBewertungByAnzahlSterne(DBInterface underTest) {
 		long timeTook_READ;
 		do {
-			timeTook_READ = mongoDBTest.getBewertungenByAnzahlSterne(7); //The stars are rotated from 1 - 9, there should be an even amount of stars in the DB
+			timeTook_READ = underTest.getBewertungenByAnzahlSterne(7); //The stars are rotated from 1 - 9, there should be an even amount of stars in the DB
 		} while (timeTook_READ == 0);
 		return timeTook_READ;
 	}
 	
-	private long testReadEinkaeufeForKunde() {
+	private long testReadEinkaeufeForKunde(DBInterface underTest) {
 		long timeTook_READ;
 		String kundenNr = MockService.getRandomInsertedKundenNummer();
 		do {
-			timeTook_READ = mongoDBTest.getEinkaeufeForKunde(kundenNr);
+			timeTook_READ = underTest.getEinkaeufeForKunde(kundenNr);
 		} while (timeTook_READ == 0);
 		return timeTook_READ;
 	}
 	
-	private long testReadVerkaeufeForArtikel() {
+	private long testReadVerkaeufeForArtikel(DBInterface underTest) {
 		long timeTook_READ;
 		String artikelNr = MockService.getRandomInsertedArtikelNummer();
 		do {
-			timeTook_READ = mongoDBTest.getVerkauefeForArtikel(artikelNr);
+			timeTook_READ = underTest.getVerkauefeForArtikel(artikelNr);
 		} while (timeTook_READ == 0);
 		return timeTook_READ;
 	}
 	
-	private long testUpdateKunde_Complete() {
+	private long testUpdateKunde_Complete(DBInterface underTest) {
 		long timeTook_UPDATE;
-		Kunde testKunde = MockService.getRandomKunde();
-		String kundenNummer = MockService.getRandomInsertedKundenNummer();
-		testKunde.setKundenNummer(kundenNummer);
 		do {				
-			timeTook_UPDATE = mongoDBTest.updateKunde(testKunde);
+			String testKndNr = MockService.getRandomInsertedKundenNummer();
+			Kunde testKunde = MockService.randomizeFields(underTest.getKundeByKundenNr_kunde(testKndNr));
+			timeTook_UPDATE = underTest.updateKunde(testKunde);
 		} while (timeTook_UPDATE == 0);
 		return timeTook_UPDATE;
 	}
 	
-	private long testUpdateKunde_Nachname() {
+	private long testUpdateKunde_Nachname(DBInterface underTest) {
 		long timeTook_UPDATE;
-		String kundenNummer = MockService.getRandomInsertedKundenNummer();
 		do {				
-			timeTook_UPDATE = mongoDBTest.updateKundenNachname(kundenNummer, MockService.rndString.generate(7));
+			String kundenNummer = MockService.getRandomInsertedKundenNummer();
+			timeTook_UPDATE = underTest.updateKundenNachname(kundenNummer, MockService.rndString.generate(7));
 		} while (timeTook_UPDATE == 0);
 		return timeTook_UPDATE;
 	}
 	
-	private long testUpdateArtikel_Complete() {
+	private long testUpdateArtikel_Complete(DBInterface underTest) {
 		long timeTook_UPDATE;
-		Artikel testArtikel = MockService.getRandomArtikel();
-		String artikelNummer = MockService.getRandomInsertedArtikelNummer();
-		testArtikel.setArtikelNummer(artikelNummer);
+		String testArtikelNr = MockService.getRandomInsertedArtikelNummer();
+		Artikel testArtikel = MockService.randomizeFields(underTest.getArtikelByArtikelNummer_artikel(testArtikelNr));
 		do {				
-			timeTook_UPDATE = mongoDBTest.updateArtikel(testArtikel);
+			timeTook_UPDATE = underTest.updateArtikel(testArtikel);
 		} while (timeTook_UPDATE == 0);
 		return timeTook_UPDATE;
 	}
 	
-	private long testUpdateBewertung_Complete() {
+	private long testUpdateBewertung_Complete(DBInterface underTest) {
 		long timeTook_UPDATE;
-		Bewertung testBewertung = MockService.getRandomBewertung();
 		CompPrimaryKey ps = MockService.getRandombewertungPS();
-		testBewertung.setArtikelNummer(ps.getArtikelNummer());
-		testBewertung.setKundenNummer(ps.getKundenNummer());
+		Bewertung testBewertung = MockService.randomizeFields(underTest.getBewertungByKundenNrAndArtikelNr_bewertung(ps.getArtikelNummer(), ps.getKundenNummer()));
 		do {				
-			timeTook_UPDATE = mongoDBTest.updateBewertung(testBewertung);
+			timeTook_UPDATE = underTest.updateBewertung(testBewertung);
 		} while (timeTook_UPDATE == 0);
 		return timeTook_UPDATE;
 	}
 	
-	private long testUpdateBewertung_Text() {
+	private long testUpdateBewertung_Text(DBInterface underTest) {
 		long timeTook_UPDATE;
 		CompPrimaryKey ps = MockService.getRandombewertungPS();
 		do {				
-			timeTook_UPDATE = mongoDBTest.updateBewertungsText(ps.getKundenNummer(), ps.getArtikelNummer(), MockService.rndString.generate(600));
+			timeTook_UPDATE = underTest.updateBewertungsText(ps.getKundenNummer(), ps.getArtikelNummer(), MockService.rndString.generate(600));
 		} while (timeTook_UPDATE == 0);
 		return timeTook_UPDATE;
 	}

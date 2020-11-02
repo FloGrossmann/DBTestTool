@@ -31,17 +31,21 @@ public class CsvBeanWriter {
 		writer.close();
 	}
 	
-	private static void createDirectory() {
+	private static void createDirectories(String subFolder) {
 		File directory = new File(DIRECTORY_DIR);
 	    if (! directory.exists()){
 	        directory.mkdir();
 	    }
+	    File subDirectory = new File(DIRECTORY_DIR + "/" + subFolder);
+	    if (! subDirectory.exists()){
+	    	subDirectory.mkdir();
+	    }
 	}
 
-	public static void writeCsvFromAccessTimeExample(List<AccessTime> list, String fileName) throws Exception {
-		createDirectory();
+	public static void writeCsvFromAccessTimeExample(List<AccessTime> list, String subFolder, String fileName) throws Exception {
+		createDirectories(subFolder);
 		LocalTime time=LocalTime.now();
-		Path path = Paths.get(DIRECTORY_DIR +"./" + fileName + "_" +time.getHour()+"_"+time.getMinute()+"_"+time.getSecond()+".csv");
+		Path path = Paths.get(DIRECTORY_DIR +"./" + subFolder + "/" + fileName + "_" +time.getHour()+"_"+time.getMinute()+"_"+time.getSecond()+".csv");
 		writeCsvFromAccessTime(path, list);
 	}
 }

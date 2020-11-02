@@ -8,10 +8,10 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.LinkedList;
 
+import org.bson.Document;
 import org.bson.codecs.configuration.CodecRegistries;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
-import org.bson.types.ObjectId;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.ConnectionString;
@@ -28,7 +28,6 @@ import dbinterface.Bewertung;
 import dbinterface.DBInterface;
 import dbinterface.Kauf;
 import dbinterface.Kunde;
-import measure.MockService;
 
 public class MongoDBTest implements DBInterface {
 
@@ -157,6 +156,11 @@ public class MongoDBTest implements DBInterface {
 		end = Instant.now();
 		return Duration.between(start, end).toNanos();
 	}
+	
+	@Override
+	public Kunde getKundeByKundenNr_kunde(String kundenNr) {
+		return kundeCollection.find(eq("kundenNummer", kundenNr)).first();
+	}
 
 	public long getKundeByEmail(String email) {
 		start = Instant.now();
@@ -187,6 +191,11 @@ public class MongoDBTest implements DBInterface {
 		end = Instant.now();
 		return Duration.between(start, end).toNanos();
 	}
+	
+	@Override
+	public Artikel getArtikelByArtikelNummer_artikel(String artikelNummer) {
+		return artikelCollection.find(eq("artikelNummer", artikelNummer)).first();
+	}
 
 	public long getArtikelByArtikelName(String artikelName) {
 		start = Instant.now();
@@ -209,6 +218,11 @@ public class MongoDBTest implements DBInterface {
 				.first();
 		end = Instant.now();
 		return Duration.between(start, end).toNanos();
+	}
+	
+	public Bewertung getBewertungByKundenNrAndArtikelNr_bewertung(String artikelNummer, String kundenNummer) {
+		return bewertungCollection.find(and(eq("artikelNummer", artikelNummer), eq("kundenNummer", kundenNummer)))
+		.first();
 	}
 
 	public long getBewertungenByAnzahlSterne(int sterne) {
@@ -236,17 +250,15 @@ public class MongoDBTest implements DBInterface {
 	}
 
 	public long getEinkaeufeForKunde(String kundenNummer) {
-		LinkedList<Kauf> result = new LinkedList<Kauf>();
 		start = Instant.now();
-		kaufCollection.find(eq("kundenNummer", kundenNummer)).into(result);
+		kaufCollection.find(eq("kundenNummer", kundenNummer));
 		end = Instant.now();
 		return Duration.between(start, end).toNanos();
 	}
 
 	public long getVerkauefeForArtikel(String artikelNummer) {
-		LinkedList<Kauf> result = new LinkedList<Kauf>();
 		start = Instant.now();
-		kaufCollection.find(eq("artikelNummer", artikelNummer)).into(result);
+		kaufCollection.find(eq("artikelNummer", artikelNummer));
 		end = Instant.now();
 		return Duration.between(start, end).toNanos();
 	}
@@ -276,8 +288,7 @@ public class MongoDBTest implements DBInterface {
 	
 	@Override
 	public long updateKundenNachname(String kundenNummer, String nachName) {
-		start = Instant.now();
-		kundeCollection.findOneAndUpdate(eq("kundenNummer", kundenNummer), new BasicDBObject("nachname", nachName));
+		kundeCollection.findOneAndUpdate(eq("kundenNummer", kundenNummer), Document.parse("{'$set':{nachname: '" + nachName + "'}}"));
 		end = Instant.now();
 		return Duration.between(start, end).toNanos();
 	}
@@ -285,7 +296,7 @@ public class MongoDBTest implements DBInterface {
 	@Override
 	public long updateBewertungsText(String kundenNummer, String artikelNummer, String newText) {
 		start = Instant.now();
-		bewertungCollection.findOneAndUpdate(and(eq("artikelNummer", artikelNummer), eq("kundenNummer", kundenNummer)), new BasicDBObject("bewertung", newText));
+		bewertungCollection.findOneAndUpdate(and(eq("artikelNummer", artikelNummer), eq("kundenNummer", kundenNummer)), Document.parse("{'$set':{bewertung: '" + newText + "'}}"));
 		end = Instant.now();
 		return Duration.between(start, end).toNanos();
 	}

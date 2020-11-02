@@ -60,6 +60,12 @@ public class DBTest {
 		LinkedList<AccessTime> mongoDB_Read_Bewertung_ByANr_KNr = new LinkedList<AccessTime>();
 		LinkedList<AccessTime> mongoDB_Read_Bewertung_BySterne = new LinkedList<AccessTime>();
 		
+		//UPDATE
+		LinkedList<AccessTime> mongoDB_Update_Kunde_Complete = new LinkedList<AccessTime>();
+		LinkedList<AccessTime> mongoDB_Update_Kunde_Nachname = new LinkedList<AccessTime>();
+		LinkedList<AccessTime> mongoDB_Update_Artikel_Complete = new LinkedList<AccessTime>();
+		LinkedList<AccessTime> mongoDB_Update_Bewertung_Complete = new LinkedList<AccessTime>();
+		LinkedList<AccessTime> mongoDB_Update_Bewertung_Text = new LinkedList<AccessTime>();
 		
 		int size = 0;
 		
@@ -84,13 +90,15 @@ public class DBTest {
 			LinkedList<Long> testListRead_KundeByEmail = new LinkedList<Long>();
 			LinkedList<Long> testListRead_Kunden_byPLZ = new LinkedList<Long>();
 			LinkedList<Long> testList_GetDistinctOrte = new LinkedList<Long>();
-			
+			LinkedList<Long> testListUpdate_Kunde_Complete = new LinkedList<Long>();
+			LinkedList<Long> testListUpdate_Kunde_Nachname = new LinkedList<Long>();
 			
 			LinkedList<Long> testListCreate_Artikel = new LinkedList<Long>();
 			LinkedList<Long> testListDelete_Artikel = new LinkedList<Long>();
 			LinkedList<Long> testListRead_ArtikelByArtikelNr = new LinkedList<Long>();
 			LinkedList<Long> testListRead_ArtikelByArtikelName = new LinkedList<Long>();
 			LinkedList<Long> testListRead_ArtikelWhichCostMoreThan = new LinkedList<Long>();
+			LinkedList<Long> testListUpdate_Artikel_Complete = new LinkedList<Long>();
 			
 			LinkedList<Long> testListCreate_Kauf = new LinkedList<Long>();
 			LinkedList<Long> testListDelete_Kauf = new LinkedList<Long>();
@@ -101,6 +109,8 @@ public class DBTest {
 			LinkedList<Long> testListDelete_Bewertung = new LinkedList<Long>();
 			LinkedList<Long> testListRead_BewertungByANr_KNr = new LinkedList<Long>();
 			LinkedList<Long> testListRead_BewertungBySterne = new LinkedList<Long>();
+			LinkedList<Long> testListUpdate_Bewertung_Complete = new LinkedList<Long>();
+			LinkedList<Long> testListUpdate_Bewertung_Text = new LinkedList<Long>();
 			
 			for (int i = 0; i < REPETITIONS; i++) {
 
@@ -111,6 +121,8 @@ public class DBTest {
 				testListRead_KundeByEmail.add(testReadKunde_byEmail());
 				testListRead_Kunden_byPLZ.add(testReadKunden_byPLZ());
 				testList_GetDistinctOrte.add(testGetDistinctOrte());
+				testListUpdate_Kunde_Complete.add(testUpdateKunde_Complete());
+				testListUpdate_Kunde_Nachname.add(testUpdateKunde_Nachname());
 				
 				// Artikel
 				testListCreate_Artikel.add(testAddArtikel());
@@ -118,6 +130,7 @@ public class DBTest {
 				testListRead_ArtikelByArtikelNr.add(testReadArtikel_byArtikelNummer());
 				testListRead_ArtikelByArtikelName.add(testReadArtikel_byArtikelName());
 				testListRead_ArtikelWhichCostMoreThan.add(testReadArtikel_whichCostMoreThan());
+				testListUpdate_Artikel_Complete.add(testUpdateArtikel_Complete());
 				
 				// Kauf
 				testListCreate_Kauf.add(testAddKauf());
@@ -130,6 +143,8 @@ public class DBTest {
 				testListDelete_Bewertung.add(testDeleteBewertung());
 				testListRead_BewertungByANr_KNr.add(testReadBewertungByKundenNrAndArtikelNr());
 				testListRead_BewertungBySterne.add(testReadBewertungByAnzahlSterne());
+				testListUpdate_Bewertung_Complete.add(testUpdateBewertung_Complete());
+				testListUpdate_Bewertung_Text.add(testUpdateBewertung_Text());
 				System.out.println("Repetition: " + i);
 			}
 			// Calculate & Store the results
@@ -157,6 +172,13 @@ public class DBTest {
 			mongoDB_Read_Kauf_ForArtikelNr.add(new AccessTime(CRUDoperation.SELECT, ObjectCategory.KAUF, MethodType.GET_EINKAUEFE_FORARTIKEL, new Messreihe(testListRead_Kauf_ForArtikelNr), size));
 			mongoDB_Read_Bewertung_ByANr_KNr.add(new AccessTime(CRUDoperation.SELECT, ObjectCategory.BEWERTUNG, MethodType.GET_BEWERTUNG_BYKUNDENNRANDARTIKELNR, new Messreihe(testListRead_BewertungByANr_KNr), size));
 			mongoDB_Read_Bewertung_BySterne.add(new AccessTime(CRUDoperation.SELECT, ObjectCategory.BEWERTUNG, MethodType.GET_KUNDE_BYKUNDENNR, new Messreihe(testListRead_BewertungBySterne), size));
+			
+			//Update
+			mongoDB_Update_Kunde_Complete.add(new AccessTime(CRUDoperation.UPDATE, ObjectCategory.KUNDE, MethodType.UPDATE_KUNDE_COMPLETE, new Messreihe(testListUpdate_Kunde_Complete), size));
+			mongoDB_Update_Kunde_Nachname.add(new AccessTime(CRUDoperation.UPDATE, ObjectCategory.KUNDE, MethodType.UPDATE_KUNDE_NACHNAME, new Messreihe(testListUpdate_Kunde_Nachname), size));
+			mongoDB_Update_Artikel_Complete.add(new AccessTime(CRUDoperation.UPDATE, ObjectCategory.ARTIKEL, MethodType.UPDATE_ARTIKEL_COMPLETE, new Messreihe(testListUpdate_Artikel_Complete), size));
+			mongoDB_Update_Bewertung_Complete.add(new AccessTime(CRUDoperation.UPDATE, ObjectCategory.BEWERTUNG, MethodType.UPDATE_BEWERTUNG_COMPLETE, new Messreihe(testListUpdate_Bewertung_Complete), size));
+			mongoDB_Update_Bewertung_Text.add(new AccessTime(CRUDoperation.UPDATE, ObjectCategory.BEWERTUNG, MethodType.UPDATE_BEWERTUNG_TEXT, new Messreihe(testListUpdate_Bewertung_Text), size));
 			System.out.println("Round " + size + " -+-+-+-+-+-+-");
 		}
 		
@@ -183,6 +205,12 @@ public class DBTest {
 			CsvBeanWriter.writeCsvFromAccessTimeExample(mongoDB_Read_Kauf_ForArtikelNr, "mongoDB_Read_Kauf_ForArtikelNr");
 			CsvBeanWriter.writeCsvFromAccessTimeExample(mongoDB_Read_Bewertung_ByANr_KNr, "mongoDB_Read_Bewertung_ByANr_KNr");
 			CsvBeanWriter.writeCsvFromAccessTimeExample(mongoDB_Read_Bewertung_BySterne, "mongoDB_Read_Bewertung_BySterne");
+			
+			CsvBeanWriter.writeCsvFromAccessTimeExample(mongoDB_Update_Kunde_Complete, "mongoDB_Update_Kunde_Complete");
+			CsvBeanWriter.writeCsvFromAccessTimeExample(mongoDB_Update_Kunde_Nachname, "mongoDB_Update_Kunde_Nachname");
+			CsvBeanWriter.writeCsvFromAccessTimeExample(mongoDB_Update_Artikel_Complete, "mongoDB_Update_Artikel_Complete");
+			CsvBeanWriter.writeCsvFromAccessTimeExample(mongoDB_Update_Bewertung_Complete, "mongoDB_Update_Bewertung_Complete");
+			CsvBeanWriter.writeCsvFromAccessTimeExample(mongoDB_Update_Bewertung_Text, "mongoDB_Update_Bewertung_Text");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -368,5 +396,57 @@ public class DBTest {
 			timeTook_READ = mongoDBTest.getVerkauefeForArtikel(artikelNr);
 		} while (timeTook_READ == 0);
 		return timeTook_READ;
+	}
+	
+	private long testUpdateKunde_Complete() {
+		long timeTook_UPDATE;
+		Kunde testKunde = MockService.getRandomKunde();
+		String kundenNummer = MockService.getRandomInsertedKundenNummer();
+		testKunde.setKundenNummer(kundenNummer);
+		do {				
+			timeTook_UPDATE = mongoDBTest.updateKunde(testKunde);
+		} while (timeTook_UPDATE == 0);
+		return timeTook_UPDATE;
+	}
+	
+	private long testUpdateKunde_Nachname() {
+		long timeTook_UPDATE;
+		String kundenNummer = MockService.getRandomInsertedKundenNummer();
+		do {				
+			timeTook_UPDATE = mongoDBTest.updateKundenNachname(kundenNummer, MockService.rndString.generate(7));
+		} while (timeTook_UPDATE == 0);
+		return timeTook_UPDATE;
+	}
+	
+	private long testUpdateArtikel_Complete() {
+		long timeTook_UPDATE;
+		Artikel testArtikel = MockService.getRandomArtikel();
+		String artikelNummer = MockService.getRandomInsertedArtikelNummer();
+		testArtikel.setArtikelNummer(artikelNummer);
+		do {				
+			timeTook_UPDATE = mongoDBTest.updateArtikel(testArtikel);
+		} while (timeTook_UPDATE == 0);
+		return timeTook_UPDATE;
+	}
+	
+	private long testUpdateBewertung_Complete() {
+		long timeTook_UPDATE;
+		Bewertung testBewertung = MockService.getRandomBewertung();
+		CompPrimaryKey ps = MockService.getRandombewertungPS();
+		testBewertung.setArtikelNummer(ps.getArtikelNummer());
+		testBewertung.setKundenNummer(ps.getKundenNummer());
+		do {				
+			timeTook_UPDATE = mongoDBTest.updateBewertung(testBewertung);
+		} while (timeTook_UPDATE == 0);
+		return timeTook_UPDATE;
+	}
+	
+	private long testUpdateBewertung_Text() {
+		long timeTook_UPDATE;
+		CompPrimaryKey ps = MockService.getRandombewertungPS();
+		do {				
+			timeTook_UPDATE = mongoDBTest.updateBewertungsText(ps.getKundenNummer(), ps.getArtikelNummer(), MockService.rndString.generate(600));
+		} while (timeTook_UPDATE == 0);
+		return timeTook_UPDATE;
 	}
 }

@@ -38,8 +38,6 @@ public interface DBInterface {
 
 	long getKundenByPlz(String plz);
 
-	long getKundenByNachName(String nachName);
-
 	long getDistinctOrte();
 
 	long getArtikelByArtikelNummer(String artikelNummer);
@@ -52,12 +50,13 @@ public interface DBInterface {
 
 	long getBewertungenByAnzahlSterne(int sterne);
 
+	// Not used - Depends on randomness
 	long getBewertungenByKundenNr(String kundenNummer);
-
+	// Not used - Depends on randomness
 	long getBewertungenByArtikelNr(String artikelNummer);
-
+	// Depends on randomness
 	long getEinkaeufeForKunde(String kundenNummer);
-
+	// Depends on randomness
 	long getVerkauefeForArtikel(String artikelNummer);
 
 	// UPDATE

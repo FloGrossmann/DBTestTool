@@ -28,6 +28,7 @@ import dbinterface.Bewertung;
 import dbinterface.DBInterface;
 import dbinterface.Kauf;
 import dbinterface.Kunde;
+import measure.MockService;
 
 public class MongoDBTest implements DBInterface {
 
@@ -172,14 +173,6 @@ public class MongoDBTest implements DBInterface {
 		return Duration.between(start, end).toNanos();
 	}
 
-	public long getKundenByNachName(String nachName) {
-		LinkedList<Kunde> result = new LinkedList<Kunde>();
-		start = Instant.now();
-		kundeCollection.find(eq("nachname", nachName)).into(result);
-		end = Instant.now();
-		return Duration.between(start, end).toNanos();
-	}
-
 	public long getDistinctOrte() {
 		LinkedList<String> result = new LinkedList<String>();
 		start = Instant.now();
@@ -290,7 +283,7 @@ public class MongoDBTest implements DBInterface {
 
 	public long deleteArtikelbyArtikelNr(String artikelNummer) {
 		start = Instant.now();
-		artikelCollection.deleteOne(eq("artikelNummer", new ObjectId(artikelNummer)));
+		artikelCollection.deleteOne(eq("artikelNummer", artikelNummer));
 		end = Instant.now();
 		return Duration.between(start, end).toNanos();
 	}
@@ -298,7 +291,7 @@ public class MongoDBTest implements DBInterface {
 	public long deleteBewertungByArtikelNrAndKundenNr(String artikelNummer, String kundenNummer) {
 		start = Instant.now();
 		bewertungCollection.deleteOne(
-				and(eq("artikelNummer", new ObjectId(artikelNummer)), eq("kundenNummer", new ObjectId(kundenNummer))));
+				and(eq("artikelNummer", artikelNummer), eq("kundenNummer", kundenNummer)));
 		end = Instant.now();
 		return Duration.between(start, end).toNanos();
 	}
@@ -307,7 +300,7 @@ public class MongoDBTest implements DBInterface {
 	public long deleteKaufByArtikelNrAndKundenNr(String artikelNummer, String kundennummer) {
 		start = Instant.now();
 		kaufCollection
-				.deleteOne(and(eq("artikelNummer", new ObjectId(artikelNummer)), eq("artikelNummer", new ObjectId())));
+				.deleteOne(and(eq("artikelNummer", artikelNummer), eq("kundenNummer", kundennummer)));
 		end = Instant.now();
 		return Duration.between(start, end).toNanos();
 	}

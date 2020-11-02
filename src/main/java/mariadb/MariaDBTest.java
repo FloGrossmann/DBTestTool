@@ -285,33 +285,6 @@ public class MariaDBTest implements DBInterface {
 		}
 	}
 
-	public long getKundenByNachName(String nachName) {
-
-		String sql = "SELECT * FROM " + databaseName + ".Kunde, " + databaseName + ".Adresse WHERE Kunde.Nachname='"
-				+ nachName + "'";
-		try {
-			start = Instant.now();
-			statement.executeQuery(sql);
-			end = Instant.now();
-			return Duration.between(start, end).toNanos();
-//			while (resultSet.next()) {
-//				Kunde kunde = new Kunde();
-//				kunde.setKundenNummer(resultSet.getString("Kundennummer"));
-//				kunde.setEmail(resultSet.getString("Email"));
-//				kunde.setTelefonNummer(resultSet.getString("Telefonnummer"));
-//				kunde.setVorname(resultSet.getString("Vorname"));
-//				kunde.setNachname(resultSet.getString("Nachname"));
-//				kunde.setAdresse(new Adresse(resultSet.getString("Ortschaft"), resultSet.getString("Hausnummer"),
-//						resultSet.getString("Strasse"), resultSet.getString("PLZ")));
-//				kundeList.add(kunde);
-//			}
-//			return kundeList;
-		} catch (SQLException e) {
-			System.err.println(e);
-			return Long.MAX_VALUE;
-		}
-	}
-
 	public long getDistinctOrte() {
 		String sql = "SELECT Ortschaft FROM " + databaseName + ".Adresse";
 		try {

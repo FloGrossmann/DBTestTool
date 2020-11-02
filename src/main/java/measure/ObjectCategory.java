@@ -2,7 +2,7 @@ package measure;
 
 public enum ObjectCategory {
 	BEWERTUNG,
-	ARTIKEl,
+	ARTIKEL,
 	KUNDE,
 	KAUF;
 }

@@ -19,7 +19,7 @@ public class MenuFrame extends JFrame {
 	
 	public MenuFrame() {
 		this.c = getContentPane();
-		setSize(600, 600);
+		setSize(600, 650);
 		setTitle("DB Test Tool");
 		try {
 			setIconImage(new ImageIcon(ImageIO.read(new File("src/main/resources/speed.png"))).getImage());

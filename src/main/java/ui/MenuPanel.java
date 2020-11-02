@@ -1,6 +1,7 @@
 package ui;
 
 import java.awt.Container;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -12,32 +13,34 @@ import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
-import measure.DBTest;
+import measure.MeasureThread;
 import monogdb.MongoDBTest;
 
 public class MenuPanel extends JPanel {
 
 	private static final long serialVersionUID = 448371628021809323L;
-	
-	private DBTest dbTest = new DBTest();
 
 	Container c;
-	JTextField mongoDBConnectionTextField;
-	JTextField mariaDBConnectionTextField;
-	JTextField mariaDBUsernameTextField;
-	JTextField mariaDBPasswordTextField;
-	JLabel mongoDBConnectionLabel;
-	JLabel mariaDBConnectionLabel;
-	JLabel mariaDBUsernameLabel;
-	JLabel mariaDBPasswordLabel;
-	JTextArea errorLabel;
+	private JTextField mongoDBConnectionTextField;
+	private JTextField mariaDBConnectionTextField;
+	private JTextField mariaDBUsernameTextField;
+	private JTextField mariaDBPasswordTextField;
+	private JLabel mongoDBConnectionLabel;
+	private JLabel mariaDBConnectionLabel;
+	private JLabel mariaDBUsernameLabel;
+	private JLabel mariaDBPasswordLabel;
+	private JTextArea errorLabel;
 	JButton mongoDBTestConnectionButton;
 	JButton mongoDBClearDBButton;
 	
 	MongoDBTest mongoTest;
 
-	JButton startTestButton;
-
+	public JButton startTestButton;
+	
+	ProgressIndicatorPanel progressPanel;
+	
+	MenuPanel self;
+	
 	public void createMariaDBPanel() {
 		mariaDBConnectionLabel = new JLabel("mariaDBConnectionString:");
 		mariaDBConnectionTextField = new JTextField(50);
@@ -61,20 +64,27 @@ public class MenuPanel extends JPanel {
 		add(mongoDBConnectionLabel);
 		errorLabel = new JTextArea();
 		errorLabel.setEditable(false);
+		errorLabel.setVisible(false);
 		mongoDBConnectionTextField = new JTextField(50);
 		mongoDBConnectionTextField.setText("mongodb://localhost:27017/?readPreference=primary&ssl=false");
 		mongoDBConnectionTextField.getDocument().addDocumentListener(alMongoDBConnectionStringUpdate);
 		add(mongoDBConnectionTextField);
 		add(errorLabel);
+		self = this;
 	}
 
 	public MenuPanel() {
+		setLayout(new GridLayout(11, 2));
+		
 		createMongoDBPanel();
 		createMariaDBPanel();
 		
 		startTestButton = new JButton("Start Testing");
 		startTestButton.addActionListener(alStartTest);
 		add(startTestButton);
+		
+		progressPanel = new ProgressIndicatorPanel();
+		add(progressPanel);
 	}
 
 	DocumentListener alMongoDBConnectionStringUpdate = new DocumentListener() {
@@ -94,9 +104,11 @@ public class MenuPanel extends JPanel {
 		public void testConnectionString() {
 			if (!mongoDBConnectionTextField.getText().startsWith("mongodb://")
 					&& !mongoDBConnectionTextField.getText().startsWith("mongodb+srv://")) {
+				errorLabel.setVisible(true);
 				errorLabel.setText(
 						"The connection string is invalid. Connection strings must start with either 'mongodb://' or 'mongodb+srv://");
 			} else {
+				errorLabel.setVisible(false);
 				errorLabel.setText("");
 			}
 		}
@@ -107,12 +119,25 @@ public class MenuPanel extends JPanel {
 		public void actionPerformed(ActionEvent action) {
 			System.out.println("Start Testing");
 			try {
-				dbTest.startTest(mongoDBConnectionTextField.getText(), mariaDBConnectionTextField.getText(), mariaDBUsernameTextField.getText(), mariaDBPasswordTextField.getText());
+				errorLabel.setVisible(false);
+				errorLabel.setText("");
+				startTestButton.setText("Testing..");
+				startTestButton.setEnabled(false);
+				update(getGraphics());
+				MeasureThread measureThread = new MeasureThread(mongoDBConnectionTextField.getText(), mariaDBConnectionTextField.getText(), mariaDBUsernameTextField.getText(), mariaDBPasswordTextField.getText(), self); 
+				measureThread.start();
 			} catch (Exception e) {
 				e.printStackTrace();
+				errorLabel.setVisible(true);
 				errorLabel.setText(e.getMessage());
+				startTestButton.setText("Start Testing");
+				startTestButton.setEnabled(true);
+				update(getGraphics());
 			}
 		}
 	};
 
+	public ProgressIndicatorPanel getProgressPanel() {
+		return progressPanel;
+	}
 }

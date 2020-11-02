@@ -10,29 +10,39 @@ import dbinterface.Kunde;
 import mariadb.MariaDBTest;
 import measure.util.CompPrimaryKey;
 import monogdb.MongoDBTest;
+import ui.ProgressIndicatorPanel;
 
 public class DBTest {
 
 	public MongoDBTest mongoDBTest;
 	public MariaDBTest mariaDBTest;
 	public LinkedList<AccessTime> mongoDBTestList = new LinkedList<AccessTime>();
-	public static final int TESTEVERY = 100;
+	public static final int TESTEVERY = 50;
 	public static final int REPETITIONS = 20;
-	public static final int MAXIMUM = 500;
+	public static final int MAXIMUM = 100;
+	private ProgressIndicatorPanel progress;
 	
 	public void startTest(String mongoDBConnectionString, String mariaDBConnectionString,
-			String mariaDBUsername, String mariaDBPassword) throws Exception {
+			String mariaDBUsername, String mariaDBPassword, ProgressIndicatorPanel progress) throws Exception {
+		this.progress = progress;
+		
+		progress.setText("Setting up MongoDB...");
 		mongoDBTest = new MongoDBTest();
 		mongoDBTest.connect(mongoDBConnectionString);
 		mongoDBTest.setupDB();
+		progress.setText("Setting up MariaDB...");
 		mariaDBTest = new MariaDBTest(mariaDBConnectionString, mariaDBUsername, mariaDBPassword);
 		mariaDBTest.connect();
 		mariaDBTest.setupDB();
 		
-		
+		progress.setDBUnderTestText("Testing MariaDB");
 		databaseTest(mariaDBTest, "MariaDB");
+		progress.setDBUnderTestText("Cleanup");
 		MockService.clearIdLists();
+		progress.setDBUnderTestText("Testing MongoDB");
 		databaseTest(mongoDBTest, "MongoDB");
+		progress.setDBUnderTestText("Finished");
+		progress.setText("Finished");
 	}
 	
 	public void databaseTest(DBInterface underTest, String databaseName) {
@@ -72,6 +82,7 @@ public class DBTest {
 		int size = 0;
 		
 		while (size < MAXIMUM) {
+			progress.setText("Adding next " + TESTEVERY*4 + " entries..");
 			do {
 				//Add more entries
 				// Kunde
@@ -83,7 +94,9 @@ public class DBTest {
 				// Bewertung
 				underTest.addBewertung(MockService.genRandomInsertBewertung());
 				size++;
+				progress.setAddingProgress((size % TESTEVERY) +1);
 			} while (size % TESTEVERY != 0 || size == 0);
+			progress.resetAddingBarProgress();
 			
 			// We have reached the 5k, we want to test now
 			LinkedList<Long> testListCreate_Kunde = new LinkedList<Long>();
@@ -115,6 +128,7 @@ public class DBTest {
 			LinkedList<Long> testListUpdate_Bewertung_Text = new LinkedList<Long>();
 			
 			for (int i = 0; i < REPETITIONS; i++) {
+				progress.setText("Repetition testing.. " + (i+1) + "/" + REPETITIONS);
 
 				// Kunde
 				testListCreate_Kunde.add(testAddKunde(underTest));
@@ -147,8 +161,10 @@ public class DBTest {
 				testListRead_BewertungBySterne.add(testReadBewertungByAnzahlSterne(underTest));
 				testListUpdate_Bewertung_Complete.add(testUpdateBewertung_Complete(underTest));
 				testListUpdate_Bewertung_Text.add(testUpdateBewertung_Text(underTest));
-				System.out.println("Repetition: " + i);
+				
+				progress.setTestRepititionProgress(i+2);
 			}
+			progress.resetTestRepititionBarProgress();
 			// Calculate & Store the results
 			// Create
 			create_Kunde.add(new AccessTime(CRUDoperation.INSERT, ObjectCategory.KUNDE, MethodType.ADD_KUNDE, new Messreihe(testListCreate_Kunde), size));
@@ -181,7 +197,8 @@ public class DBTest {
 			update_Artikel_Complete.add(new AccessTime(CRUDoperation.UPDATE, ObjectCategory.ARTIKEL, MethodType.UPDATE_ARTIKEL_COMPLETE, new Messreihe(testListUpdate_Artikel_Complete), size));
 			update_Bewertung_Complete.add(new AccessTime(CRUDoperation.UPDATE, ObjectCategory.BEWERTUNG, MethodType.UPDATE_BEWERTUNG_COMPLETE, new Messreihe(testListUpdate_Bewertung_Complete), size));
 			update_Bewertung_Text.add(new AccessTime(CRUDoperation.UPDATE, ObjectCategory.BEWERTUNG, MethodType.UPDATE_BEWERTUNG_TEXT, new Messreihe(testListUpdate_Bewertung_Text), size));
-			System.out.println("Round " + size + " -+-+-+-+-+-+-");
+			
+			progress.setGlobalProgress(size / DBTest.TESTEVERY);
 		}
 		
 		// Write to csv
@@ -213,6 +230,7 @@ public class DBTest {
 			CsvBeanWriter.writeCsvFromAccessTimeExample(update_Artikel_Complete, databaseName, databaseName + "_Update_Artikel_Complete");
 			CsvBeanWriter.writeCsvFromAccessTimeExample(update_Bewertung_Complete, databaseName, databaseName + "_Update_Bewertung_Complete");
 			CsvBeanWriter.writeCsvFromAccessTimeExample(update_Bewertung_Text, databaseName, databaseName + "_Update_Bewertung_Text");
+			progress.resetGlobalProgress();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

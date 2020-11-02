@@ -128,7 +128,7 @@ public class MariaDBTest implements DBInterface {
 			prestKunde.executeUpdate();
 			prestAdresse.executeUpdate();
 			end = Instant.now();
-			return Duration.between(start, end).toNanos();
+			return Duration.between(start, end).toMillis();
 		} catch (SQLException e) {
 			System.err.println(e);
 			return Long.MAX_VALUE;
@@ -153,7 +153,7 @@ public class MariaDBTest implements DBInterface {
 			prest.executeUpdate();
 			end = Instant.now();
 
-			return Duration.between(start, end).toNanos();
+			return Duration.between(start, end).toMillis();
 		} catch (SQLException e) {
 			System.err.println(e);
 			return Long.MAX_VALUE;
@@ -176,7 +176,7 @@ public class MariaDBTest implements DBInterface {
 			start = Instant.now();
 			prest.executeUpdate();
 			end = Instant.now();
-			return Duration.between(start, end).toNanos();
+			return Duration.between(start, end).toMillis();
 		} catch (SQLException e) {
 			System.err.println(e);
 			return Long.MAX_VALUE;
@@ -199,7 +199,7 @@ public class MariaDBTest implements DBInterface {
 			prest.executeUpdate();
 			end = Instant.now();
 
-			return Duration.between(start, end).toNanos();
+			return Duration.between(start, end).toMillis();
 		} catch (SQLException e) {
 			System.err.println(e);
 			return Long.MAX_VALUE;
@@ -215,7 +215,7 @@ public class MariaDBTest implements DBInterface {
 			start = Instant.now();
 			statement.executeQuery(sql);
 			end = Instant.now();
-			return Duration.between(start, end).toNanos();
+			return Duration.between(start, end).toMillis();
 //			while (resultSet.next()) {
 //				kunde.setKundenNummer(resultSet.getString("Kundennummer"));
 //				kunde.setEmail(resultSet.getString("Email"));
@@ -270,7 +270,7 @@ public class MariaDBTest implements DBInterface {
 			start = Instant.now();
 			statement.executeQuery(sql);
 			end = Instant.now();
-			return Duration.between(start, end).toNanos();
+			return Duration.between(start, end).toMillis();
 //			while (resultSet.next()) {
 //				kunde.setKundenNummer(resultSet.getString("Kundennummer"));
 //				kunde.setEmail(resultSet.getString("Email"));
@@ -295,7 +295,7 @@ public class MariaDBTest implements DBInterface {
 			start = Instant.now();
 			statement.executeQuery(sql);
 			end = Instant.now();
-			return Duration.between(start, end).toNanos();
+			return Duration.between(start, end).toMillis();
 //			while (resultSet.next()) {
 //				Kunde kunde = new Kunde();
 //				kunde.setKundenNummer(resultSet.getString("Kundennummer"));
@@ -320,7 +320,7 @@ public class MariaDBTest implements DBInterface {
 			start = Instant.now();
 			statement.executeQuery(sql);
 			end = Instant.now();
-			return Duration.between(start, end).toNanos();
+			return Duration.between(start, end).toMillis();
 //			while (resultSet.next()) {
 //				String ort = resultSet.getString("Ortschaft");
 //				ortList.add(ort);
@@ -338,7 +338,7 @@ public class MariaDBTest implements DBInterface {
 			start = Instant.now();
 			statement.executeQuery(sql);
 			end = Instant.now();
-			return Duration.between(start, end).toNanos();
+			return Duration.between(start, end).toMillis();
 //			while (resultSet.next()) {
 //				artikel.setArtikelNummer(resultSet.getString("Artikelnummer"));
 //				artikel.setArtikelName(resultSet.getString("Artikelname"));
@@ -379,7 +379,7 @@ public class MariaDBTest implements DBInterface {
 			start = Instant.now();
 			statement.executeQuery(sql);
 			end = Instant.now();
-			return Duration.between(start, end).toNanos();
+			return Duration.between(start, end).toMillis();
 //			while (resultSet.next()) {
 //				artikel.setArtikelNummer(resultSet.getString("Artikelnummer"));
 //				artikel.setArtikelName(resultSet.getString("Artikelname"));
@@ -401,7 +401,7 @@ public class MariaDBTest implements DBInterface {
 			start = Instant.now();
 			statement.executeQuery(sql);
 			end = Instant.now();
-			return Duration.between(start, end).toNanos();
+			return Duration.between(start, end).toMillis();
 //			while (resultSet.next()) {
 //				Artikel artikel = new Artikel();
 //				artikel.setArtikelNummer(resultSet.getString("Artikelnummer"));
@@ -424,7 +424,7 @@ public class MariaDBTest implements DBInterface {
 			start = Instant.now();
 			statement.executeQuery(sql);
 			end = Instant.now();
-			return Duration.between(start, end).toNanos();
+			return Duration.between(start, end).toMillis();
 //			while (resultSet.next()) {
 //				bewertung.setArtikelNummer(resultSet.getString("Artikelnummer"));
 //				bewertung.setKundenNummer(resultSet.getString("Kundennummer"));
@@ -466,7 +466,7 @@ public class MariaDBTest implements DBInterface {
 			start = Instant.now();
 			statement.executeQuery(sql);
 			end = Instant.now();
-			return Duration.between(start, end).toNanos();
+			return Duration.between(start, end).toMillis();
 //			while (resultSet.next()) {
 //				Bewertung bewertung = new Bewertung();
 //				bewertung.setArtikelNummer(resultSet.getString("Artikelnummer"));
@@ -488,7 +488,7 @@ public class MariaDBTest implements DBInterface {
 			start = Instant.now();
 			statement.executeQuery(sql);
 			end = Instant.now();
-			return Duration.between(start, end).toNanos();
+			return Duration.between(start, end).toMillis();
 //			while (resultSet.next()) {
 //				Bewertung bewertung = new Bewertung();
 //				bewertung.setArtikelNummer(resultSet.getString("Artikelnummer"));
@@ -510,7 +510,7 @@ public class MariaDBTest implements DBInterface {
 			start = Instant.now();
 			statement.executeQuery(sql);
 			end = Instant.now();
-			return Duration.between(start, end).toNanos();
+			return Duration.between(start, end).toMillis();
 //			while (resultSet.next()) {
 //				Bewertung bewertung = new Bewertung();
 //				bewertung.setArtikelNummer(resultSet.getString("Artikelnummer"));
@@ -532,7 +532,7 @@ public class MariaDBTest implements DBInterface {
 			start = Instant.now();
 			statement.executeQuery(sql);
 			end = Instant.now();
-			return Duration.between(start, end).toNanos();
+			return Duration.between(start, end).toMillis();
 //			while (resultSet.next()) {
 //				Kauf kauf = new Kauf();
 //				kauf.setArtikelNummer(resultSet.getString("Artikelnummer"));
@@ -555,7 +555,7 @@ public class MariaDBTest implements DBInterface {
 			start = Instant.now();
 			statement.executeQuery(sql);
 			end = Instant.now();
-			return Duration.between(start, end).toNanos();
+			return Duration.between(start, end).toMillis();
 //			while (resultSet.next()) {
 //				Kauf kauf = new Kauf();
 //				kauf.setArtikelNummer(resultSet.getString("Artikelnummer"));
@@ -582,7 +582,7 @@ public class MariaDBTest implements DBInterface {
 					+ "', Hausnummer='" + adresse.getHausnummer() + "', Ortschaft='" + adresse.getOrtschaft()
 					+ "', PLZ='" + adresse.getPlz() + "' WHERE Kundennummer='" + kunde.getKundenNummer() + "'");
 			end = Instant.now();
-			return Duration.between(start, end).toNanos();
+			return Duration.between(start, end).toMillis();
 		} catch (SQLException e) {
 			System.err.println(e);
 			return Long.MAX_VALUE;
@@ -597,7 +597,7 @@ public class MariaDBTest implements DBInterface {
 					+ ", Waehrung='" + artikel.getWaehrung() + "' WHERE Artikelnummer='" + artikel.getArtikelNummer()
 					+ "'");
 			end = Instant.now();
-			return Duration.between(start, end).toNanos();
+			return Duration.between(start, end).toMillis();
 		} catch (SQLException e) {
 			System.err.println(e);
 			return Long.MAX_VALUE;
@@ -611,7 +611,7 @@ public class MariaDBTest implements DBInterface {
 					+ "', Sterne=" + bewertung.getSterne() + " WHERE Artikelnummer='" + bewertung.getArtikelNummer()
 					+ "' AND Kundennummer='" + bewertung.getKundenNummer() + "'");
 			end = Instant.now();
-			return Duration.between(start, end).toNanos();
+			return Duration.between(start, end).toMillis();
 		} catch (SQLException e) {
 			System.err.println(e);
 			return Long.MAX_VALUE;
@@ -626,7 +626,7 @@ public class MariaDBTest implements DBInterface {
 			statement.executeUpdate("UPDATE " + databaseName + ".Kunde SET Nachname='" + nachName + "'"
 					+ " WHERE Kundennummer='" + kundenNummer + "'");
 			end = Instant.now();
-			return Duration.between(start, end).toNanos();
+			return Duration.between(start, end).toMillis();
 		} catch (SQLException e) {
 			System.err.println(e);
 			return Long.MAX_VALUE;
@@ -641,7 +641,7 @@ public class MariaDBTest implements DBInterface {
 					+ " WHERE Artikelnummer='" + artikelNummer
 					+ "' AND Kundennummer='" + kundenNummer + "'");
 			end = Instant.now();
-			return Duration.between(start, end).toNanos();
+			return Duration.between(start, end).toMillis();
 		} catch (SQLException e) {
 			System.err.println(e);
 			return Long.MAX_VALUE;
@@ -655,7 +655,7 @@ public class MariaDBTest implements DBInterface {
 			statement.executeUpdate("DELETE FROM " + databaseName + ".Adresse WHERE Kundennummer='" + kundenNr + "'");
 			statement.executeUpdate("DELETE FROM " + databaseName + ".Kunde WHERE Kundennummer='" + kundenNr + "'");
 			end = Instant.now();
-			return Duration.between(start, end).toNanos();
+			return Duration.between(start, end).toMillis();
 		} catch (SQLException e) {
 			System.err.println(e);
 			return Long.MAX_VALUE;
@@ -667,7 +667,7 @@ public class MariaDBTest implements DBInterface {
 			start = Instant.now();
 			statement.executeUpdate("DELETE FROM " + databaseName + ".Artikel WHERE Artikelnummer='" + artikelNr + "'");
 			end = Instant.now();
-			return Duration.between(start, end).toNanos();
+			return Duration.between(start, end).toMillis();
 		} catch (SQLException e) {
 			System.err.println(e);
 			return Long.MAX_VALUE;
@@ -680,7 +680,7 @@ public class MariaDBTest implements DBInterface {
 			statement.executeUpdate("DELETE FROM " + databaseName + ".Bewertung WHERE Kundennummer='" + kundennummer
 					+ "' AND Artikelnummer='" + artikelnummer + "'");
 			end = Instant.now();
-			return Duration.between(start, end).toNanos();
+			return Duration.between(start, end).toMillis();
 		} catch (SQLException e) {
 			System.err.println(e);
 			return Long.MAX_VALUE;
@@ -693,7 +693,7 @@ public class MariaDBTest implements DBInterface {
 			statement.executeUpdate("DELETE FROM " + databaseName + ".Kauf WHERE Kundennummer='" + kundennummer
 					+ "' AND Artikelnummer='" + artikelNr + "'");
 			end = Instant.now();
-			return Duration.between(start, end).toNanos();
+			return Duration.between(start, end).toMillis();
 		} catch (SQLException e) {
 			System.err.println(e);
 			return Long.MAX_VALUE;
@@ -707,7 +707,7 @@ public class MariaDBTest implements DBInterface {
 			statement.executeUpdate(
 					"DELETE FROM " + databaseName + ".Adresse WHERE Kundennummer='" + kundennummer + "'");
 			end = Instant.now();
-			return Duration.between(start, end).toNanos();
+			return Duration.between(start, end).toMillis();
 		} catch (SQLException e) {
 			System.err.println(e);
 			return Long.MAX_VALUE;

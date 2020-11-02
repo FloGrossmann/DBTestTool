@@ -107,7 +107,7 @@ public class MongoDBTest implements DBInterface {
 			start = Instant.now();
 			kundeCollection.insertOne(kunde);
 			end = Instant.now();
-			return Duration.between(start, end).toNanos();
+			return Duration.between(start, end).toMillis();
 		} catch (Exception e) {
 			System.err.println(e);
 			return -1l;
@@ -119,7 +119,7 @@ public class MongoDBTest implements DBInterface {
 			start = Instant.now();
 			artikelCollection.insertOne(artikel);
 			end = Instant.now();
-			return Duration.between(start, end).toNanos();
+			return Duration.between(start, end).toMillis();
 		} catch (Exception e) {
 			System.err.println(e);
 			return -1l;
@@ -131,7 +131,7 @@ public class MongoDBTest implements DBInterface {
 			start = Instant.now();
 			bewertungCollection.insertOne(bewertung);
 			end = Instant.now();
-			return Duration.between(start, end).toNanos();
+			return Duration.between(start, end).toMillis();
 		} catch (Exception e) {
 			System.err.println(e);
 			return -1l;
@@ -143,7 +143,7 @@ public class MongoDBTest implements DBInterface {
 			start = Instant.now();
 			kaufCollection.insertOne(kauf);
 			end = Instant.now();
-			return Duration.between(start, end).toNanos();
+			return Duration.between(start, end).toMillis();
 		} catch (Exception e) {
 			System.err.println(e);
 			return -1l;
@@ -154,7 +154,7 @@ public class MongoDBTest implements DBInterface {
 		start = Instant.now();
 		kundeCollection.find(eq("kundenNummer", kundenNr)).first();
 		end = Instant.now();
-		return Duration.between(start, end).toNanos();
+		return Duration.between(start, end).toMillis();
 	}
 	
 	@Override
@@ -166,7 +166,7 @@ public class MongoDBTest implements DBInterface {
 		start = Instant.now();
 		kundeCollection.find(eq("email", email)).first();
 		end = Instant.now();
-		return Duration.between(start, end).toNanos();
+		return Duration.between(start, end).toMillis();
 	}
 
 	public long getKundenByPlz(String plz) {
@@ -174,7 +174,7 @@ public class MongoDBTest implements DBInterface {
 		start = Instant.now();
 		kundeCollection.find(eq("adresse.plz", plz)).into(result);
 		end = Instant.now();
-		return Duration.between(start, end).toNanos();
+		return Duration.between(start, end).toMillis();
 	}
 
 	public long getDistinctOrte() {
@@ -182,14 +182,14 @@ public class MongoDBTest implements DBInterface {
 		start = Instant.now();
 		kundeCollection.distinct("adresse.ortschaft", String.class).into(result);
 		end = Instant.now();
-		return Duration.between(start, end).toNanos();
+		return Duration.between(start, end).toMillis();
 	}
 
 	public long getArtikelByArtikelNummer(String artikelNummer) {
 		start = Instant.now();
 		artikelCollection.find(eq("artikelNummer", artikelNummer)).first();
 		end = Instant.now();
-		return Duration.between(start, end).toNanos();
+		return Duration.between(start, end).toMillis();
 	}
 	
 	@Override
@@ -201,7 +201,7 @@ public class MongoDBTest implements DBInterface {
 		start = Instant.now();
 		artikelCollection.find(eq("artikelName", artikelName)).first();
 		end = Instant.now();
-		return Duration.between(start, end).toNanos();
+		return Duration.between(start, end).toMillis();
 	}
 
 	public long getArtikelWhichCostMoreThan(Double price) {
@@ -209,7 +209,7 @@ public class MongoDBTest implements DBInterface {
 		LinkedList<Artikel> result = new LinkedList<Artikel>();
 		artikelCollection.find(gt("einzelPreis", price)).into(result);
 		end = Instant.now();
-		return Duration.between(start, end).toNanos();
+		return Duration.between(start, end).toMillis();
 	}
 
 	public long getBewertungByKundenNrAndArtikelNr(String artikelNummer, String kundenNummer) {
@@ -217,7 +217,7 @@ public class MongoDBTest implements DBInterface {
 		bewertungCollection.find(and(eq("artikelNummer", artikelNummer), eq("kundenNummer", kundenNummer)))
 				.first();
 		end = Instant.now();
-		return Duration.between(start, end).toNanos();
+		return Duration.between(start, end).toMillis();
 	}
 	
 	public Bewertung getBewertungByKundenNrAndArtikelNr_bewertung(String artikelNummer, String kundenNummer) {
@@ -230,7 +230,7 @@ public class MongoDBTest implements DBInterface {
 		start = Instant.now();
 		bewertungCollection.find(eq("sterne", sterne)).into(result);
 		end = Instant.now();
-		return Duration.between(start, end).toNanos();
+		return Duration.between(start, end).toMillis();
 	}
 
 	public long getBewertungenByKundenNr(String kundenNummer) {
@@ -238,7 +238,7 @@ public class MongoDBTest implements DBInterface {
 		start = Instant.now();
 		bewertungCollection.find(eq("kundenNummer", kundenNummer)).into(result);
 		end = Instant.now();
-		return Duration.between(start, end).toNanos();
+		return Duration.between(start, end).toMillis();
 	}
 
 	public long getBewertungenByArtikelNr(String artikelNummer) {
@@ -246,35 +246,35 @@ public class MongoDBTest implements DBInterface {
 		start = Instant.now();
 		bewertungCollection.find(eq("artikelNummer", artikelNummer)).into(result);
 		end = Instant.now();
-		return Duration.between(start, end).toNanos();
+		return Duration.between(start, end).toMillis();
 	}
 
 	public long getEinkaeufeForKunde(String kundenNummer) {
 		start = Instant.now();
 		kaufCollection.find(eq("kundenNummer", kundenNummer));
 		end = Instant.now();
-		return Duration.between(start, end).toNanos();
+		return Duration.between(start, end).toMillis();
 	}
 
 	public long getVerkauefeForArtikel(String artikelNummer) {
 		start = Instant.now();
 		kaufCollection.find(eq("artikelNummer", artikelNummer));
 		end = Instant.now();
-		return Duration.between(start, end).toNanos();
+		return Duration.between(start, end).toMillis();
 	}
 
 	public long updateKunde(Kunde kunde) {
 		start = Instant.now();
 		kundeCollection.findOneAndReplace(eq("kundenNummer", kunde.getKundenNummer()), kunde);
 		end = Instant.now();
-		return Duration.between(start, end).toNanos();
+		return Duration.between(start, end).toMillis();
 	}
 
 	public long updateArtikel(Artikel artikel) {
 		start = Instant.now();
 		artikelCollection.findOneAndReplace(eq("artikelNummer", artikel.getArtikelNummer()), artikel);
 		end = Instant.now();
-		return Duration.between(start, end).toNanos();
+		return Duration.between(start, end).toMillis();
 	}
 
 	public long updateBewertung(Bewertung bewertung) {
@@ -283,14 +283,14 @@ public class MongoDBTest implements DBInterface {
 				and(eq("artikelNummer", bewertung.getArtikelNummer()), eq("kundenNummer", bewertung.getKundenNummer())),
 				bewertung);
 		end = Instant.now();
-		return Duration.between(start, end).toNanos();
+		return Duration.between(start, end).toMillis();
 	}
 	
 	@Override
 	public long updateKundenNachname(String kundenNummer, String nachName) {
 		kundeCollection.findOneAndUpdate(eq("kundenNummer", kundenNummer), Document.parse("{'$set':{nachname: '" + nachName + "'}}"));
 		end = Instant.now();
-		return Duration.between(start, end).toNanos();
+		return Duration.between(start, end).toMillis();
 	}
 
 	@Override
@@ -298,21 +298,21 @@ public class MongoDBTest implements DBInterface {
 		start = Instant.now();
 		bewertungCollection.findOneAndUpdate(and(eq("artikelNummer", artikelNummer), eq("kundenNummer", kundenNummer)), Document.parse("{'$set':{bewertung: '" + newText + "'}}"));
 		end = Instant.now();
-		return Duration.between(start, end).toNanos();
+		return Duration.between(start, end).toMillis();
 	}
 
 	public long deleteKundeByKundenNr(String kundenNr) {
 		start = Instant.now();
 		kundeCollection.deleteOne(eq("kundenNummer", kundenNr));
 		end = Instant.now();
-		return Duration.between(start, end).toNanos();
+		return Duration.between(start, end).toMillis();
 	}
 
 	public long deleteArtikelbyArtikelNr(String artikelNummer) {
 		start = Instant.now();
 		artikelCollection.deleteOne(eq("artikelNummer", artikelNummer));
 		end = Instant.now();
-		return Duration.between(start, end).toNanos();
+		return Duration.between(start, end).toMillis();
 	}
 
 	public long deleteBewertungByArtikelNrAndKundenNr(String artikelNummer, String kundenNummer) {
@@ -320,7 +320,7 @@ public class MongoDBTest implements DBInterface {
 		bewertungCollection.deleteOne(
 				and(eq("artikelNummer", artikelNummer), eq("kundenNummer", kundenNummer)));
 		end = Instant.now();
-		return Duration.between(start, end).toNanos();
+		return Duration.between(start, end).toMillis();
 	}
 
 	@Override
@@ -329,7 +329,7 @@ public class MongoDBTest implements DBInterface {
 		kaufCollection
 				.deleteOne(and(eq("artikelNummer", artikelNummer), eq("kundenNummer", kundennummer)));
 		end = Instant.now();
-		return Duration.between(start, end).toNanos();
+		return Duration.between(start, end).toMillis();
 	}
 
 	@Override
@@ -338,7 +338,7 @@ public class MongoDBTest implements DBInterface {
 		kundeCollection.updateOne(eq("kundenNummer", kundennummer),
 				new BasicDBObject("$unset", new BasicDBObject("adresse", "")));
 		end = Instant.now();
-		return Duration.between(start, end).toNanos();
+		return Duration.between(start, end).toMillis();
 	}
 
 }

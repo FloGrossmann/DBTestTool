@@ -13,10 +13,10 @@ public class AccessTime extends CsvBean {
 	@CsvBindByName(column = "Methode", required = true)
 	MethodType methode;
 
-	@CsvBindByName(column = "Durchschnitts Zeit in Nanosekunden", required = true)
+	@CsvBindByName(column = "Durchschnitts Zeit in Millisekunden", required = true)
 	double durchschnittsZugriffsZeit;
 
-	@CsvBindByName(column = "Varianz der Messpunkte", required = true)
+	@CsvBindByName(column = "Varianz der Messpunkte in MS", required = true)
 	double varianz;
 
 	@CsvBindByName(column = "Standardabweichung der Messpunkte", required = true)

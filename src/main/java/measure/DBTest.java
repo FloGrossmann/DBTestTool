@@ -7,6 +7,7 @@ import dbinterface.Bewertung;
 import dbinterface.DBInterface;
 import dbinterface.Kauf;
 import dbinterface.Kunde;
+import main.Main;
 import mariadb.MariaDBTest;
 import measure.util.CompPrimaryKey;
 import monogdb.MongoDBTest;
@@ -17,9 +18,9 @@ public class DBTest {
 	public MongoDBTest mongoDBTest;
 	public MariaDBTest mariaDBTest;
 	public LinkedList<AccessTime> mongoDBTestList = new LinkedList<AccessTime>();
-	public static final int TESTEVERY = 50;
-	public static final int REPETITIONS = 20;
-	public static final int MAXIMUM = 100;
+	public static final int TESTEVERY = Main.TESTEVERY;
+	public static final int REPETITIONS = Main.REPETITIONS;
+	public static final int MAXIMUM = Main.MAXIMUM;
 	private ProgressIndicatorPanel progress;
 	
 	public void startTest(String mongoDBConnectionString, String mariaDBConnectionString,

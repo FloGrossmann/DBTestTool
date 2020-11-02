@@ -62,10 +62,14 @@ public interface DBInterface {
 	// UPDATE
 
 	long updateKunde(Kunde kunde);
+	
+	long updateKundenNachname(String kundenNr, String nachName);
 
 	long updateArtikel(Artikel artikel);
-
+	
 	long updateBewertung(Bewertung bewertung);
+	
+	long updateBewertungsText(String kundenNummer, String artikelNummer, String newText);
 
 	// DELETE
 

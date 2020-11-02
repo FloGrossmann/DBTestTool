@@ -76,7 +76,7 @@ public class MariaDBTest implements DBInterface {
 			statement.execute("CREATE TABLE IF NOT EXISTS " + databaseName
 					+ ".Artikel (Artikelnummer varchar(255),Artikelname varchar(255), Einzelpreis double(20,2), Waehrung varchar(255), Beschreibung varchar(255), primary key (Artikelnummer))");
 			statement.execute("CREATE TABLE IF NOT EXISTS " + databaseName
-					+ ".Bewertung (Sterne int, Bewertung varchar(255), Kundennummer varchar(255), Artikelnummer varchar(255), FOREIGN KEY (Kundennummer) REFERENCES Kunde(Kundennummer),  FOREIGN KEY (Artikelnummer) REFERENCES Artikel(Artikelnummer), CONSTRAINT Bewertungsnummer PRIMARY KEY (Kundennummer, Artikelnummer))");
+					+ ".Bewertung (Sterne int, Bewertung varchar(1050), Kundennummer varchar(255), Artikelnummer varchar(255), FOREIGN KEY (Kundennummer) REFERENCES Kunde(Kundennummer),  FOREIGN KEY (Artikelnummer) REFERENCES Artikel(Artikelnummer), CONSTRAINT Bewertungsnummer PRIMARY KEY (Kundennummer, Artikelnummer))");
 			statement.execute("CREATE TABLE IF NOT EXISTS " + databaseName
 					+ ".Kauf (Kaufdatum Date, Kaufpreis double(20,2), Menge int, Kundennummer varchar(255), Artikelnummer varchar(255), FOREIGN KEY (Kundennummer) REFERENCES Kunde(Kundennummer),  FOREIGN KEY (Artikelnummer) REFERENCES Artikel(Artikelnummer), CONSTRAINT Kaufnummer PRIMARY KEY (Kundennummer, Artikelnummer))");
 			System.out.println("Tabellen erstellt");
@@ -547,6 +547,37 @@ public class MariaDBTest implements DBInterface {
 			return Long.MAX_VALUE;
 		}
 	}
+	
+
+	@Override
+	public long updateKundenNachname(String kundenNummer, String nachName) {
+		try {
+			start = Instant.now();
+			statement.executeUpdate("UPDATE " + databaseName + ".Kunde SET Nachname='" + nachName
+					+ " WHERE Kundennummer='" + kundenNummer + "'");
+			end = Instant.now();
+			return Duration.between(start, end).toNanos();
+		} catch (SQLException e) {
+			System.err.println(e);
+			return Long.MAX_VALUE;
+		}
+	}
+
+	@Override
+	public long updateBewertungsText(String kundenNummer, String artikelNummer, String newText) {
+		try {
+			start = Instant.now();
+			statement.executeUpdate("UPDATE " + databaseName + ".Bewertung SET Bewertung='" + newText
+					+ " WHERE Artikelnummer='" + artikelNummer
+					+ "' AND Kundennummer='" + kundenNummer + "'");
+			end = Instant.now();
+			return Duration.between(start, end).toNanos();
+		} catch (SQLException e) {
+			System.err.println(e);
+			return Long.MAX_VALUE;
+		}
+	}
+
 
 	public long deleteKundeByKundenNr(String kundenNr) {
 		try {

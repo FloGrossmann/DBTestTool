@@ -273,6 +273,22 @@ public class MongoDBTest implements DBInterface {
 		end = Instant.now();
 		return Duration.between(start, end).toNanos();
 	}
+	
+	@Override
+	public long updateKundenNachname(String kundenNummer, String nachName) {
+		start = Instant.now();
+		kundeCollection.findOneAndUpdate(eq("kundenNummer", kundenNummer), new BasicDBObject("nachname", nachName));
+		end = Instant.now();
+		return Duration.between(start, end).toNanos();
+	}
+
+	@Override
+	public long updateBewertungsText(String kundenNummer, String artikelNummer, String newText) {
+		start = Instant.now();
+		bewertungCollection.findOneAndUpdate(and(eq("artikelNummer", artikelNummer), eq("kundenNummer", kundenNummer)), new BasicDBObject("bewertung", newText));
+		end = Instant.now();
+		return Duration.between(start, end).toNanos();
+	}
 
 	public long deleteKundeByKundenNr(String kundenNr) {
 		start = Instant.now();

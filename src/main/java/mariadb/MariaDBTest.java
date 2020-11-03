@@ -61,9 +61,9 @@ public class MariaDBTest implements DBInterface {
 	}
 
 	public void connect() throws SQLException {
-			System.out.println("Verbindung zu MariaDB erfolgt...");
-			mariaDbConnection = DriverManager.getConnection("jdbc:mariadb://" + connectionString, username, password);
-			statement = mariaDbConnection.createStatement();
+		System.out.println("Verbindung zu MariaDB erfolgt...");
+		mariaDbConnection = DriverManager.getConnection("jdbc:mariadb://" + connectionString, username, password);
+		statement = mariaDbConnection.createStatement();
 	}
 
 	public boolean setupDB() {
@@ -73,7 +73,9 @@ public class MariaDBTest implements DBInterface {
 			statement.execute("CREATE TABLE IF NOT EXISTS " + databaseName
 					+ ".Kunde (Kundennummer varchar(255), Vorname varchar(255), Nachname varchar(255), Email varchar(255), Telefonnummer varchar(255), primary key (Kundennummer))");
 			statement.execute("CREATE TABLE IF NOT EXISTS " + databaseName
-					+ ".Adresse (PLZ varchar(255), Strasse varchar(255), Hausnummer varchar(255), Ortschaft varchar(255), Kundennummer varchar(255), FOREIGN KEY (Kundennummer) REFERENCES Kunde(Kundennummer), primary key (Kundennummer))");
+					+ ".Adresse (PLZ varchar(255), Strasse varchar(255), Hausnummer varchar(255), Kundennummer varchar(255), FOREIGN KEY (PLZ) REFERENCES Ortschaft(PLZ),FOREIGN KEY (Kundennummer) REFERENCES Kunde(Kundennummer), primary key (Kundennummer))");
+			statement.execute("CREATE TABLE IF NOT EXISTS " + databaseName
+					+ ".Ortschaft (PLZ varchar(255), Ortschaft varchar(255), primary key (PLZ))");
 			statement.execute("CREATE TABLE IF NOT EXISTS " + databaseName
 					+ ".Artikel (Artikelnummer varchar(255),Artikelname varchar(255), Einzelpreis double(20,2), Waehrung varchar(255), Beschreibung varchar(255), primary key (Artikelnummer))");
 			statement.execute("CREATE TABLE IF NOT EXISTS " + databaseName
@@ -105,11 +107,14 @@ public class MariaDBTest implements DBInterface {
 		String sqlKunde = "INSERT INTO " + databaseName
 				+ ".Kunde (Kundennummer, Vorname, Nachname, Email, Telefonnummer) VALUES(?,?,?,?,?)";
 		PreparedStatement prestKunde;
+		String sqlOrtschaft = "INSERT INTO " + databaseName + ".Ortschaft (PLZ, Ortschaft) VALUES(?,?)";
+		PreparedStatement prestOrtschaft;
 		String sqlAdresse = "INSERT INTO " + databaseName
-				+ ".Adresse (PLZ, Strasse, Hausnummer, Ortschaft, Kundennummer) VALUES(?,?,?,?,?)";
+				+ ".Adresse (PLZ, Strasse, Hausnummer, Kundennummer) VALUES(?,?,?,?)";
 		PreparedStatement prestAdresse;
 		try {
 			prestKunde = mariaDbConnection.prepareStatement(sqlKunde);
+			prestOrtschaft = mariaDbConnection.prepareStatement(sqlOrtschaft);
 			prestAdresse = mariaDbConnection.prepareStatement(sqlAdresse);
 
 			prestKunde.setString(1, kunde.getKundenNummer());
@@ -118,15 +123,71 @@ public class MariaDBTest implements DBInterface {
 			prestKunde.setString(4, kunde.getEmail());
 			prestKunde.setString(5, kunde.getTelefonNummer());
 
+			prestOrtschaft.setString(1, adresse.getPlz());
+			prestOrtschaft.setString(2, adresse.getOrtschaft());
+
 			prestAdresse.setString(1, adresse.getPlz());
 			prestAdresse.setString(2, adresse.getStrasse());
 			prestAdresse.setString(3, adresse.getHausnummer());
-			prestAdresse.setString(4, adresse.getOrtschaft());
-			prestAdresse.setString(5, kunde.getKundenNummer());
+			prestAdresse.setString(4, kunde.getKundenNummer());
 
 			start = Instant.now();
 			prestKunde.executeUpdate();
+			prestOrtschaft.executeUpdate();
 			prestAdresse.executeUpdate();
+			end = Instant.now();
+			return Duration.between(start, end).toMillis();
+		} catch (SQLException e) {
+			System.err.println(e);
+			return Long.MAX_VALUE;
+		}
+	}
+
+	public long addKunden(List<Kunde> kundenList) {
+
+		String sqlKunde = "INSERT INTO " + databaseName
+				+ ".Kunde (Kundennummer, Vorname, Nachname, Email, Telefonnummer) VALUES(?,?,?,?,?)";
+		PreparedStatement prestKunde;
+		String sqlOrtschaft = "INSERT INTO " + databaseName + ".Ortschaft (PLZ, Ortschaft) VALUES(?,?)";
+		PreparedStatement prestOrtschaft;
+		String sqlAdresse = "INSERT INTO " + databaseName
+				+ ".Adresse (PLZ, Strasse, Hausnummer, Kundennummer) VALUES(?,?,?,?)";
+		PreparedStatement prestAdresse;
+		try {
+			prestKunde = mariaDbConnection.prepareStatement(sqlKunde);
+			prestOrtschaft = mariaDbConnection.prepareStatement(sqlOrtschaft);
+			prestAdresse = mariaDbConnection.prepareStatement(sqlAdresse);
+
+			Iterator<Kunde> iterator = kundenList.iterator();
+
+			while (iterator.hasNext()) {
+				Kunde kunde = iterator.next();
+				Adresse adresse = kunde.getAdresse();
+
+				prestKunde.setString(1, kunde.getKundenNummer());
+				prestKunde.setString(2, kunde.getVorname());
+				prestKunde.setString(3, kunde.getNachname());
+				prestKunde.setString(4, kunde.getEmail());
+				prestKunde.setString(5, kunde.getTelefonNummer());
+				prestKunde.addBatch();
+//				prestKunde.clearParameters(); zum Clearen - weiß nicht in wie weit das nötig sein wird
+
+				prestOrtschaft.setString(1, adresse.getPlz());
+				prestOrtschaft.setString(2, adresse.getOrtschaft());
+				prestOrtschaft.addBatch();
+//				prestOrtschaft.clearParameters();
+
+				prestAdresse.setString(1, adresse.getPlz());
+				prestAdresse.setString(2, adresse.getStrasse());
+				prestAdresse.setString(3, adresse.getHausnummer());
+				prestAdresse.setString(4, kunde.getKundenNummer());
+				prestAdresse.addBatch();
+//				prestAdresse.clearParameters();
+			}
+			start = Instant.now();
+			prestKunde.executeBatch();
+			prestOrtschaft.executeBatch();
+			prestAdresse.executeBatch();
 			end = Instant.now();
 			return Duration.between(start, end).toMillis();
 		} catch (SQLException e) {
@@ -160,6 +221,38 @@ public class MariaDBTest implements DBInterface {
 		}
 	}
 
+	public long addArtikelliste(List<Artikel> artikelList) {
+
+		String sql = "INSERT INTO " + databaseName
+				+ ".Artikel (Artikelnummer, Artikelname, Einzelpreis, Waehrung, Beschreibung) VALUES(?,?,?,?,?)";
+		PreparedStatement prest;
+		try {
+			prest = mariaDbConnection.prepareStatement(sql);
+
+			Iterator<Artikel> iterator = artikelList.iterator();
+			while (iterator.hasNext()) {
+				Artikel artikel = iterator.next();
+
+				prest.setString(1, artikel.getArtikelNummer());
+				prest.setString(2, artikel.getArtikelName());
+				prest.setDouble(3, artikel.getEinzelPreis());
+				prest.setString(4, artikel.getWaehrung());
+				prest.setString(5, artikel.getBeschreibung());
+				prest.addBatch();
+//				prest.clearParameters();
+
+			}
+			start = Instant.now();
+			prest.executeBatch();
+			end = Instant.now();
+
+			return Duration.between(start, end).toMillis();
+		} catch (SQLException e) {
+			System.err.println(e);
+			return Long.MAX_VALUE;
+		}
+	}
+
 	public long addBewertung(Bewertung bewertung) {
 
 		String sql = "INSERT INTO " + databaseName
@@ -183,6 +276,34 @@ public class MariaDBTest implements DBInterface {
 		}
 	}
 
+	public long addBewertungen(List<Bewertung> bewertungList) {
+
+		String sql = "INSERT INTO " + databaseName
+				+ ".Bewertung (Sterne, Bewertung, Kundennummer, Artikelnummer) VALUES(?,?,?,?)";
+		PreparedStatement prest;
+		try {
+			prest = mariaDbConnection.prepareStatement(sql);
+
+			Iterator<Bewertung> iterator = bewertungList.iterator();
+			while (iterator.hasNext()) {
+				Bewertung bewertung = iterator.next();
+				prest.setInt(1, bewertung.getSterne());
+				prest.setString(2, bewertung.getBewertung());
+				prest.setString(3, bewertung.getKundenNummer());
+				prest.setString(4, bewertung.getArtikelNummer());
+				prest.addBatch();
+//				prest.clearParameters();
+			}
+			start = Instant.now();
+			prest.executeBatch();
+			end = Instant.now();
+			return Duration.between(start, end).toMillis();
+		} catch (SQLException e) {
+			System.err.println(e);
+			return Long.MAX_VALUE;
+		}
+	}
+
 	public long addKauf(Kauf kauf) {
 
 		String sql = "INSERT INTO " + databaseName
@@ -197,6 +318,37 @@ public class MariaDBTest implements DBInterface {
 			prest.setString(5, kauf.getArtikelNummer());
 			start = Instant.now();
 			prest.executeUpdate();
+			end = Instant.now();
+
+			return Duration.between(start, end).toMillis();
+		} catch (SQLException e) {
+			System.err.println(e);
+			return Long.MAX_VALUE;
+		}
+
+	}
+
+	public long addKaeufe(List<Kauf> kaufList) {
+
+		String sql = "INSERT INTO " + databaseName
+				+ ".Kauf (Kaufdatum, Kaufpreis, Menge, Kundennummer, Artikelnummer) VALUES (?,?,?,?,?)";
+		PreparedStatement prest;
+		try {
+			prest = mariaDbConnection.prepareStatement(sql);
+
+			Iterator<Kauf> iterator = kaufList.iterator();
+			while (iterator.hasNext()) {
+				Kauf kauf=iterator.next();
+				prest.setDate(1, kauf.getKaufdatum());
+				prest.setDouble(2, kauf.getKaufPreis());
+				prest.setInt(3, kauf.getMenge());
+				prest.setString(4, kauf.getKundenNummer());
+				prest.setString(5, kauf.getArtikelNummer());
+				prest.addBatch();
+//				prest.clearParameters();
+			}
+			start = Instant.now();
+			prest.executeBatch();
 			end = Instant.now();
 
 			return Duration.between(start, end).toMillis();
@@ -239,10 +391,10 @@ public class MariaDBTest implements DBInterface {
 		String sql = "SELECT * FROM " + databaseName + ".Kunde, " + databaseName + ".Adresse WHERE Kunde.Kundennummer='"
 				+ kundenNr + "'";
 		try {
-			
+
 			ResultSet resultSet = statement.executeQuery(sql);
 			Kunde kunde = new Kunde();
-			
+
 			while (resultSet.next()) {
 				kunde.setKundenNummer(resultSet.getString("Kundennummer"));
 				kunde.setEmail(resultSet.getString("Email"));
@@ -250,18 +402,17 @@ public class MariaDBTest implements DBInterface {
 				kunde.setVorname(resultSet.getString("Vorname"));
 				kunde.setNachname(resultSet.getString("Nachname"));
 			}
-		
+
 			while (resultSet.next())
-				kunde.setAdresse(
-						new Adresse(resultSet.getString("Ortschaft"), resultSet.getString("Hausnummer"),
-								resultSet.getString("Strasse"), resultSet.getString("PLZ")));
+				kunde.setAdresse(new Adresse(resultSet.getString("Ortschaft"), resultSet.getString("Hausnummer"),
+						resultSet.getString("Strasse"), resultSet.getString("PLZ")));
 			return kunde;
 		} catch (SQLException e) {
 			System.err.println(e);
 			return null;
 		}
 	}
-	
+
 	public long getKundeByEmail(String email) {
 
 		String sql = "SELECT * FROM " + databaseName + ".Kunde, " + databaseName + ".Adresse WHERE Kunde.Email='"
@@ -315,7 +466,7 @@ public class MariaDBTest implements DBInterface {
 	}
 
 	public long getDistinctOrte() {
-		String sql = "SELECT Ortschaft FROM " + databaseName + ".Adresse";
+		String sql = "SELECT Ortschaft FROM " + databaseName + ".Ortschaft";
 		try {
 			start = Instant.now();
 			statement.executeQuery(sql);
@@ -352,7 +503,7 @@ public class MariaDBTest implements DBInterface {
 			return Long.MAX_VALUE;
 		}
 	}
-	
+
 	@Override
 	public Artikel getArtikelByArtikelNummer_artikel(String artikelNummer) {
 		String sql = "SELECT * FROM " + databaseName + ".Artikel WHERE Artikelnummer='" + artikelNummer + "'";
@@ -360,7 +511,7 @@ public class MariaDBTest implements DBInterface {
 			ResultSet resultSet = statement.executeQuery(sql);
 			Artikel artikel = new Artikel();
 			while (resultSet.next()) {
-				artikel .setArtikelNummer(resultSet.getString("Artikelnummer"));
+				artikel.setArtikelNummer(resultSet.getString("Artikelnummer"));
 				artikel.setArtikelName(resultSet.getString("Artikelname"));
 				artikel.setEinzelPreis(resultSet.getDouble("Einzelpreis"));
 				artikel.setWaehrung(resultSet.getString("Waehrung"));
@@ -437,7 +588,6 @@ public class MariaDBTest implements DBInterface {
 			return Long.MAX_VALUE;
 		}
 	}
-	
 
 	@Override
 	public Bewertung getBewertungByKundenNrAndArtikelNr_bewertung(String artikelNummer, String kundenNummer) {
@@ -573,14 +723,16 @@ public class MariaDBTest implements DBInterface {
 
 	public long updateKunde(Kunde kunde) {
 		try {
+			Adresse adresse = kunde.getAdresse();
 			start = Instant.now();
 			statement.executeUpdate("UPDATE " + databaseName + ".Kunde SET Vorname='" + kunde.getVorname()
 					+ "', Nachname='" + kunde.getNachname() + "', Email='" + kunde.getEmail() + "', Telefonnummer='"
 					+ kunde.getTelefonNummer() + "' WHERE Kundennummer='" + kunde.getKundenNummer() + "'");
-			Adresse adresse = kunde.getAdresse();
 			statement.executeUpdate("UPDATE " + databaseName + ".Adresse SET Strasse='" + adresse.getStrasse()
-					+ "', Hausnummer='" + adresse.getHausnummer() + "', Ortschaft='" + adresse.getOrtschaft()
-					+ "', PLZ='" + adresse.getPlz() + "' WHERE Kundennummer='" + kunde.getKundenNummer() + "'");
+					+ "', Hausnummer='" + adresse.getHausnummer() + "', PLZ='" + adresse.getPlz()
+					+ "' WHERE Kundennummer='" + kunde.getKundenNummer() + "'");
+			statement.executeUpdate("UPDATE " + databaseName + ".Ortschaft SET Ortschaft='" + adresse.getOrtschaft()
+					+ " WHERE PLZ='" + adresse.getPlz() + "'");
 			end = Instant.now();
 			return Duration.between(start, end).toMillis();
 		} catch (SQLException e) {
@@ -617,7 +769,6 @@ public class MariaDBTest implements DBInterface {
 			return Long.MAX_VALUE;
 		}
 	}
-	
 
 	@Override
 	public long updateKundenNachname(String kundenNummer, String nachName) {
@@ -638,8 +789,7 @@ public class MariaDBTest implements DBInterface {
 		try {
 			start = Instant.now();
 			statement.executeUpdate("UPDATE " + databaseName + ".Bewertung SET Bewertung='" + newText + "'"
-					+ " WHERE Artikelnummer='" + artikelNummer
-					+ "' AND Kundennummer='" + kundenNummer + "'");
+					+ " WHERE Artikelnummer='" + artikelNummer + "' AND Kundennummer='" + kundenNummer + "'");
 			end = Instant.now();
 			return Duration.between(start, end).toMillis();
 		} catch (SQLException e) {
@@ -647,7 +797,6 @@ public class MariaDBTest implements DBInterface {
 			return Long.MAX_VALUE;
 		}
 	}
-
 
 	public long deleteKundeByKundenNr(String kundenNr) {
 		try {

@@ -73,9 +73,9 @@ public class MariaDBTest implements DBInterface {
 			statement.execute("CREATE TABLE IF NOT EXISTS " + databaseName
 					+ ".Kunde (Kundennummer varchar(255), Vorname varchar(255), Nachname varchar(255), Email varchar(255), Telefonnummer varchar(255), primary key (Kundennummer))");
 			statement.execute("CREATE TABLE IF NOT EXISTS " + databaseName
-					+ ".Adresse (PLZ varchar(255), Strasse varchar(255), Hausnummer varchar(255), Kundennummer varchar(255), FOREIGN KEY (PLZ) REFERENCES Ortschaft(PLZ),FOREIGN KEY (Kundennummer) REFERENCES Kunde(Kundennummer), primary key (Kundennummer))");
-			statement.execute("CREATE TABLE IF NOT EXISTS " + databaseName
 					+ ".Ortschaft (PLZ varchar(255), Ortschaft varchar(255), primary key (PLZ))");
+			statement.execute("CREATE TABLE IF NOT EXISTS " + databaseName
+					+ ".Adresse (PLZ varchar(255), Strasse varchar(255), Hausnummer varchar(255), Kundennummer varchar(255), FOREIGN KEY (PLZ) REFERENCES Ortschaft(PLZ), FOREIGN KEY (Kundennummer) REFERENCES Kunde(Kundennummer), primary key (Kundennummer))");
 			statement.execute("CREATE TABLE IF NOT EXISTS " + databaseName
 					+ ".Artikel (Artikelnummer varchar(255),Artikelname varchar(255), Einzelpreis double(20,2), Waehrung varchar(255), Beschreibung varchar(255), primary key (Artikelnummer))");
 			statement.execute("CREATE TABLE IF NOT EXISTS " + databaseName
@@ -107,7 +107,7 @@ public class MariaDBTest implements DBInterface {
 		String sqlKunde = "INSERT INTO " + databaseName
 				+ ".Kunde (Kundennummer, Vorname, Nachname, Email, Telefonnummer) VALUES(?,?,?,?,?)";
 		PreparedStatement prestKunde;
-		String sqlOrtschaft = "INSERT INTO " + databaseName + ".Ortschaft (PLZ, Ortschaft) VALUES(?,?)";
+		String sqlOrtschaft = "INSERT IGNORE INTO " + databaseName + ".Ortschaft (PLZ, Ortschaft) VALUES(?,?)";
 		PreparedStatement prestOrtschaft;
 		String sqlAdresse = "INSERT INTO " + databaseName
 				+ ".Adresse (PLZ, Strasse, Hausnummer, Kundennummer) VALUES(?,?,?,?)";
@@ -148,7 +148,7 @@ public class MariaDBTest implements DBInterface {
 		String sqlKunde = "INSERT INTO " + databaseName
 				+ ".Kunde (Kundennummer, Vorname, Nachname, Email, Telefonnummer) VALUES(?,?,?,?,?)";
 		PreparedStatement prestKunde;
-		String sqlOrtschaft = "INSERT INTO " + databaseName + ".Ortschaft (PLZ, Ortschaft) VALUES(?,?)";
+		String sqlOrtschaft = "INSERT IGNORE INTO " + databaseName + ".Ortschaft (PLZ, Ortschaft) VALUES(?,?)";
 		PreparedStatement prestOrtschaft;
 		String sqlAdresse = "INSERT INTO " + databaseName
 				+ ".Adresse (PLZ, Strasse, Hausnummer, Kundennummer) VALUES(?,?,?,?)";
@@ -724,15 +724,18 @@ public class MariaDBTest implements DBInterface {
 	public long updateKunde(Kunde kunde) {
 		try {
 			Adresse adresse = kunde.getAdresse();
+			String sqlOrtschaft = "INSERT IGNORE INTO " + databaseName + ".Ortschaft (PLZ, Ortschaft) VALUES(?,?)";
+			PreparedStatement prestOrtschaft = mariaDbConnection.prepareStatement(sqlOrtschaft);
+			prestOrtschaft.setString(1, adresse.getPlz());
+			prestOrtschaft.setString(2, adresse.getOrtschaft());
 			start = Instant.now();
 			statement.executeUpdate("UPDATE " + databaseName + ".Kunde SET Vorname='" + kunde.getVorname()
 					+ "', Nachname='" + kunde.getNachname() + "', Email='" + kunde.getEmail() + "', Telefonnummer='"
 					+ kunde.getTelefonNummer() + "' WHERE Kundennummer='" + kunde.getKundenNummer() + "'");
+			prestOrtschaft.execute(); // Maybe we add a Kunde whose Ortschaft is not yet added to the database
 			statement.executeUpdate("UPDATE " + databaseName + ".Adresse SET Strasse='" + adresse.getStrasse()
 					+ "', Hausnummer='" + adresse.getHausnummer() + "', PLZ='" + adresse.getPlz()
 					+ "' WHERE Kundennummer='" + kunde.getKundenNummer() + "'");
-			statement.executeUpdate("UPDATE " + databaseName + ".Ortschaft SET Ortschaft='" + adresse.getOrtschaft()
-					+ " WHERE PLZ='" + adresse.getPlz() + "'");
 			end = Instant.now();
 			return Duration.between(start, end).toMillis();
 		} catch (SQLException e) {

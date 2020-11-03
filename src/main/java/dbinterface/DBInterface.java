@@ -1,5 +1,7 @@
 package dbinterface;
 
+import java.util.List;
+
 public interface DBInterface {
 
 	// SETUP
@@ -23,12 +25,20 @@ public interface DBInterface {
 	// CREATE
 
 	long addKunde(Kunde kunde);
+	
+	long addKunden(List<Kunde> kundenListe);
 
 	long addArtikel(Artikel artikel);
+	
+	long addArtikelListe(List<Artikel> artikelListe);
 
 	long addBewertung(Bewertung bewertung);
+	
+	long addBewertungen(List<Bewertung> bewertungen);
 
 	long addKauf(Kauf kauf);
+	
+	long addKaeufe(List<Kauf> kaufListe);
 
 	// READ
 

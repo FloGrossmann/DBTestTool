@@ -1,5 +1,7 @@
 package measure;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.LinkedList;
 
 import dbinterface.Artikel;
@@ -36,12 +38,12 @@ public class DBTest {
 		mariaDBTest.connect();
 		mariaDBTest.setupDB();
 		
+		progress.setDBUnderTestText("Testing MongoDB");
+		databaseTest(mongoDBTest, "MongoDB");
+		MockService.clearIdLists();
 		progress.setDBUnderTestText("Testing MariaDB");
 		databaseTest(mariaDBTest, "MariaDB");
 		progress.setDBUnderTestText("Cleanup");
-		MockService.clearIdLists();
-		progress.setDBUnderTestText("Testing MongoDB");
-		databaseTest(mongoDBTest, "MongoDB");
 		progress.setDBUnderTestText("Finished");
 		progress.setText("Finished");
 	}
@@ -81,22 +83,56 @@ public class DBTest {
 		LinkedList<AccessTime> update_Bewertung_Text = new LinkedList<AccessTime>();
 		
 		int size = 0;
+		long timeTookAddingKunden = 0, timeTookAddingArtikel = 0, timeTookAddingKauf = 0, timeTookAddingBewertung = 0, timeTookTesting = 0;
 		
 		while (size < MAXIMUM) {
-			progress.setText("Adding next " + TESTEVERY + "(*4 objects) entries..");
+			Instant globalTestStepStart =Instant.now();
+			progress.setText("Generating next " + TESTEVERY + "(*4 objects) entries..");
+			LinkedList<Kunde> kundenListe = new LinkedList<Kunde>();
+			LinkedList<Artikel> artikelListe = new LinkedList<Artikel>();
+			LinkedList<Kauf> kaufListe = new LinkedList<Kauf>();
+			LinkedList<Bewertung> bewertungListe = new LinkedList<Bewertung>();
+			int sizeDisplay = 0;
 			do {
-				//Add more entries
-				// Kunde
-				underTest.addKunde(MockService.genRandomInsertKunde());
-				// Artikel
-				underTest.addArtikel(MockService.genRandomInsertArtikel());
-				// Kauf
-				underTest.addKauf(MockService.genRandomInsertKauf(false));
-				// Bewertung
-				underTest.addBewertung(MockService.genRandomInsertBewertung(false));
-				size++;
-				progress.setAddingProgress((size % TESTEVERY) +1);
+				do {
+					//Add more entries
+					// Kunde
+					kundenListe.add(MockService.genRandomInsertKunde());
+	//				underTest.addKunde(MockService.genRandomInsertKunde());
+					// Artikel
+					artikelListe.add(MockService.genRandomInsertArtikel());
+	//				underTest.addArtikel(MockService.genRandomInsertArtikel());
+					// Kauf
+					kaufListe.add(MockService.genRandomInsertKauf(false));
+	//				underTest.addKauf(MockService.genRandomInsertKauf(false));
+					// Bewertung
+					bewertungListe.add(MockService.genRandomInsertBewertung(false));
+	//				underTest.addBewertung(MockService.genRandomInsertBewertung(false));
+					size++;
+				} while (size % (TESTEVERY/10) != 0 || size == 0);
+				sizeDisplay = sizeDisplay + kundenListe.size();
+				progress.setAddingProgress(((sizeDisplay/10) % TESTEVERY) +1);
+				progress.setText("Adding " + kundenListe.size() + " Kunden.... expected time: " + timeTookAddingKunden / 1000 + "s");
+				timeTookAddingKunden = underTest.addKunden(kundenListe);
+				sizeDisplay = sizeDisplay += artikelListe.size();
+				progress.setAddingProgress(((sizeDisplay/10) % TESTEVERY) +1);
+				progress.setText("Adding " + artikelListe.size() + " Artikel... expected time: " + timeTookAddingArtikel / 1000 + "s" );
+				timeTookAddingArtikel = underTest.addArtikelListe(artikelListe);
+				sizeDisplay = sizeDisplay += kaufListe.size();
+				progress.setAddingProgress(((sizeDisplay/10) % TESTEVERY) +1);
+				progress.setText("Adding " + kaufListe.size() + " Kaeufe.... expected time: " + timeTookAddingKauf / 1000 + "s" );
+				timeTookAddingKauf = underTest.addKaeufe(kaufListe);
+				sizeDisplay = sizeDisplay + bewertungListe.size();
+				progress.setAddingProgress(((sizeDisplay/10) % TESTEVERY) +1);
+				progress.setText("Adding " + bewertungListe.size() + " Bewertungen.. expected time: " + timeTookAddingBewertung / 1000 + "s" );
+				timeTookAddingBewertung = underTest.addBewertungen(bewertungListe);
+				
+				kundenListe.clear();
+				artikelListe.clear();
+				kaufListe.clear();
+				bewertungListe.clear();
 			} while (size % TESTEVERY != 0 || size == 0);
+			
 			progress.resetAddingBarProgress();
 			
 			// We have reached the 5k, we want to test now
@@ -129,7 +165,8 @@ public class DBTest {
 			LinkedList<Long> testListUpdate_Bewertung_Text = new LinkedList<Long>();
 			
 			for (int i = 0; i < REPETITIONS; i++) {
-				progress.setText("Repetition testing.. " + (i+1) + "/" + REPETITIONS);
+				Instant startTest = Instant.now();
+				progress.setText("Repetition testing.. " + (i+1) + "/" + REPETITIONS + " expected time: " + timeTookTesting + "s");
 
 				// Kunde
 				testListCreate_Kunde.add(testAddKunde(underTest));
@@ -163,6 +200,8 @@ public class DBTest {
 				testListUpdate_Bewertung_Complete.add(testUpdateBewertung_Complete(underTest));
 				testListUpdate_Bewertung_Text.add(testUpdateBewertung_Text(underTest));
 				
+				Instant endTest = Instant.now();
+				timeTookTesting = Duration.between(startTest, endTest).toSeconds();
 				progress.setTestRepititionProgress(i+2);
 			}
 			progress.resetTestRepititionBarProgress();
@@ -199,6 +238,14 @@ public class DBTest {
 			update_Bewertung_Complete.add(new AccessTime(CRUDoperation.UPDATE, ObjectCategory.BEWERTUNG, MethodType.UPDATE_BEWERTUNG_COMPLETE, new Messreihe(testListUpdate_Bewertung_Complete), size));
 			update_Bewertung_Text.add(new AccessTime(CRUDoperation.UPDATE, ObjectCategory.BEWERTUNG, MethodType.UPDATE_BEWERTUNG_TEXT, new Messreihe(testListUpdate_Bewertung_Text), size));
 			
+			Instant globalTestStepEnd = Instant.now();
+			Duration dur = Duration.between(globalTestStepStart, globalTestStepEnd);
+			Duration estimated = Duration.between(globalTestStepStart, globalTestStepEnd);
+			for (int j = ((MAXIMUM / size) - (size / DBTest.TESTEVERY)); j > 0; j--) {				
+				estimated = estimated.plus(dur);
+			}
+			
+			progress.setDBUnderTestText("Testing " + databaseName + " expected time left: " + estimated.toHoursPart() + "h " + estimated.toMinutesPart() + "m " + estimated.toSecondsPart() + "s.");
 			progress.setGlobalProgress(size / DBTest.TESTEVERY);
 		}
 		

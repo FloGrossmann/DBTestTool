@@ -221,7 +221,7 @@ public class MariaDBTest implements DBInterface {
 		}
 	}
 
-	public long addArtikelliste(List<Artikel> artikelList) {
+	public long addArtikelListe(List<Artikel> artikelList) {
 
 		String sql = "INSERT INTO " + databaseName
 				+ ".Artikel (Artikelnummer, Artikelname, Einzelpreis, Waehrung, Beschreibung) VALUES(?,?,?,?,?)";

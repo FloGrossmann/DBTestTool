@@ -7,6 +7,7 @@ import static com.mongodb.client.model.Filters.gt;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.LinkedList;
+import java.util.List;
 
 import org.bson.Document;
 import org.bson.codecs.configuration.CodecRegistries;
@@ -337,6 +338,46 @@ public class MongoDBTest implements DBInterface {
 		start = Instant.now();
 		kundeCollection.updateOne(eq("kundenNummer", kundennummer),
 				new BasicDBObject("$unset", new BasicDBObject("adresse", "")));
+		end = Instant.now();
+		return Duration.between(start, end).toMillis();
+	}
+
+	@Override
+	public long addKunden(List<Kunde> kundenListe) {
+		start = Instant.now();
+		for (Kunde kunde : kundenListe) {
+			addKunde(kunde);
+		}
+		end = Instant.now();
+		return Duration.between(start, end).toMillis();
+	}
+
+	@Override
+	public long addArtikelListe(List<Artikel> artikelListe) {
+		start = Instant.now();
+		for (Artikel artikel : artikelListe) {
+			addArtikel(artikel);
+		}
+		end = Instant.now();
+		return Duration.between(start, end).toMillis();
+	}
+
+	@Override
+	public long addBewertungen(List<Bewertung> bewertungen) {
+		start = Instant.now();
+		for (Bewertung bewertung : bewertungen) {
+			addBewertung(bewertung);
+		}
+		end = Instant.now();
+		return Duration.between(start, end).toMillis();
+	}
+
+	@Override
+	public long addKaeufe(List<Kauf> kaufListe) {
+		start = Instant.now();
+		for (Kauf kauf : kaufListe) {
+			addKauf(kauf);
+		}
 		end = Instant.now();
 		return Duration.between(start, end).toMillis();
 	}

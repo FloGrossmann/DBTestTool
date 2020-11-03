@@ -91,9 +91,9 @@ public class DBTest {
 				// Artikel
 				underTest.addArtikel(MockService.genRandomInsertArtikel());
 				// Kauf
-				underTest.addKauf(MockService.genRandomInsertKauf());
+				underTest.addKauf(MockService.genRandomInsertKauf(false));
 				// Bewertung
-				underTest.addBewertung(MockService.genRandomInsertBewertung());
+				underTest.addBewertung(MockService.genRandomInsertBewertung(false));
 				size++;
 				progress.setAddingProgress((size % TESTEVERY) +1);
 			} while (size % TESTEVERY != 0 || size == 0);
@@ -243,7 +243,7 @@ public class DBTest {
 			Kunde testKunde = MockService.genRandomInsertKunde();
 			timeTook_CREATE = underTest.addKunde(testKunde);
 			underTest.deleteKundeByKundenNr(testKunde.getKundenNummer());
-			MockService.removeKundenNr(testKunde.getKundenNummer());
+			MockService.removeKundenNr();
 		} while (timeTook_CREATE == 0);
 		return timeTook_CREATE;
 	}
@@ -254,7 +254,7 @@ public class DBTest {
 			Kunde testKunde = MockService.genRandomInsertKunde();
 			underTest.addKunde(testKunde);
 			timeTook_DELETE = underTest.deleteKundeByKundenNr(testKunde.getKundenNummer());
-			MockService.removeKundenNr(testKunde.getKundenNummer());
+			MockService.removeKundenNr();
 		} while (timeTook_DELETE == 0);
 		return timeTook_DELETE;
 	}
@@ -265,7 +265,7 @@ public class DBTest {
 			Artikel testArtikel = MockService.genRandomInsertArtikel();
 			timeTook_CREATE = underTest.addArtikel(testArtikel);
 			underTest.deleteArtikelbyArtikelNr(testArtikel.getArtikelNummer());
-			MockService.removeArtikelNr(testArtikel.getArtikelNummer());
+			MockService.removeArtikelNr();
 		} while (timeTook_CREATE == 0);
 		return timeTook_CREATE;
 	}
@@ -276,7 +276,7 @@ public class DBTest {
 			Artikel testArtikel = MockService.genRandomInsertArtikel();
 			underTest.addArtikel(testArtikel);
 			timeTook_DELETE = underTest.deleteArtikelbyArtikelNr(testArtikel.getArtikelNummer());
-			MockService.removeArtikelNr(testArtikel.getArtikelNummer());
+			MockService.removeArtikelNr();
 		} while (timeTook_DELETE == 0);
 		return timeTook_DELETE;
 	}
@@ -284,10 +284,9 @@ public class DBTest {
 	private long testAddKauf(DBInterface underTest) {
 		long timeTook_CREATE = 0;
 		do {
-			Kauf testKauf = MockService.genRandomInsertKauf();
+			Kauf testKauf = MockService.genRandomInsertKauf(true);
 			timeTook_CREATE = underTest.addKauf(testKauf);
 			underTest.deleteKaufByArtikelNrAndKundenNr(testKauf.getArtikelNummer(), testKauf.getKundenNummer());
-			MockService.removeKaufPS(testKauf.getArtikelNummer(), testKauf.getKundenNummer());
 		} while (timeTook_CREATE == 0);
 		return timeTook_CREATE;
 	}
@@ -295,10 +294,9 @@ public class DBTest {
 	private long testDeleteKauf(DBInterface underTest) {
 		long timeTook_DELETE;
 		do {
-			Kauf testKauf = MockService.genRandomInsertKauf();
+			Kauf testKauf = MockService.genRandomInsertKauf(true);
 			underTest.addKauf(testKauf);
 			timeTook_DELETE = underTest.deleteKaufByArtikelNrAndKundenNr(testKauf.getArtikelNummer(), testKauf.getKundenNummer());
-			MockService.removeKaufPS(testKauf.getArtikelNummer(), testKauf.getKundenNummer());
 		} while (timeTook_DELETE == 0);
 		return timeTook_DELETE;
 	}
@@ -306,10 +304,9 @@ public class DBTest {
 	private long testAddBewertung(DBInterface underTest) {
 		long timeTook_CREATE = 0;
 		do {				
-			Bewertung testBewertung = MockService.genRandomInsertBewertung();
+			Bewertung testBewertung = MockService.genRandomInsertBewertung(true);
 			timeTook_CREATE = underTest.addBewertung(testBewertung);
 			underTest.deleteBewertungByArtikelNrAndKundenNr(testBewertung.getArtikelNummer(), testBewertung.getKundenNummer());
-			MockService.removeBewertungPS(testBewertung.getArtikelNummer(), testBewertung.getKundenNummer());
 		} while (timeTook_CREATE == 0);
 		return timeTook_CREATE;
 	}
@@ -317,10 +314,9 @@ public class DBTest {
 	private long testDeleteBewertung(DBInterface underTest) {
 		long timeTook_DELETE;
 		do {
-			Bewertung testBewertung = MockService.genRandomInsertBewertung();
+			Bewertung testBewertung = MockService.genRandomInsertBewertung(true);
 			underTest.addBewertung(testBewertung);
 			timeTook_DELETE = underTest.deleteBewertungByArtikelNrAndKundenNr(testBewertung.getArtikelNummer(), testBewertung.getKundenNummer());
-			MockService.removeBewertungPS(testBewertung.getArtikelNummer(), testBewertung.getKundenNummer());
 		} while (timeTook_DELETE == 0);
 		return timeTook_DELETE;
 	}

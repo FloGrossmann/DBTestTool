@@ -1,10 +1,8 @@
 package measure;
 
 import java.time.LocalDate;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Random;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -20,7 +18,7 @@ import measure.util.CompPrimaryKey;
 
 public class MockService {
 
-	public static LinkedList<String> kundenNummern = new LinkedList<String>();
+	public static int kundenNummer = 1;
 	public static LinkedList<String> emails = new LinkedList<String>();
 	public static final String[] plzs = { "76131", "76133", "76135", "76137", "76139", "76149", "76185", "76187",
 			"76189", "76199", "76227", "76228", "76229", "10115", "10117", "10119", "10176", "10178", "10179", "10243",
@@ -30,40 +28,27 @@ public class MockService {
 			"10779", "10781", "10783", "10785", "10787", "10789", "10823", "10825", "10827", "10829", "10961", "10963",
 			"10965", "10967", "10969", "10997", "10999", "12043", "12045", "12047", "12049" };
 
-	public static LinkedList<String> artikelNummern = new LinkedList<String>();
+	public static int artikelNummer = 1;
 	public static LinkedList<String> artikelNamen = new LinkedList<String>();
 	public static int currentStar = 1;
 	
-	public static LinkedList<CompPrimaryKey> bewertungPS = new LinkedList<CompPrimaryKey>();
-	// To keep track of duplicate keys
-	public static Set<CompPrimaryKey> kaufPS_SET = new HashSet<CompPrimaryKey>();
-	public static Set<CompPrimaryKey> bewertungPS_SET = new HashSet<CompPrimaryKey>();
+	public static int bewertungPSNr = 1;
+	public static int kaufPSNr = 1;
 	
-	public static CompPrimaryKey getRandomUniqueCompKey_Kauf() {
-		String artikelNr;
-		String kundenNr;
-		CompPrimaryKey key = null;
-		do {
-			artikelNr = getRandomInsertedArtikelNummer();
-			kundenNr = getRandomInsertedKundenNummer();
-			key = new CompPrimaryKey(artikelNr, kundenNr);
-		} while (kaufPS_SET.contains(key));
-		kaufPS_SET.add(key);
-		return key;
+	public static CompPrimaryKey getRandomUniqueCompKey_Kauf(boolean testing) {
+		if (!testing) {			
+			return new CompPrimaryKey(String.valueOf(kaufPSNr), String.valueOf(kaufPSNr));
+		} else {
+			return new CompPrimaryKey(String.valueOf(kaufPSNr-1), String.valueOf(kaufPSNr));
+		}
 	}
 	
-	public static CompPrimaryKey getRandomUniqueCompKey_Bewertung() {
-		String artikelNr;
-		String kundenNr;
-		CompPrimaryKey key = null;
-		do {
-			artikelNr = getRandomInsertedArtikelNummer();
-			kundenNr = getRandomInsertedKundenNummer();
-			key = new CompPrimaryKey(artikelNr, kundenNr);
-		} while (bewertungPS_SET.contains(key));
-		bewertungPS.add(key);
-		bewertungPS_SET.add(key);
-		return key;
+	public static CompPrimaryKey getRandomUniqueCompKey_Bewertung(boolean testing) {
+		if (!testing) {			
+			return new CompPrimaryKey(String.valueOf(bewertungPSNr), String.valueOf(bewertungPSNr));
+		} else {
+			return new CompPrimaryKey(String.valueOf(bewertungPSNr-1), String.valueOf(bewertungPSNr));
+		}
 	}
 	
 	public static int getNextCurrentStar() {
@@ -79,11 +64,17 @@ public class MockService {
 	}
 	
 	public static String getRandomInsertedKundenNummer() {
-		return kundenNummern.get(ThreadLocalRandom.current().nextInt(0, kundenNummern.size()));
+		if (kundenNummer == 1) {
+			return String.valueOf(1);
+		}
+		return String.valueOf(ThreadLocalRandom.current().nextInt(1, kundenNummer));
 	}
 
 	public static String getRandomInsertedArtikelNummer() {
-		return artikelNummern.get(ThreadLocalRandom.current().nextInt(0, artikelNummern.size()));
+		if (artikelNummer == 1) {
+			return String.valueOf(1);
+		}
+		return String.valueOf(ThreadLocalRandom.current().nextInt(1, artikelNummer));
 	}
 
 	public static String getRandomInsertedEmail() {
@@ -95,7 +86,11 @@ public class MockService {
 	}
 
 	public static CompPrimaryKey getRandombewertungPS() {
-		return bewertungPS.get(ThreadLocalRandom.current().nextInt(0, bewertungPS.size()));
+		if (bewertungPSNr == 1) {
+			return new CompPrimaryKey("1", "1");
+		}
+		int bewertungPs = ThreadLocalRandom.current().nextInt(1, artikelNummer);
+		return new CompPrimaryKey(String.valueOf(bewertungPs), String.valueOf(bewertungPs));
 	}
 
 	public static RandomStringGenerator rndString = new RandomStringGenerator.Builder().withinRange('a', 'z')
@@ -120,10 +115,12 @@ public class MockService {
 		Kunde kunde = new Kunde();
 		String email = UUID.randomUUID().toString();
 		kunde.setEmail(email);
-		emails.add(email);
-		String kundenNummer = UUID.randomUUID().toString();
+		if (emails.size() < 5000) {			
+			emails.add(email);
+		}
+		MockService.kundenNummer++;
+		String kundenNummer = "" + MockService.kundenNummer;
 		kunde.setKundenNummer(kundenNummer);
-		kundenNummern.add(kundenNummer);
 		kunde.setNachname(rndString.generate(7));
 		kunde.setVorname(rndString.generate(7));
 		kunde.setTelefonNummer(rndInt.generate(12).toString());
@@ -156,9 +153,11 @@ public class MockService {
 		Artikel artikel = new Artikel();
 		String artikelName = rndString.generate(12);
 		artikel.setArtikelName(artikelName);
-		artikelNamen.add(artikelName);
-		String artikelNummer = UUID.randomUUID().toString();
-		artikelNummern.add(artikelNummer);
+		if (artikelNamen.size() < 5000) {			
+			artikelNamen.add(artikelName);
+		}
+		MockService.artikelNummer++;
+		String artikelNummer = "" + MockService.artikelNummer;
 		artikel.setArtikelNummer(artikelNummer);
 		artikel.setBeschreibung(rndString.generate(40));
 		artikel.setEinzelPreis(Integer.valueOf(rndInt.generate(3)));
@@ -174,29 +173,35 @@ public class MockService {
 		return artikel;
 	}
 
-	public static Kauf genRandomInsertKauf() {
-		if (artikelNummern.size() == 0 || kundenNummern.size() == 0) {
+	public static Kauf genRandomInsertKauf(boolean testing) {
+		if (artikelNummer == 0 || kundenNummer == 0) {
 			throw new RuntimeException("No Kunde or artikel to assign the kauf object to");
 		}
 
 		Kauf kauf = new Kauf();
 		kauf.setKaufPreis(Integer.valueOf(rndInt.generate(3)));
 		kauf.setKaufdatum(java.sql.Date.valueOf(getRandomDate()));
-		CompPrimaryKey ps = getRandomUniqueCompKey_Kauf();
+		if (!testing) {
+			kaufPSNr++;
+		}
+		CompPrimaryKey ps = getRandomUniqueCompKey_Kauf(testing);
 		kauf.setArtikelNummer(ps.getArtikelNummer());
 		kauf.setKundenNummer(ps.getKundenNummer());
 		kauf.setMenge(ThreadLocalRandom.current().nextInt(0, 200));
 		return kauf;
 	}
 
-	public static Bewertung genRandomInsertBewertung() {
-		if (artikelNummern.size() == 0 || kundenNummern.size() == 0) {
+	public static Bewertung genRandomInsertBewertung(boolean testing) {
+		if (artikelNummer == 0 || kundenNummer == 0) {
 			throw new RuntimeException("No Kunde or artikel to assign the kauf object to");
 		}
 		Bewertung bewertung = new Bewertung();
 		bewertung.setBewertung(rndString.generate(600));
 		bewertung.setSterne(ThreadLocalRandom.current().nextInt(1, 11));
-		CompPrimaryKey ps = getRandomUniqueCompKey_Bewertung();
+		if (!testing) {
+			bewertungPSNr++;
+		}
+		CompPrimaryKey ps = getRandomUniqueCompKey_Bewertung(testing);
 		bewertung.setArtikelNummer(ps.getArtikelNummer());
 		bewertung.setKundenNummer(ps.getKundenNummer());
 		return bewertung;
@@ -208,43 +213,33 @@ public class MockService {
 		return bewertung;
 	}
 
-	public static void removeArtikelNr(String artikelNr) {
-		artikelNummern.remove(artikelNr);
+	public static void removeArtikelNr() {
+		artikelNummer--;
 	}
 
-	public static void removeKundenNr(String kundenNr) {
-		kundenNummern.remove(kundenNr);
-	}
-
-	public static void removeBewertungPS(String artikelNr, String kundenNr) {
-		removeBewertungPS(new CompPrimaryKey(artikelNr, kundenNr));
-	}
-
-	public static void removeBewertungPS(CompPrimaryKey ps) {
-		bewertungPS.remove(ps);
-		bewertungPS_SET.remove(ps);
+	public static void removeKundenNr() {
+		kundenNummer--;
 	}
 	
-	public static void removeKaufPS(String artikelNr, String kundenNr) {
-		removeKaufPS(new CompPrimaryKey(artikelNr, kundenNr));
-	}
-
-	public static void removeKaufPS(CompPrimaryKey ps) {
-		kaufPS_SET.remove(ps);
+	public static void removeKaufNr() {
+		kaufPSNr--;
 	}
 	
+	public static void removeBewertungNr() {
+		bewertungPSNr--;
+	}
+
 	public static void removeEmail(String email) {
 		emails.remove(email);
 	}
 
 	public static void clearIdLists() {
-		artikelNummern.clear();
-		kundenNummern.clear();
+		artikelNummer = 0;
+		kundenNummer = 0;
+		kaufPSNr = 0;
+		bewertungPSNr = 0;
 		emails.clear();
 		artikelNamen.clear();
-		bewertungPS.clear();
 		currentStar = 1;
-		kaufPS_SET.clear();
-		bewertungPS_SET.clear();
 	}
 }

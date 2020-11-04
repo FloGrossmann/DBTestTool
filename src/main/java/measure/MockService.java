@@ -67,14 +67,14 @@ public class MockService {
 		if (kundenNummer == 1) {
 			return String.valueOf(1);
 		}
-		return String.valueOf(ThreadLocalRandom.current().nextInt(1, kundenNummer));
+		return String.valueOf(ThreadLocalRandom.current().nextInt(1, kundenNummer-1));
 	}
 
 	public static String getRandomInsertedArtikelNummer() {
 		if (artikelNummer == 1) {
 			return String.valueOf(1);
 		}
-		return String.valueOf(ThreadLocalRandom.current().nextInt(1, artikelNummer));
+		return String.valueOf(ThreadLocalRandom.current().nextInt(1, artikelNummer-1));
 	}
 
 	public static String getRandomInsertedEmail() {

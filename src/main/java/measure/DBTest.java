@@ -29,6 +29,7 @@ public class DBTest {
 			String mariaDBUsername, String mariaDBPassword, ProgressIndicatorPanel progress) throws Exception {
 		this.progress = progress;
 		
+		Instant dbTestStart = Instant.now();
 		progress.setText("Setting up MongoDB...");
 		mongoDBTest = new MongoDBTest();
 		mongoDBTest.connect(mongoDBConnectionString);
@@ -40,11 +41,14 @@ public class DBTest {
 		
 		progress.setDBUnderTestText("Testing MongoDB");
 		databaseTest(mongoDBTest, "MongoDB");
+		progress.setDBUnderTestText("Cleanup");
 		MockService.clearIdLists();
 		progress.setDBUnderTestText("Testing MariaDB");
 		databaseTest(mariaDBTest, "MariaDB");
-		progress.setDBUnderTestText("Cleanup");
-		progress.setDBUnderTestText("Finished");
+		MockService.clearIdLists();
+		Instant dbTestEnd = Instant.now();
+		Duration dur = Duration.between(dbTestStart, dbTestEnd);
+		progress.setDBUnderTestText("Finished - time Took: " + dur.toHoursPart() + "h " + dur.toMinutesPart() + "m " + dur.toSecondsPart() + "s.");
 		progress.setText("Finished");
 	}
 	

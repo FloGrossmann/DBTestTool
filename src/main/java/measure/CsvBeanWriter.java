@@ -13,6 +13,8 @@ import com.opencsv.CSVWriter;
 import com.opencsv.bean.StatefulBeanToCsv;
 import com.opencsv.bean.StatefulBeanToCsvBuilder;
 
+import main.Main;
+
 public class CsvBeanWriter {
 	
 	private static final String DIRECTORY_DIR = "./messdaten";
@@ -43,6 +45,7 @@ public class CsvBeanWriter {
 	}
 
 	public static void writeCsvFromAccessTimeExample(List<AccessTime> list, String subFolder, String fileName) throws Exception {
+		subFolder = subFolder + "_Maximum" + Main.MAXIMUM + "_TestEvery_" + Main.TESTEVERY + "_TestWiederholungen_" + Main.REPETITIONS;
 		createDirectories(subFolder);
 		LocalTime time=LocalTime.now();
 		Path path = Paths.get(DIRECTORY_DIR +"./" + subFolder + "/" + fileName + "_" +time.getHour()+"_"+time.getMinute()+"_"+time.getSecond()+".csv");

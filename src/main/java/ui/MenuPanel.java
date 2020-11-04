@@ -13,6 +13,7 @@ import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
+import main.Main;
 import measure.MeasureThread;
 import monogdb.MongoDBTest;
 
@@ -121,7 +122,7 @@ public class MenuPanel extends JPanel {
 			try {
 				errorLabel.setVisible(false);
 				errorLabel.setText("");
-				startTestButton.setText("Testing..");
+				startTestButton.setText("Testing.. with Maximum: " + Main.MAXIMUM + " TestEvery: " + Main.TESTEVERY + " Repetitions: " + Main.REPETITIONS);
 				startTestButton.setEnabled(false);
 				update(getGraphics());
 				MeasureThread measureThread = new MeasureThread(mongoDBConnectionTextField.getText(), mariaDBConnectionTextField.getText(), mariaDBUsernameTextField.getText(), mariaDBPasswordTextField.getText(), self); 

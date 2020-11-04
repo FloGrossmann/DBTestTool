@@ -358,8 +358,9 @@ public class MariaDBTest implements DBInterface {
 
 	public long getKundeByKundenNr(String kundenNr) {
 
-		String sql = "SELECT * FROM " + databaseName + ".Kunde, " + databaseName + ".Adresse WHERE Kunde.Kundennummer='"
-				+ kundenNr + "'";
+		String sql = "SELECT kunde.Kundennummer, kunde.vorname, kunde.nachname, kunde.email, kunde.telefonnummer, adresse.plz, ortschaft.ortschaft, adresse.hausnummer, adresse.strasse "
+				+ "FROM " + databaseName +".kunde, " + databaseName +".adresse, " + databaseName +".ortschaft WHERE kunde.Kundennummer = '" + kundenNr + "' AND adresse.kundennummer = kunde.kundennummer AND ortschaft.plz = adresse.plz";
+
 		try {
 			start = Instant.now();
 			statement.executeQuery(sql);
@@ -385,8 +386,9 @@ public class MariaDBTest implements DBInterface {
 
 	@Override
 	public Kunde getKundeByKundenNr_kunde(String kundenNr) {
-		String sql = "SELECT * FROM " + databaseName + ".Kunde, " + databaseName + ".Adresse WHERE Kunde.Kundennummer='"
-				+ kundenNr + "'";
+		String sql = "SELECT kunde.Kundennummer, kunde.vorname, kunde.nachname, kunde.email, kunde.telefonnummer, adresse.plz, ortschaft.ortschaft, adresse.hausnummer, adresse.strasse "
+				+ "FROM " + databaseName +".kunde, " + databaseName +".adresse, " + databaseName +".ortschaft WHERE kunde.Kundennummer = '" + kundenNr + "' AND adresse.kundennummer = kunde.kundennummer AND ortschaft.plz = adresse.plz";
+
 		try {
 
 			ResultSet resultSet = statement.executeQuery(sql);
@@ -412,8 +414,9 @@ public class MariaDBTest implements DBInterface {
 
 	public long getKundeByEmail(String email) {
 
-		String sql = "SELECT * FROM " + databaseName + ".Kunde, " + databaseName + ".Adresse WHERE Kunde.Email='"
-				+ email + "'";
+		String sql = "SELECT kunde.Kundennummer, kunde.vorname, kunde.nachname, kunde.email, kunde.telefonnummer, adresse.plz, ortschaft.ortschaft, adresse.hausnummer, adresse.strasse "
+				+ "FROM " + databaseName +".kunde, " + databaseName +".adresse, " + databaseName +".ortschaft WHERE kunde.email = '" + email + "' AND adresse.kundennummer = kunde.kundennummer AND ortschaft.plz = adresse.plz";
+
 		try {
 			start = Instant.now();
 			statement.executeQuery(sql);

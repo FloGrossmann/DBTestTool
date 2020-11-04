@@ -39,12 +39,12 @@ public class DBTest {
 		mariaDBTest.connect();
 		mariaDBTest.setupDB();
 		
-		progress.setDBUnderTestText("Testing MongoDB");
-		databaseTest(mongoDBTest, "MongoDB");
-		progress.setDBUnderTestText("Cleanup");
-		MockService.clearIdLists();
 		progress.setDBUnderTestText("Testing MariaDB");
 		databaseTest(mariaDBTest, "MariaDB");
+		progress.setDBUnderTestText("Cleanup");
+		MockService.clearIdLists();
+		progress.setDBUnderTestText("Testing MongoDB");
+		databaseTest(mongoDBTest, "MongoDB");
 		MockService.clearIdLists();
 		Instant dbTestEnd = Instant.now();
 		Duration dur = Duration.between(dbTestStart, dbTestEnd);
@@ -245,7 +245,8 @@ public class DBTest {
 			Instant globalTestStepEnd = Instant.now();
 			Duration dur = Duration.between(globalTestStepStart, globalTestStepEnd);
 			Duration estimated = Duration.between(globalTestStepStart, globalTestStepEnd);
-			for (int j = ((MAXIMUM / size) - (size / DBTest.TESTEVERY)); j > 0; j--) {				
+			int runsLeft = (MAXIMUM / size) - (size / DBTest.TESTEVERY);
+			for (int j = runsLeft; j > 0; j--) {				
 				estimated = estimated.plus(dur);
 			}
 			

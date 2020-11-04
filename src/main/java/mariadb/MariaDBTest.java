@@ -2,7 +2,6 @@ package mariadb;
 
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -21,8 +20,6 @@ import dbinterface.DBInterface;
 import dbinterface.Kauf;
 import dbinterface.Kunde;
 import measure.AccessTime;
-import measure.CRUDoperation;
-import measure.CsvBeanWriter;
 
 public class MariaDBTest implements DBInterface {
 
@@ -440,8 +437,8 @@ public class MariaDBTest implements DBInterface {
 
 	public long getKundenByPlz(String plz) {
 
-		String sql = "SELECT * FROM " + databaseName + ".Kunde, " + databaseName + ".Adresse WHERE Adresse.PLZ='" + plz
-				+ "'";
+		String sql = "SELECT kunde.Kundennummer, kunde.vorname, kunde.nachname, kunde.email, kunde.telefonnummer, adresse.plz, ortschaft.ortschaft, adresse.hausnummer, adresse.strasse "
+				+ "FROM " + databaseName +".kunde, " + databaseName +".adresse, " + databaseName +".ortschaft WHERE adresse.PLZ = '" + plz + "' AND adresse.kundennummer = kunde.kundennummer AND ortschaft.plz = adresse.plz";
 		try {
 			start = Instant.now();
 			statement.executeQuery(sql);

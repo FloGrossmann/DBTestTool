@@ -13,11 +13,17 @@ public class AccessTime extends CsvBean {
 	@CsvBindByName(column = "Methode", required = true)
 	MethodType methode;
 
-	@CsvBindByName(column = "Durchschnitts Zeit in Millisekunden", required = true)
+	@CsvBindByName(column = "Durchschnitts Zeit in MilliSekunden", required = true)
 	double durchschnittsZugriffsZeit;
+	
+	@CsvBindByName(column="Durchschnitts Zeit in Nanosekunden", required = true)
+	double durchschnittsZugriffsZeitinNs;
 
-	@CsvBindByName(column = "Varianz der Messpunkte in MS", required = true)
+	@CsvBindByName(column = "Varianz der Messpunkte in Millisekunden", required = true)
 	double varianz;
+
+	@CsvBindByName(column = "Varianz der Messpunkte in Nanosekunden", required = true)
+	double varianzNs;
 
 	@CsvBindByName(column = "Standardabweichung der Messpunkte", required = true)
 	double standardAbweichung;
@@ -31,10 +37,12 @@ public class AccessTime extends CsvBean {
 	public AccessTime(CRUDoperation crudCategory, ObjectCategory objectCategory, MethodType methodType,
 			double average_time, double varianz, double standardAbweichung, int averaged_over, int testedAt) {
 		this.methode = methodType;
-		this.durchschnittsZugriffsZeit = average_time;
+		this.durchschnittsZugriffsZeit = average_time/1000000;
+		this.durchschnittsZugriffsZeitinNs=average_time;
 		this.kategorie = crudCategory;
 		this.objektKategorie = objectCategory;
-		this.varianz = varianz;
+		this.varianzNs = varianz;
+		this.varianz=varianz/ 1000000;
 		this.standardAbweichung = standardAbweichung;
 		this.averaged_over = averaged_over;
 		this.testedAt = testedAt;
@@ -42,7 +50,7 @@ public class AccessTime extends CsvBean {
 
 	public AccessTime(CRUDoperation curdCategory, ObjectCategory objectCategory, MethodType methodType,
 			Messreihe messreihe, int testedAt) {
-		this(curdCategory, objectCategory, methodType, messreihe.getDurchschnitt(), messreihe.getVarianz(),
+		this(curdCategory, objectCategory, methodType, messreihe.getDurchschnitt(),  messreihe.getVarianz(),
 				messreihe.getStandardAbweichung(), messreihe.getMessungen().size(), testedAt);
 	}
 

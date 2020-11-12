@@ -35,14 +35,14 @@ public class AccessTime extends CsvBean {
 	int testedAt;
 
 	public AccessTime(CRUDoperation crudCategory, ObjectCategory objectCategory, MethodType methodType,
-			double average_time, double varianz, double standardAbweichung, int averaged_over, int testedAt) {
+			double average_time, double average_timeMs, double varianz, double varianzMs, double standardAbweichung, int averaged_over, int testedAt) {
 		this.methode = methodType;
-		this.durchschnittsZugriffsZeit = average_time/1000000;
+		this.durchschnittsZugriffsZeit = average_timeMs;
 		this.durchschnittsZugriffsZeitinNs=average_time;
 		this.kategorie = crudCategory;
 		this.objektKategorie = objectCategory;
+		this.varianz=varianzMs;
 		this.varianzNs = varianz;
-		this.varianz=varianz/ 1000000;
 		this.standardAbweichung = standardAbweichung;
 		this.averaged_over = averaged_over;
 		this.testedAt = testedAt;
@@ -50,7 +50,7 @@ public class AccessTime extends CsvBean {
 
 	public AccessTime(CRUDoperation curdCategory, ObjectCategory objectCategory, MethodType methodType,
 			Messreihe messreihe, int testedAt) {
-		this(curdCategory, objectCategory, methodType, messreihe.getDurchschnitt(),  messreihe.getVarianz(),
+		this(curdCategory, objectCategory, methodType, messreihe.getDurchschnitt(), messreihe.getDurchschnittMs(),  messreihe.getVarianz(), messreihe.getVarianzMs(),
 				messreihe.getStandardAbweichung(), messreihe.getMessungen().size(), testedAt);
 	}
 
@@ -124,6 +124,22 @@ public class AccessTime extends CsvBean {
 
 	public void setTestedAt(int testedAt) {
 		this.testedAt = testedAt;
+	}
+
+	public double getDurchschnittsZugriffsZeitinNs() {
+		return durchschnittsZugriffsZeitinNs;
+	}
+
+	public void setDurchschnittsZugriffsZeitinNs(double durchschnittsZugriffsZeitinNs) {
+		this.durchschnittsZugriffsZeitinNs = durchschnittsZugriffsZeitinNs;
+	}
+
+	public double getVarianzNs() {
+		return varianzNs;
+	}
+
+	public void setVarianzNs(double varianzNs) {
+		this.varianzNs = varianzNs;
 	}
 
 }

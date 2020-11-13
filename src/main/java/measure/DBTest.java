@@ -23,6 +23,8 @@ public class DBTest {
 	public static final int TESTEVERY = Main.TESTEVERY;
 	public static final int REPETITIONS = Main.REPETITIONS;
 	public static final int MAXIMUM = Main.MAXIMUM;
+	/** In how many parts the batch-size of adding objects should be divided **/
+	public static final int ADD_BATCH_SIZE = 10;
 	private ProgressIndicatorPanel progress;
 	
 	public void startTest(String mongoDBConnectionString, String mariaDBConnectionString,
@@ -113,22 +115,18 @@ public class DBTest {
 					bewertungListe.add(MockService.genRandomInsertBewertung(false));
 	//				underTest.addBewertung(MockService.genRandomInsertBewertung(false));
 					size++;
-				} while (size % (TESTEVERY/10) != 0 || size == 0);
+				} while (size % (TESTEVERY/ADD_BATCH_SIZE) != 0 || size == 0);
 				sizeDisplay = sizeDisplay + kundenListe.size();
-				progress.setAddingProgress(((sizeDisplay/10) % TESTEVERY) +1);
-				progress.setText("Adding " + kundenListe.size() + " Kunden.... expected time: " + timeTookAddingKunden / 1000 + "s");
+				updateAddStatus(sizeDisplay, timeTookAddingKunden, "Kunden");
 				timeTookAddingKunden = underTest.addKunden(kundenListe);
 				sizeDisplay = sizeDisplay += artikelListe.size();
-				progress.setAddingProgress(((sizeDisplay/10) % TESTEVERY) +1);
-				progress.setText("Adding " + artikelListe.size() + " Artikel... expected time: " + timeTookAddingArtikel / 1000 + "s" );
+				updateAddStatus(sizeDisplay, timeTookAddingArtikel, "Artikel");
 				timeTookAddingArtikel = underTest.addArtikelListe(artikelListe);
 				sizeDisplay = sizeDisplay += kaufListe.size();
-				progress.setAddingProgress(((sizeDisplay/10) % TESTEVERY) +1);
-				progress.setText("Adding " + kaufListe.size() + " Kaeufe.... expected time: " + timeTookAddingKauf / 1000 + "s" );
+				updateAddStatus(sizeDisplay, timeTookAddingKauf, "Kaeufe");
 				timeTookAddingKauf = underTest.addKaeufe(kaufListe);
 				sizeDisplay = sizeDisplay + bewertungListe.size();
-				progress.setAddingProgress(((sizeDisplay/10) % TESTEVERY) +1);
-				progress.setText("Adding " + bewertungListe.size() + " Bewertungen.. expected time: " + timeTookAddingBewertung / 1000 + "s" );
+				updateAddStatus(sizeDisplay, timeTookAddingBewertung, "Bewertungen");
 				timeTookAddingBewertung = underTest.addBewertungen(bewertungListe);
 				
 				kundenListe.clear();
@@ -515,5 +513,15 @@ public class DBTest {
 			timeTook_UPDATE = underTest.updateBewertungsText(ps.getKundenNummer(), ps.getArtikelNummer(), MockService.rndString.generate(600));
 		} while (timeTook_UPDATE == 0);
 		return timeTook_UPDATE;
+	}
+	
+	private void updateAddStatus(int currentSize, long timeTook, String objectName) {
+		progress.setAddingProgress(((currentSize/ADD_BATCH_SIZE) % TESTEVERY) +1);
+		if (timeTook == 0) {
+			progress.setText("Adding " + TESTEVERY/ADD_BATCH_SIZE + " " + objectName);
+		} else {			
+			Duration took = Duration.ofNanos(timeTook);
+			progress.setText("Adding " + TESTEVERY/ADD_BATCH_SIZE + " " + objectName + "... expected time: " + took.toMinutesPart() + "m " + took.toSecondsPart() + "s");
+		}
 	}
 }
